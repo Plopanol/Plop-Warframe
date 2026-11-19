@@ -1,4 +1,4 @@
-//! Entry point. Until the UI exists (TASK-006), a command line drives the import.
+//! Entry point: the window without a command, otherwise the import command line.
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -6,10 +6,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, bail};
 use plop_warframe::db;
+use plop_warframe::ui_bridge;
 use plop_warframe::update::{self, DataPaths, Origin};
 
-const USAGE: &str = "Usage : plop-warframe [--data-dir <dossier>] <commande>
-Commandes :
+const USAGE: &str = "Usage : plop-warframe [--data-dir <dossier>] [commande]
+Sans commande, ouvre la fenêtre. Commandes :
   --import        télécharge les modules du wiki, met à jour le cache puis importe
   --import-cache  importe depuis le cache, sans réseau
   --stats         affiche l'état de la base";
@@ -40,10 +41,14 @@ fn run() -> Result<()> {
     };
     log::info!("Dossier de données : {}", paths.dir.display());
 
+    let Some(command) = command else {
+        return ui_bridge::run(paths, now).context("fenêtre de l'application");
+    };
     match command {
         Command::Import(origin) => {
-            let report =
-                update::run_import(&paths, origin, &now, &mut |line| log::info!("{line}"))?;
+            let report = update::run_import(&paths, origin, &now, &mut |progress| {
+                log::info!("{}", progress.message)
+            })?;
             for warning in &report.warnings {
                 log::warn!("{warning}");
             }
@@ -62,7 +67,9 @@ fn run() -> Result<()> {
     Ok(())
 }
 
-fn parse_args(mut args: impl Iterator<Item = String>) -> Result<(Option<PathBuf>, Command)> {
+fn parse_args(
+    mut args: impl Iterator<Item = String>,
+) -> Result<(Option<PathBuf>, Option<Command>)> {
     let mut data_dir = None;
     let mut command = None;
     while let Some(arg) = args.next() {
@@ -81,7 +88,6 @@ fn parse_args(mut args: impl Iterator<Item = String>) -> Result<(Option<PathBuf>
             bail!("une seule commande à la fois\n{USAGE}");
         }
     }
-    let command = command.with_context(|| format!("commande manquante\n{USAGE}"))?;
     Ok((data_dir, command))
 }
 

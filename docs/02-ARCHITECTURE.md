@@ -12,8 +12,8 @@ Crate binaire unique `plop-warframe`.
 | `src/source/` | Trait `DropSource` ; source wiki : exécution des modules Lua (`lua.rs`), conversion vers le modèle (`wiki.rs`), téléchargement (`http.rs`), cache disque (`cache.rs`) |
 | `src/db/` | Ouverture, migrations `PRAGMA user_version`, import transactionnel, statistiques ; requêtes de recherche (TASK-005) |
 | `src/update.rs` | Cas d'usage d'import partagé par la ligne de commande et l'interface : téléchargement ou cache, lecture, écriture ; bloquant, sur un thread de travail |
-| `src/ui_bridge.rs`, `ui/*.slint` | Conversion modèle ↔ modèles Slint, onglets Données et Recherche (à partir de TASK-006) |
-| `src/main.rs` | Démarrage, journalisation ; ligne de commande `--import`, `--import-cache`, `--stats`, `--data-dir` ; câblage de l'interface (TASK-006) |
+| `src/ui_bridge.rs`, `ui/*.slint` | Textes et modèles Slint, fenêtre à onglets Données et Recherche, thread d'import |
+| `src/main.rs` | Démarrage, journalisation ; ligne de commande `--import`, `--import-cache`, `--stats`, `--data-dir` ; sans commande, ouvre la fenêtre |
 
 Le cœur (`model`, `source`, `db`) ignore l'interface ; le travail long (téléchargement, import) tourne hors du thread UI et revient par `slint::invoke_from_event_loop`.
 
@@ -31,8 +31,9 @@ Chaque dépendance est justifiée dans le commit qui l'introduit ; aucune n'est 
 | `log`, `env_logger` | Journalisation | TASK-004 |
 | `anyhow` | Erreurs du binaire | TASK-004 |
 | `tempfile` (développement) | Dossiers de test | TASK-004 |
+| `slint`, `slint-build` (`=1.18.1`, winit, rendu logiciel) | Interface ; licence Slint Royalty-free 2.0 | TASK-006 |
 
-Prévues : `slint` et `slint-build` épinglés (TASK-006). Les avertissements de lecture des sources sont portés par `DropDataset::warnings` et journalisés à l'import.
+Les avertissements de lecture des sources sont portés par `DropDataset::warnings` et journalisés à l'import.
 
 ## Données
 

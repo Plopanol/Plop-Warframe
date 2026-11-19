@@ -2,6 +2,11 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.4
+
+- Fenêtre Slint à deux onglets ; onglet Données : base, volumes, dernier import (statut, dates, source, révision), boutons « Mettre à jour depuis le wiki » et « Réimporter depuis le cache », barre de progression et journal ; import en arrière-plan, fenêtre réactive.
+- Sans commande, l'exécutable ouvre la fenêtre ; `--import`, `--import-cache` et `--stats` restent disponibles.
+
 ## v0.1.3
 
 - Requêtes de recherche dans la base : autocomplétion d'objets « contient » insensible à la casse et aux accents, liste des types de mission, recherche par objet et combinée (somme des chances par nœud et rotation) avec chance par cycle AABC des missions sans fin, filtres de type de mission, de rotation et de missions spéciales.

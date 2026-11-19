@@ -3,4 +3,5 @@
 pub mod db;
 pub mod model;
 pub mod source;
+pub mod ui_bridge;
 pub mod update;

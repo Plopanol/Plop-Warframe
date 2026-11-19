@@ -1,0 +1,207 @@
+import {
+    Button,
+    GroupBox,
+    ListView,
+    ProgressIndicator,
+    TabWidget,
+    VerticalBox,
+    HorizontalBox,
+    GridBox,
+} from "std-widgets.slint";
+
+// Texts of the Data tab, computed in Rust from the database (src/ui_bridge.rs).
+export struct DataStatus {
+    database-path: string,
+    has-run: bool,
+    started-at: string,
+    finished-at: string,
+    status: string,
+    source: string,
+    revision: string,
+    message: string,
+    nodes: string,
+    items: string,
+    drops: string,
+}
+
+component Field inherits HorizontalLayout {
+    in property <string> label;
+    in property <string> value;
+    spacing: 8px;
+    Text {
+        text: root.label;
+        min-width: 140px;
+        horizontal-stretch: 0;
+        color: #808080;
+    }
+
+    Text {
+        text: root.value;
+        wrap: word-wrap;
+        horizontal-stretch: 1;
+    }
+}
+
+component DataTab inherits VerticalBox {
+    in property <DataStatus> status;
+    in property <bool> busy;
+    in property <float> progress;
+    in property <[string]> log-lines;
+    callback update-from-wiki();
+    callback reimport-from-cache();
+
+    GroupBox {
+        title: "Base";
+        VerticalLayout {
+            spacing: 4px;
+            Field {
+                label: "Fichier";
+                value: root.status.database-path;
+            }
+
+            Field {
+                label: "Nœuds";
+                value: root.status.nodes;
+            }
+
+            Field {
+                label: "Objets";
+                value: root.status.items;
+            }
+
+            Field {
+                label: "Drops";
+                value: root.status.drops;
+            }
+        }
+    }
+
+    GroupBox {
+        title: "Dernier import";
+        VerticalLayout {
+            spacing: 4px;
+            if !root.status.has-run: Text {
+                text: "Aucun import : lancez une mise à jour.";
+            }
+            if root.status.has-run: VerticalLayout {
+                spacing: 4px;
+                Field {
+                    label: "Statut";
+                    value: root.status.status;
+                }
+
+                Field {
+                    label: "Début";
+                    value: root.status.started-at;
+                }
+
+                Field {
+                    label: "Fin";
+                    value: root.status.finished-at;
+                }
+
+                Field {
+                    label: "Source";
+                    value: root.status.source;
+                }
+
+                Field {
+                    label: "Révision";
+                    value: root.status.revision;
+                }
+
+                Field {
+                    label: "Message";
+                    value: root.status.message;
+                }
+            }
+        }
+    }
+
+    HorizontalBox {
+        padding: 0px;
+        Button {
+            accessible-id: "update-from-wiki";
+            text: "Mettre à jour depuis le wiki";
+            enabled: !root.busy;
+            clicked => {
+                root.update-from-wiki();
+            }
+        }
+
+        Button {
+            accessible-id: "reimport-from-cache";
+            text: "Réimporter depuis le cache";
+            enabled: !root.busy;
+            clicked => {
+                root.reimport-from-cache();
+            }
+        }
+
+        Rectangle {
+            horizontal-stretch: 1;
+        }
+    }
+
+    ProgressIndicator {
+        progress: root.progress;
+        height: 8px;
+    }
+
+    GroupBox {
+        title: "Journal";
+        vertical-stretch: 1;
+        log-view := ListView {
+            accessible-id: "import-log";
+            for line in root.log-lines: Text {
+                text: line;
+                wrap: word-wrap;
+            }
+        }
+    }
+
+    // Keep the newest line visible as the log grows.
+    changed log-lines => {
+        log-view.content-y = min(0px, log-view.visible-height - log-view.content-height);
+    }
+}
+
+export component AppWindow inherits Window {
+    title: "Plop-Warframe";
+    preferred-width: 900px;
+    preferred-height: 700px;
+
+    in property <DataStatus> data-status;
+    in property <bool> busy;
+    in property <float> progress;
+    in property <[string]> log-lines;
+    callback update-from-wiki();
+    callback reimport-from-cache();
+
+    TabWidget {
+        Tab {
+            title: "Données";
+            DataTab {
+                status: root.data-status;
+                busy: root.busy;
+                progress: root.progress;
+                log-lines: root.log-lines;
+                update-from-wiki => {
+                    root.update-from-wiki();
+                }
+                reimport-from-cache => {
+                    root.reimport-from-cache();
+                }
+            }
+        }
+
+        Tab {
+            title: "Recherche";
+            VerticalBox {
+                Text {
+                    text: "La recherche arrive dans une prochaine version.";
+                }
+            }
+        }
+    }
+}

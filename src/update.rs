@@ -43,6 +43,34 @@ pub enum UpdateError {
     },
 }
 
+/// Import progress: `done` steps out of `total`, with a French status line for the log.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Progress<'a> {
+    pub done: usize,
+    pub total: usize,
+    pub message: &'a str,
+}
+
+impl Progress<'_> {
+    /// Completed share, from 0 to 1, for a progress bar.
+    pub fn fraction(&self) -> f32 {
+        if self.total == 0 {
+            return 1.0;
+        }
+        let done = u16::try_from(self.done.min(self.total)).unwrap_or(u16::MAX);
+        let total = u16::try_from(self.total).unwrap_or(u16::MAX);
+        f32::from(done) / f32::from(total)
+    }
+}
+
+/// Number of progress steps of an import: one per download, reading, writing.
+pub fn step_count(origin: Origin) -> usize {
+    match origin {
+        Origin::Wiki => MODULES.len() + 2,
+        Origin::Cache => 2,
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UpdateReport {
     pub summary: ImportSummary,
@@ -91,14 +119,23 @@ impl DataPaths {
     }
 }
 
-/// Runs a whole import. `progress` receives French status lines for the log; `now` returns
-/// Unix seconds.
+/// Runs a whole import. `progress` is called before each step; `now` returns Unix seconds.
 pub fn run_import(
     paths: &DataPaths,
     origin: Origin,
     now: &dyn Fn() -> i64,
-    progress: &mut dyn FnMut(&str),
+    progress: &mut dyn FnMut(Progress<'_>),
 ) -> Result<UpdateReport, UpdateError> {
+    let total = step_count(origin);
+    let mut done = 0;
+    let mut step = |message: &str| {
+        progress(Progress {
+            done,
+            total,
+            message,
+        });
+        done += 1;
+    };
     std::fs::create_dir_all(&paths.dir).map_err(|source| UpdateError::DataDir {
         path: paths.dir.clone(),
         source,
@@ -108,7 +145,7 @@ pub fn run_import(
     if origin == Origin::Wiki {
         let mut fetcher = ModuleFetcher::new()?;
         for (page, file) in MODULES {
-            progress(&format!("Téléchargement de {page}…"));
+            step(&format!("Téléchargement de {page}…"));
             let page_data = fetcher.fetch_raw(page)?;
             cache.store(
                 file,
@@ -121,13 +158,13 @@ pub fn run_import(
         }
     }
 
-    progress("Lecture des modules…");
+    step("Lecture des modules…");
     let [drop_tables, missions] = MODULES.map(|(_, file)| cache.load(file));
     let (drop_tables, missions) = (drop_tables?, missions?);
     let revision = revision(&[&drop_tables, &missions]);
     let dataset = WikiSource::new(drop_tables.text, missions.text).load()?;
 
-    progress("Écriture dans la base…");
+    step("Écriture dans la base…");
     let mut conn = db::open(&paths.database)?;
     let source = match origin {
         Origin::Wiki => "wiki",
