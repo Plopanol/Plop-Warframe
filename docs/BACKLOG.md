@@ -4,5 +4,5 @@ Idées hors périmètre : non planifiées, jamais implémentées d'office. Une i
 
 | Idée | Origine | Intérêt |
 |---|---|---|
-| Drops des ennemis et des conteneurs (sections `Enemies`, `Containers`) | TASK-002 | Couvrir mods et ressources lâchés hors récompenses de mission |
+| Drops des conteneurs (section `Containers`) | TASK-002 | Couvrir les objets des caisses et coffres |
 | Source alternative : tables officielles de DE (`warframe.com/droptables`) | Cadrage initial | Recouper ou remplacer le wiki derrière `DropSource` |

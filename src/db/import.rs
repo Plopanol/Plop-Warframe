@@ -6,7 +6,7 @@ use std::collections::{BTreeSet, HashMap};
 use rusqlite::{Connection, Transaction, params};
 
 use super::DbError;
-use crate::model::DropDataset;
+use crate::model::{DropDataset, node_faction_codes};
 
 /// Placeholder stored when the wiki leaves a planet or mission type empty.
 const UNKNOWN: &str = "(inconnu)";
@@ -69,7 +69,12 @@ fn load(
     // Children first, for the foreign keys. Without AUTOINCREMENT, ids restart at 1, so two
     // imports of the same data give identical rows.
     tx.execute_batch(
-        "DELETE FROM \"drop\";
+        "DELETE FROM region_resource;
+         DELETE FROM enemy_drop;
+         DELETE FROM enemy_location;
+         DELETE FROM enemy;
+         DELETE FROM node_faction;
+         DELETE FROM \"drop\";
          DELETE FROM node_drop_table;
          DELETE FROM node;
          DELETE FROM item;
@@ -80,16 +85,19 @@ fn load(
 
     let planet_ids = insert_planets(&tx, dataset)?;
     let type_ids = insert_mission_types(&tx, dataset)?;
-    let (table_ids, item_count, drop_count) = insert_tables(&tx, dataset)?;
+    let mut items = Items::new(&tx)?;
+    let (table_ids, drop_count) = insert_tables(&tx, dataset, &mut items)?;
 
     let mut insert_node = tx.prepare_cached(
         "INSERT INTO node (key, name, planet_id, mission_type_id, faction, min_level, max_level,
-                           is_dark_sector, is_special)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+                           is_dark_sector, is_special, tileset)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
     )?;
     let mut insert_link = tx.prepare_cached(
         "INSERT INTO node_drop_table (node_id, drop_table_id, role) VALUES (?1, ?2, ?3)",
     )?;
+    let mut insert_faction =
+        tx.prepare_cached("INSERT INTO node_faction (node_id, faction) VALUES (?1, ?2)")?;
     for node in &dataset.nodes {
         insert_node.execute(params![
             node.key,
@@ -101,6 +109,7 @@ fn load(
             node.max_level,
             node.is_dark_sector,
             node.is_special,
+            node.tileset,
         ])?;
         let node_id = tx.last_insert_rowid();
         for link in &node.tables {
@@ -109,9 +118,21 @@ fn load(
                 insert_link.execute(params![node_id, table_id, link.role.code()])?;
             }
         }
+        // Special missions have no fixed enemies.
+        if !node.is_special {
+            for code in node_faction_codes(node.faction.as_deref().unwrap_or_default()) {
+                insert_faction.execute(params![node_id, code])?;
+            }
+        }
     }
     drop(insert_node);
     drop(insert_link);
+    drop(insert_faction);
+
+    insert_enemies(&tx, dataset, &mut items)?;
+    insert_region_resources(&tx, dataset, &planet_ids, &mut items)?;
+    let item_count = items.count();
+    drop(items);
 
     let summary = ImportSummary {
         run_id,
@@ -145,10 +166,17 @@ fn insert_planets<'d>(
     tx: &Transaction<'_>,
     dataset: &'d DropDataset,
 ) -> Result<HashMap<&'d str, i64>, DbError> {
+    // Region planets are usually node planets; the others are kept for completeness.
     let names: BTreeSet<&str> = dataset
         .nodes
         .iter()
         .map(|node| or_unknown(&node.planet))
+        .chain(
+            dataset
+                .region_resources
+                .iter()
+                .map(|region| or_unknown(&region.planet)),
+        )
         .collect();
     let mut statement = tx.prepare_cached("INSERT INTO planet (name) VALUES (?1)")?;
     let mut ids = HashMap::new();
@@ -194,24 +222,104 @@ fn insert_mission_types<'d>(
 
 type TableIds<'d> = HashMap<&'d str, i64>;
 
+/// Item ids by name. An item keeps the category of its first occurrence; the wiki is not
+/// always consistent (an Ayatan sculpture may be "Item" or "Ayatan Sculpture").
+struct Items<'t, 'd> {
+    insert: rusqlite::CachedStatement<'t>,
+    ids: HashMap<&'d str, i64>,
+}
+
+impl<'t, 'd> Items<'t, 'd> {
+    fn new(tx: &'t Transaction<'_>) -> Result<Self, DbError> {
+        Ok(Self {
+            insert: tx.prepare_cached("INSERT INTO item (name, category) VALUES (?1, ?2)")?,
+            ids: HashMap::new(),
+        })
+    }
+
+    fn id(&mut self, tx: &Transaction<'_>, name: &'d str, category: &str) -> Result<i64, DbError> {
+        if let Some(id) = self.ids.get(name) {
+            return Ok(*id);
+        }
+        self.insert.execute(params![name, category])?;
+        let id = tx.last_insert_rowid();
+        self.ids.insert(name, id);
+        Ok(id)
+    }
+
+    fn count(&self) -> usize {
+        self.ids.len()
+    }
+}
+
+fn insert_enemies<'d>(
+    tx: &Transaction<'_>,
+    dataset: &'d DropDataset,
+    items: &mut Items<'_, 'd>,
+) -> Result<(), DbError> {
+    let mut insert_enemy =
+        tx.prepare_cached("INSERT INTO enemy (key, name, faction) VALUES (?1, ?2, ?3)")?;
+    let mut insert_location = tx.prepare_cached(
+        "INSERT OR IGNORE INTO enemy_location (enemy_id, kind, value) VALUES (?1, ?2, ?3)",
+    )?;
+    let mut insert_drop = tx.prepare_cached(
+        "INSERT INTO enemy_drop (enemy_id, item_id, chance, rarity) VALUES (?1, ?2, ?3, ?4)",
+    )?;
+    for enemy in &dataset.enemies {
+        insert_enemy.execute(params![enemy.key, enemy.name, enemy.faction])?;
+        let enemy_id = tx.last_insert_rowid();
+        let locations = enemy
+            .planets
+            .iter()
+            .map(|planet| ("planet", planet))
+            .chain(enemy.tilesets.iter().map(|tileset| ("tileset", tileset)));
+        for (kind, value) in locations {
+            insert_location.execute(params![enemy_id, kind, value])?;
+        }
+        for drop in &enemy.drops {
+            let item_id = items.id(tx, &drop.item, &drop.category)?;
+            insert_drop.execute(params![enemy_id, item_id, drop.chance, drop.rarity.code()])?;
+        }
+    }
+    Ok(())
+}
+
+fn insert_region_resources<'d>(
+    tx: &Transaction<'_>,
+    dataset: &'d DropDataset,
+    planet_ids: &HashMap<&str, i64>,
+    items: &mut Items<'_, 'd>,
+) -> Result<(), DbError> {
+    let mut insert = tx.prepare_cached(
+        "INSERT OR IGNORE INTO region_resource (planet_id, item_id) VALUES (?1, ?2)",
+    )?;
+    for region in &dataset.region_resources {
+        let Some(planet_id) = planet_ids.get(or_unknown(&region.planet)) else {
+            continue;
+        };
+        for resource in &region.resources {
+            let item_id = items.id(tx, resource, "Resource")?;
+            insert.execute(params![planet_id, item_id])?;
+        }
+    }
+    Ok(())
+}
+
 fn insert_tables<'d>(
     tx: &Transaction<'_>,
     dataset: &'d DropDataset,
-) -> Result<(TableIds<'d>, usize, usize), DbError> {
+    items: &mut Items<'_, 'd>,
+) -> Result<(TableIds<'d>, usize), DbError> {
     let mut insert_table = tx.prepare_cached(
         "INSERT INTO drop_table (alias, name, table_type, tier, rotation_kind)
          VALUES (?1, ?2, ?3, ?4, ?5)",
     )?;
-    let mut insert_item = tx.prepare_cached("INSERT INTO item (name, category) VALUES (?1, ?2)")?;
     let mut insert_drop = tx.prepare_cached(
         "INSERT INTO \"drop\" (drop_table_id, rotation, item_id, chance, rarity, quantity)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
     )?;
 
     let mut table_ids = HashMap::new();
-    // An item keeps the category of its first occurrence; the wiki is not always consistent
-    // (an Ayatan sculpture may be "Item" or "Ayatan Sculpture").
-    let mut item_ids: HashMap<&str, i64> = HashMap::new();
     let mut drop_count = 0;
     for table in &dataset.tables {
         insert_table.execute(params![
@@ -225,15 +333,7 @@ fn insert_tables<'d>(
         table_ids.insert(table.alias.as_str(), table_id);
 
         for entry in &table.entries {
-            let item_id = match item_ids.get(entry.item.as_str()) {
-                Some(id) => *id,
-                None => {
-                    insert_item.execute(params![entry.item, entry.category])?;
-                    let id = tx.last_insert_rowid();
-                    item_ids.insert(entry.item.as_str(), id);
-                    id
-                }
-            };
+            let item_id = items.id(tx, &entry.item, &entry.category)?;
             insert_drop.execute(params![
                 table_id,
                 entry.rotation.code(),
@@ -245,5 +345,5 @@ fn insert_tables<'d>(
             drop_count += 1;
         }
     }
-    Ok((table_ids, item_ids.len(), drop_count))
+    Ok((table_ids, drop_count))
 }

@@ -29,10 +29,11 @@ Jalon : `--import` remplit la base depuis le wiki et une requête de test retrou
 | [TASK-006](tasks/TASK-006-onglet-donnees.md) | Onglet Données, import en arrière-plan | TASK-004 |
 | [TASK-010](tasks/TASK-010-console-release.md) | Pas de console Windows en release (Q-003) | TASK-006 |
 | [TASK-007](tasks/TASK-007-onglet-recherche.md) | Onglet Recherche | TASK-005, TASK-006 |
-| [TASK-008](tasks/TASK-008-finitions.md) | Gestion d'erreurs, README, contrôle Linux | TASK-007 |
+| [TASK-011](tasks/TASK-011-onglet-recherche-spot.md) | Onglet Recherche Spot (drops des ennemis) | TASK-007 |
+| [TASK-008](tasks/TASK-008-finitions.md) | Gestion d'erreurs, README, contrôle Linux | TASK-011 |
 
 Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Windows et Linux.
 
 ## Prochaine tâche
 
-[TASK-008](tasks/TASK-008-finitions.md)
+[TASK-011](tasks/TASK-011-onglet-recherche-spot.md)

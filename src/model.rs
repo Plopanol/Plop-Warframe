@@ -218,7 +218,77 @@ pub struct Node {
     pub is_dark_sector: bool,
     /// Table without a fixed node (bounty, Sortie, Arbitrations…).
     pub is_special: bool,
+    /// Wiki `Tileset`, matched against an enemy's `TileSets`.
+    pub tileset: Option<String>,
     pub tables: Vec<NodeTable>,
+}
+
+/// Generic drop that stands for one resource of the node's planet (`RegionResources`).
+pub const REGION_RESOURCE: &str = "Region Resource";
+
+/// Per-kill drop of an enemy.
+#[derive(Debug, Clone, PartialEq)]
+pub struct EnemyDrop {
+    pub item: String,
+    pub category: String,
+    /// Per-kill fraction between 0 and 1: category chance × entry chance.
+    pub chance: f64,
+    pub rarity: Rarity,
+}
+
+/// Enemy of `Enemies` in `Module:DropTables/data`, placed by `Module:Enemies/data`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Enemy {
+    /// Key of the drop table (`Heavy Gunner (2)` for a variant).
+    pub key: String,
+    pub name: String,
+    /// Normalised faction code ([`faction_code`]); `None` leaves the enemy without a spot.
+    pub faction: Option<String>,
+    /// Restrictions listed by the wiki; empty means anywhere its faction appears.
+    pub planets: Vec<String>,
+    pub tilesets: Vec<String>,
+    pub drops: Vec<EnemyDrop>,
+}
+
+/// Resources a « Region Resource » drop may give on a planet.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RegionResources {
+    pub planet: String,
+    pub resources: Vec<String>,
+}
+
+/// Faction code shared by nodes and enemies, so that « Kuva Grineer » enemies meet
+/// « Grineer » nodes (`docs/04-REGLES-DROPS.md`, rule 13). `None` for a faction that does
+/// not hold nodes (Tenno, Neutral, wildlife…).
+pub fn faction_code(name: &str) -> Option<&'static str> {
+    let code = match name.trim().to_lowercase().as_str() {
+        "grineer" | "kuva grineer" => "grineer",
+        "corpus" | "corpus amalgam" => "corpus",
+        "infested" | "infestation" | "infested deimos" => "infested",
+        "corrupted" | "orokin" => "orokin",
+        "sentient" => "sentient",
+        "the murmur" | "murmur" => "murmur",
+        "narmer" => "narmer",
+        "scaldra" => "scaldra",
+        "techrot" => "techrot",
+        "anarchs" => "anarchs",
+        "duviri" => "duviri",
+        _ => return None,
+    };
+    Some(code)
+}
+
+/// Faction codes of a node's `faction` text: « Grineer / Corpus » and « Grineer or Corpus »
+/// both give the two factions.
+pub fn node_faction_codes(faction: &str) -> Vec<&'static str> {
+    let mut codes: Vec<&'static str> = faction
+        .split(" / ")
+        .flat_map(|part| part.split(" or "))
+        .filter_map(faction_code)
+        .collect();
+    codes.sort_unstable();
+    codes.dedup();
+    codes
 }
 
 /// Everything a source yields for one import.
@@ -227,6 +297,8 @@ pub struct DropDataset {
     pub mission_types: Vec<MissionType>,
     pub nodes: Vec<Node>,
     pub tables: Vec<DropTable>,
+    pub enemies: Vec<Enemy>,
+    pub region_resources: Vec<RegionResources>,
     /// Non-fatal anomalies (missing alias, malformed entry), in French for the import log.
     pub warnings: Vec<String>,
 }

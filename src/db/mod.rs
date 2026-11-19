@@ -27,7 +27,10 @@ pub enum DbError {
 }
 
 /// Migrations in order; migration `n` (1-based) brings `user_version` from `n - 1` to `n`.
-const MIGRATIONS: &[&str] = &[include_str!("migrations/001_initial.sql")];
+const MIGRATIONS: &[&str] = &[
+    include_str!("migrations/001_initial.sql"),
+    include_str!("migrations/002_enemies.sql"),
+];
 
 fn latest_version() -> i64 {
     i64::try_from(MIGRATIONS.len()).unwrap_or(i64::MAX)

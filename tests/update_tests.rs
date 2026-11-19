@@ -111,5 +111,8 @@ fn progress_fraction_is_bounded() {
     assert_eq!(at(2, 4), 0.5);
     assert_eq!(at(5, 4), 1.0);
     assert_eq!(at(0, 0), 1.0);
-    assert_eq!(update::step_count(Origin::Wiki), update::MODULES.len() + 2);
+    assert_eq!(
+        update::step_count(Origin::Wiki),
+        update::MODULES.len() + update::enemy_modules().len() + 2
+    );
 }
