@@ -12,7 +12,7 @@ use super::AppWindow;
 use crate::db::{self, DbError, ItemHit, RotationFilter, SearchFilter};
 use crate::search_view::{
     CategoryChoice, MissionTypeChoice, ResultTable, SearchMode, category_choices,
-    mission_type_choices, specials_from_index, suggestion_label, summary,
+    mission_type_choices, node_filter_from_index, suggestion_label, summary,
 };
 use crate::update::DataPaths;
 
@@ -259,7 +259,8 @@ impl SearchState {
                 b: window.get_search_rotation_b(),
                 c: window.get_search_rotation_c(),
             },
-            specials: specials_from_index(window.get_search_specials_index()),
+            specials: node_filter_from_index(window.get_search_specials_index()),
+            dark_sectors: node_filter_from_index(window.get_search_dark_sectors_index()),
             item_ids: self.selected.iter().map(|s| s.id).collect(),
         };
         let result = match (&self.conn, mode) {

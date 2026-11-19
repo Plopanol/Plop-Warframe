@@ -1,10 +1,12 @@
 # Index des tâches
 
-Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-016.
+Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-017.
 
 ## Actives
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-016](TASK-016-secteurs-sombres.md) | Repérer et filtrer les Secteurs sombres | En cours | Phase 2 — Interface | Normale |
 
 ## À faire
 

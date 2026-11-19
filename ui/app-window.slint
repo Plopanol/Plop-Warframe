@@ -212,6 +212,7 @@ component SearchTab inherits VerticalBox {
     in-out property <int> mission-type-index;
     in-out property <int> mode-index;
     in-out property <int> specials-index;
+    in-out property <int> dark-sectors-index;
     in-out property <bool> rotation-a;
     in-out property <bool> rotation-b;
     in-out property <bool> rotation-c;
@@ -324,6 +325,21 @@ component SearchTab inherits VerticalBox {
                 accessible-id: "special-missions";
                 model: ["Incluses", "Exclues", "Uniquement"];
                 current-index <=> root.specials-index;
+                enabled: root.enabled;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+
+            Text {
+                text: "Secteurs sombres";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "dark-sectors";
+                model: ["Inclus", "Exclus", "Uniquement"];
+                current-index <=> root.dark-sectors-index;
                 enabled: root.enabled;
                 selected => {
                     root.filters-changed();
@@ -702,6 +718,7 @@ export component AppWindow inherits Window {
     in-out property <int> search-mission-type-index;
     in-out property <int> search-mode-index;
     in-out property <int> search-specials-index;
+    in-out property <int> search-dark-sectors-index;
     in-out property <bool> search-rotation-a: true;
     in-out property <bool> search-rotation-b: true;
     in-out property <bool> search-rotation-c: true;
@@ -807,6 +824,7 @@ export component AppWindow inherits Window {
                     mission-type-index <=> root.search-mission-type-index;
                     mode-index <=> root.search-mode-index;
                     specials-index <=> root.search-specials-index;
+                    dark-sectors-index <=> root.search-dark-sectors-index;
                     rotation-a <=> root.search-rotation-a;
                     rotation-b <=> root.search-rotation-b;
                     rotation-c <=> root.search-rotation-c;

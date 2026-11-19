@@ -34,10 +34,11 @@ Jalon : `--import` remplit la base depuis le wiki et une requête de test retrou
 | [TASK-013](tasks/TASK-013-filtre-type-objet.md) | Filtre des suggestions par type d'objet | TASK-011 |
 | [TASK-014](tasks/TASK-014-theme-wiki.md) | Couleurs et polices du wiki | TASK-008 |
 | [TASK-015](tasks/TASK-015-icone-coffre.md) | Icône coffre de loot (fenêtre et exe) | TASK-008 |
+| [TASK-016](tasks/TASK-016-secteurs-sombres.md) | Badge et filtre Secteurs sombres | TASK-007 |
 | [TASK-012](tasks/TASK-012-controle-linux.md) | Contrôle Linux (reporté) | TASK-008 |
 
 Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Windows et Linux.
 
 ## Prochaine tâche
 
-Aucune tâche planifiée.
+[TASK-016](tasks/TASK-016-secteurs-sombres.md)

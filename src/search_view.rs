@@ -5,7 +5,7 @@
 use std::cmp::Ordering;
 
 use crate::db::{
-    CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, SpecialFilter, fold_text,
+    CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, NodeFilter, fold_text,
 };
 use crate::model::{Rotation, RotationKind, TableRole};
 
@@ -107,12 +107,13 @@ impl SearchMode {
     }
 }
 
-/// From the index of the special missions selector: "Incluses", "Exclues", "Uniquement".
-pub fn specials_from_index(index: i32) -> SpecialFilter {
+/// From the index of a node class selector (special missions, Dark Sectors): "Incluses",
+/// "Exclues", "Uniquement".
+pub fn node_filter_from_index(index: i32) -> NodeFilter {
     match index {
-        1 => SpecialFilter::Exclude,
-        2 => SpecialFilter::Only,
-        _ => SpecialFilter::Include,
+        1 => NodeFilter::Exclude,
+        2 => NodeFilter::Only,
+        _ => NodeFilter::Include,
     }
 }
 
@@ -276,6 +277,7 @@ pub const BY_ITEM_COLUMNS: &[&str] = &[
     "Nœud",
     "Planète",
     "Type de mission",
+    "Secteur sombre",
     "Pool",
     "Chance",
     "Rareté",
@@ -287,6 +289,7 @@ pub const COMBINED_COLUMNS: &[&str] = &[
     "Nœud",
     "Planète",
     "Type de mission",
+    "Secteur sombre",
     "Pool",
     "Chance cumulée",
     "Objets",
@@ -374,6 +377,9 @@ pub fn chance_cell(chance: Option<f64>) -> (String, SortKey) {
     )
 }
 
+/// "Secteur sombre" cell of a Dark Sector node; other nodes leave it empty.
+const DARK_SECTOR_MARK: &str = "Oui";
+
 fn location_cells(location: &Location) -> Vec<(String, SortKey)> {
     let pool = pool_label(location.rotation_kind, location.role, location.rotation);
     // Pools sort by kind then letter, which the label text gives.
@@ -381,6 +387,11 @@ fn location_cells(location: &Location) -> Vec<(String, SortKey)> {
         text_cell(&location.node_name),
         text_cell(&location.planet),
         text_cell(mission_type_label(&location.mission_type)),
+        text_cell(if location.is_dark_sector {
+            DARK_SECTOR_MARK
+        } else {
+            ""
+        }),
         text_cell(&pool),
     ]
 }
@@ -397,6 +408,7 @@ mod tests {
             planet: "Ceres".to_owned(),
             mission_type: "Survival".to_owned(),
             is_special: false,
+            is_dark_sector: false,
             table_alias: "T".to_owned(),
             table_name: "T".to_owned(),
             rotation_kind: kind,
@@ -472,10 +484,10 @@ mod tests {
     fn maps_selector_indexes() {
         assert_eq!(SearchMode::from_index(0), SearchMode::ByItem);
         assert_eq!(SearchMode::from_index(1), SearchMode::Combined);
-        assert_eq!(specials_from_index(0), SpecialFilter::Include);
-        assert_eq!(specials_from_index(1), SpecialFilter::Exclude);
-        assert_eq!(specials_from_index(2), SpecialFilter::Only);
-        assert_eq!(specials_from_index(-1), SpecialFilter::Include);
+        assert_eq!(node_filter_from_index(0), NodeFilter::Include);
+        assert_eq!(node_filter_from_index(1), NodeFilter::Exclude);
+        assert_eq!(node_filter_from_index(2), NodeFilter::Only);
+        assert_eq!(node_filter_from_index(-1), NodeFilter::Include);
     }
 
     #[test]
@@ -531,6 +543,7 @@ mod tests {
                 "Olympus",
                 "Ceres",
                 "Survie",
+                "",
                 "Rotation C",
                 "7,69 %",
                 "Rare",
@@ -543,7 +556,10 @@ mod tests {
     #[test]
     fn builds_combined_cells_without_aabc() {
         let row = CombinedRow {
-            location: location("Gabii", RotationKind::None, Rotation::None),
+            location: Location {
+                is_dark_sector: true,
+                ..location("Gabii", RotationKind::None, Rotation::None)
+            },
             chance: 0.5,
             items: 2,
             aabc: None,
@@ -553,7 +569,7 @@ mod tests {
         assert_eq!(
             table.rows[0].cells,
             [
-                "Gabii", "Ceres", "Survie", "Unique", "50,00 %", "2", MISSING
+                "Gabii", "Ceres", "Survie", "Oui", "Unique", "50,00 %", "2", MISSING
             ]
         );
     }
@@ -571,10 +587,10 @@ mod tests {
 
         table.sort(1, false);
         assert_eq!(nodes(&table), ["Alpha", "beta", "Élan"]);
-        table.sort(5, true);
+        table.sort(6, true);
         assert_eq!(nodes(&table), ["Alpha", "Élan", "beta"]);
         // A missing AABC sorts below every value.
-        table.sort(8, false);
+        table.sort(9, false);
         assert_eq!(nodes(&table), ["beta", "Élan", "Alpha"]);
         table.sort(99, true);
         assert_eq!(nodes(&table), ["beta", "Élan", "Alpha"]);

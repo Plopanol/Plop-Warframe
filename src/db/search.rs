@@ -142,21 +142,22 @@ impl Default for RotationFilter {
     }
 }
 
-/// Treatment of special missions (bounties, Sortie, Arbitrations…).
+/// Treatment of a class of nodes: special missions (bounties, Sortie, Arbitrations…) or
+/// Dark Sectors.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub enum SpecialFilter {
+pub enum NodeFilter {
     #[default]
     Include,
     Exclude,
     Only,
 }
 
-impl SpecialFilter {
+impl NodeFilter {
     fn code(self) -> i64 {
         match self {
-            SpecialFilter::Include => 0,
-            SpecialFilter::Exclude => 1,
-            SpecialFilter::Only => 2,
+            NodeFilter::Include => 0,
+            NodeFilter::Exclude => 1,
+            NodeFilter::Only => 2,
         }
     }
 }
@@ -166,7 +167,8 @@ pub struct SearchFilter {
     /// `None` searches every mission type.
     pub mission_type_id: Option<i64>,
     pub rotations: RotationFilter,
-    pub specials: SpecialFilter,
+    pub specials: NodeFilter,
+    pub dark_sectors: NodeFilter,
     /// Chosen items; none gives no result.
     pub item_ids: Vec<i64>,
 }
@@ -179,6 +181,7 @@ pub struct Location {
     pub planet: String,
     pub mission_type: String,
     pub is_special: bool,
+    pub is_dark_sector: bool,
     pub table_alias: String,
     pub table_name: String,
     pub rotation_kind: RotationKind,
@@ -220,7 +223,8 @@ const CHOSEN_CTE: &str = "chosen AS (
     )";
 
 /// Joins `r` (columns `drop_table_id`, `rotation`) and `a` (`aabc`) to their nodes and applies
-/// the filters `?2` mission type, `?3`..`?5` rotations A, B, C, `?6` special missions.
+/// the filters `?2` mission type, `?3`..`?5` rotations A, B, C, `?6` special missions,
+/// `?7` Dark Sectors.
 const LOCATION_JOINS: &str = "
     JOIN drop_table dt ON dt.id = r.drop_table_id
     JOIN node_drop_table ndt ON ndt.drop_table_id = dt.id
@@ -230,10 +234,12 @@ const LOCATION_JOINS: &str = "
     WHERE (?2 IS NULL OR n.mission_type_id = ?2)
       AND (dt.rotation_kind <> 'rotation'
            OR (r.rotation = 'A' AND ?3) OR (r.rotation = 'B' AND ?4) OR (r.rotation = 'C' AND ?5))
-      AND (?6 = 0 OR (?6 = 1 AND n.is_special = 0) OR (?6 = 2 AND n.is_special = 1))";
+      AND (?6 = 0 OR (?6 = 1 AND n.is_special = 0) OR (?6 = 2 AND n.is_special = 1))
+      AND (?7 = 0 OR (?7 = 1 AND n.is_dark_sector = 0) OR (?7 = 2 AND n.is_dark_sector = 1))";
 
 /// Location columns, read by [`location`] from index 0.
-const LOCATION_COLUMNS: &str = "n.key, n.name, p.name, mt.name, n.is_special, dt.alias, dt.name,
+const LOCATION_COLUMNS: &str =
+    "n.key, n.name, p.name, mt.name, n.is_special, n.is_dark_sector, dt.alias, dt.name,
     dt.rotation_kind, ndt.role, r.rotation,
     CASE WHEN dt.rotation_kind = 'rotation' AND mt.is_endless = 1 THEN a.aabc END";
 
@@ -242,7 +248,7 @@ const AABC_EXPR: &str = "(2 * sum(CASE WHEN rotation = 'A' THEN chance ELSE 0 EN
         + sum(CASE WHEN rotation = 'B' THEN chance ELSE 0 END)
         + sum(CASE WHEN rotation = 'C' THEN chance ELSE 0 END)) / 4.0";
 
-const LOCATION_COLUMN_COUNT: usize = 11;
+const LOCATION_COLUMN_COUNT: usize = 12;
 
 pub fn search_by_item(
     conn: &Connection,
@@ -272,7 +278,8 @@ pub fn search_by_item(
             filter.rotations.a,
             filter.rotations.b,
             filter.rotations.c,
-            filter.specials.code()
+            filter.specials.code(),
+            filter.dark_sectors.code()
         ],
         |row| {
             let base = LOCATION_COLUMN_COUNT;
@@ -318,7 +325,8 @@ pub fn search_combined(
             filter.rotations.a,
             filter.rotations.b,
             filter.rotations.c,
-            filter.specials.code()
+            filter.specials.code(),
+            filter.dark_sectors.code()
         ],
         |row| {
             let base = LOCATION_COLUMN_COUNT;
@@ -346,11 +354,12 @@ fn location(row: &Row<'_>) -> rusqlite::Result<Location> {
         planet: row.get(2)?,
         mission_type: row.get(3)?,
         is_special: row.get(4)?,
-        table_alias: row.get(5)?,
-        table_name: row.get(6)?,
-        rotation_kind: row.get::<_, Code<RotationKind>>(7)?.0,
-        role: row.get::<_, Code<TableRole>>(8)?.0,
-        rotation: row.get::<_, Code<Rotation>>(9)?.0,
+        is_dark_sector: row.get(5)?,
+        table_alias: row.get(6)?,
+        table_name: row.get(7)?,
+        rotation_kind: row.get::<_, Code<RotationKind>>(8)?.0,
+        role: row.get::<_, Code<TableRole>>(9)?.0,
+        rotation: row.get::<_, Code<Rotation>>(10)?.0,
     })
 }
 
