@@ -107,6 +107,47 @@ fn numbered_variants_use_the_base_enemy() {
     }
 }
 
+/// Regression: `Planets = {}` and stray positional values used to reject whole modules
+/// (infestation, sentient, unaffiliated), leaving their enemies without a spot.
+#[test]
+fn every_location_module_is_read() {
+    assert!(
+        !dataset()
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("illisible")),
+        "{:?}",
+        dataset()
+            .warnings
+            .iter()
+            .filter(|warning| warning.contains("illisible"))
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(
+        enemy("Volatile Runner").faction.as_deref(),
+        Some("infested")
+    );
+}
+
+#[test]
+fn malformed_location_entries_are_skipped_alone() {
+    let module = r#"return {
+        ["Broken"] = { General = { Planets = {}, TileSets = {}, Faction = "Grineer", 1 } },
+        ["Heavy Gunner"] = { General = { Faction = "Grineer", Planets = { "Earth" } } },
+    }"#;
+    let dataset = WikiSource::new(DROP_TABLES, MISSIONS)
+        .with_enemy_modules(vec![("test".to_owned(), module.to_owned())])
+        .load()
+        .expect("fixtures must parse");
+    let gunner = dataset
+        .enemies
+        .iter()
+        .find(|enemy| enemy.key == "Heavy Gunner")
+        .expect("Heavy Gunner");
+    assert_eq!(gunner.faction.as_deref(), Some("grineer"));
+    assert_eq!(gunner.planets, ["Earth"]);
+}
+
 #[test]
 fn unknown_enemies_are_reported() {
     assert!(

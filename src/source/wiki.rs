@@ -6,7 +6,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use mlua::Value;
 use serde::Deserialize;
 
-use super::lua::SandboxedLua;
+use super::lua::{LuaError, SandboxedLua};
 use super::{DropSource, SourceError};
 use crate::model::{
     DropDataset, DropEntry, DropTable, Enemy, EnemyDrop, MissionType, Node, NodeTable, Rarity,
@@ -61,29 +61,40 @@ impl WikiSource {
         &self,
         lua: &SandboxedLua,
         warnings: &mut Vec<String>,
-    ) -> BTreeMap<String, RawEnemyGeneral> {
+    ) -> BTreeMap<String, EnemyInfo> {
         let mut infos = BTreeMap::new();
         for (page, code) in &self.enemy_modules {
             let entries = lua
                 .run_module(page, code)
-                .and_then(|value| lua.convert::<BTreeMap<String, RawEnemyInfo>>(value));
-            let entries = match entries {
+                .and_then(|value| lua.entries(&value));
+            let mut entries = match entries {
                 Ok(entries) => entries,
                 Err(error) => {
                     warnings.push(format!("Module « {page} » illisible, ignoré : {error}"));
                     continue;
                 }
             };
-            for (key, info) in entries {
-                let Some(general) = info.general else {
-                    continue;
+            // Lua iteration order is unspecified; sorting keeps the import deterministic.
+            entries.sort_by(|a, b| a.0.cmp(&b.0));
+            for (key, entry) in entries {
+                // Fields are read one by one: the module mixes shapes (`Planets = {}`, stray
+                // positional values) that a whole-table conversion would reject.
+                let info = match enemy_info(lua, &entry) {
+                    Ok(Some(info)) => info,
+                    Ok(None) => continue,
+                    Err(error) => {
+                        warnings.push(format!(
+                            "Module « {page} », ennemi « {key} » illisible, ignoré : {error}"
+                        ));
+                        continue;
+                    }
                 };
                 // The first module wins, as in the wiki's own lookup (Heavy Gunner is both
                 // Grineer and Unaffiliated).
-                if let Some(name) = general.name.clone().filter(|name| *name != key) {
-                    infos.entry(name).or_insert_with(|| general.clone());
+                if let Some(name) = info.name.clone().filter(|name| *name != key) {
+                    infos.entry(name).or_insert_with(|| info.clone());
                 }
-                infos.entry(key).or_insert(general);
+                infos.entry(key).or_insert(info);
             }
         }
         infos
@@ -121,17 +132,48 @@ impl DropSource for WikiSource {
             .map(|(planet, resources)| RegionResources { planet, resources })
             .collect();
 
-        let enemy_drops: BTreeMap<String, RawEnemyDrops> = read_optional_field(
-            &lua,
-            DROP_TABLES_MODULE,
-            &drop_data,
-            "Enemies",
-            &mut dataset.warnings,
-        );
+        let enemy_drops = read_enemy_drops(&lua, &drop_data, &mut dataset.warnings);
         let infos = self.enemy_infos(&lua, &mut dataset.warnings);
         dataset.enemies = build_enemies(enemy_drops, &infos, &mut dataset.warnings);
         Ok(dataset)
     }
+}
+
+/// Drop tables of `Enemies`, converted one by one so that a malformed enemy is reported and
+/// skipped without losing the others.
+fn read_enemy_drops(
+    lua: &SandboxedLua,
+    drop_data: &Value,
+    warnings: &mut Vec<String>,
+) -> BTreeMap<String, RawEnemyDrops> {
+    let entries = lua
+        .field(drop_data, "Enemies")
+        .and_then(|section| lua.entries(&section));
+    let entries = match entries {
+        Ok(entries) if !entries.is_empty() => entries,
+        Ok(_) => {
+            warnings.push(format!(
+                "structure inattendue dans « {DROP_TABLES_MODULE} » : champ « Enemies » absent"
+            ));
+            return BTreeMap::new();
+        }
+        Err(error) => {
+            warnings.push(format!(
+                "« {DROP_TABLES_MODULE} », section Enemies illisible : {error}"
+            ));
+            return BTreeMap::new();
+        }
+    };
+    let mut drops = BTreeMap::new();
+    for (key, value) in entries {
+        match lua.convert::<RawEnemyDrops>(value) {
+            Ok(raw) => {
+                drops.insert(key, raw);
+            }
+            Err(error) => warnings.push(format!("Ennemi « {key} » illisible, ignoré : {error}")),
+        }
+    }
+    drops
 }
 
 /// Reads a field whose absence only degrades the data: reported, then treated as empty.
@@ -217,7 +259,7 @@ struct RawMissionType {
     is_endless: bool,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(untagged)]
 enum OneOrMany {
     One(String),
@@ -252,19 +294,34 @@ struct RawNode {
     tileset: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-struct RawEnemyInfo {
-    general: Option<RawEnemyGeneral>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-struct RawEnemyGeneral {
+/// `General` part of a `Module:Enemies/data` entry.
+#[derive(Debug, Clone)]
+struct EnemyInfo {
     name: Option<String>,
     faction: Option<String>,
-    planets: Option<OneOrMany>,
-    tile_sets: Option<OneOrMany>,
+    planets: Vec<String>,
+    tilesets: Vec<String>,
+}
+
+/// Reads the `General` fields of one enemy entry; `None` when it has no `General` table.
+fn enemy_info(lua: &SandboxedLua, entry: &Value) -> Result<Option<EnemyInfo>, LuaError> {
+    let general = lua.field(entry, "General")?;
+    if !general.is_table() {
+        return Ok(None);
+    }
+    let clean = |texts: Vec<String>| -> Vec<String> {
+        texts
+            .into_iter()
+            .map(|text| text.trim().to_owned())
+            .filter(|text| !text.is_empty())
+            .collect()
+    };
+    Ok(Some(EnemyInfo {
+        name: lua.text(&lua.field(&general, "Name")?),
+        faction: lua.text(&lua.field(&general, "Faction")?),
+        planets: clean(lua.texts(&lua.field(&general, "Planets")?)?),
+        tilesets: clean(lua.texts(&lua.field(&general, "TileSets")?)?),
+    }))
 }
 
 /// Drops of one enemy: each category has its own chance per kill, then a pool.
@@ -444,7 +501,7 @@ fn build_dataset(
 
 fn build_enemies(
     raw: BTreeMap<String, RawEnemyDrops>,
-    infos: &BTreeMap<String, RawEnemyGeneral>,
+    infos: &BTreeMap<String, EnemyInfo>,
     warnings: &mut Vec<String>,
 ) -> Vec<Enemy> {
     let mut enemies = Vec::with_capacity(raw.len());
@@ -465,8 +522,8 @@ fn build_enemies(
                     .as_deref()
                     .and_then(faction_code)
                     .map(str::to_owned),
-                text_list(info.planets.clone()),
-                text_list(info.tile_sets.clone()),
+                info.planets.clone(),
+                info.tilesets.clone(),
             ),
             None => {
                 if !infos.is_empty() {
@@ -487,16 +544,6 @@ fn build_enemies(
         });
     }
     enemies
-}
-
-fn text_list(value: Option<OneOrMany>) -> Vec<String> {
-    value
-        .map(OneOrMany::into_vec)
-        .unwrap_or_default()
-        .into_iter()
-        .map(|text| text.trim().to_owned())
-        .filter(|text| !text.is_empty())
-        .collect()
 }
 
 /// `Heavy Gunner (2)` → `Heavy Gunner`.
