@@ -25,9 +25,10 @@ Chaque dépendance est justifiée dans le commit qui l'introduit ; aucune n'est 
 | `mlua` (`lua54`, `vendored`, `serialize`) | Exécuter les modules Lua du wiki | TASK-003 |
 | `serde` | Désérialiser les tables Lua | TASK-003 |
 | `thiserror` | Erreurs typées du cœur | TASK-003 |
-| `log` | Journalisation (avertissements d'import) | TASK-003 |
 
-Prévues : `rusqlite` (`bundled`), `reqwest` (bloquant, thread dédié), `slint` et `slint-build` épinglés, `env_logger`, `anyhow` côté binaire.
+Prévues : `rusqlite` (`bundled`), `reqwest` (bloquant, thread dédié), `slint` et `slint-build` épinglés, `log` et `env_logger`, `anyhow` côté binaire. Les avertissements de lecture des sources sont portés par `DropDataset::warnings`, destinés au journal d'import.
+
+Le binaire offre provisoirement `--parse <DropTables_data.lua> <Missions_data.lua>`, remplacé par `--import` en TASK-004.
 
 ## Données
 

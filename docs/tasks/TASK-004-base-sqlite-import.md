@@ -1,6 +1,6 @@
 # TASK-004 — Base SQLite et import transactionnel
 
-- **Statut :** À cadrer
+- **Statut :** À faire
 - **Phase :** Phase 1 — Données
 - **Priorité :** Haute
 - **Dépendances :** TASK-003, [Q-001](../QUESTIONS.md#q-001)
@@ -22,4 +22,4 @@ Non exécutée.
 
 ## Obstacles et reprise
 
-Bloquée en partie par Q-001 (emplacement de la base) ; le schéma et l'import peuvent avancer sur une base en mémoire.
+Q-001 (emplacement de la base) doit être tranchée avant le code d'ouverture de la base et du cache ; le schéma et l'import peuvent avancer sur une base en mémoire.
