@@ -3,7 +3,9 @@
 
 use std::cmp::Ordering;
 
-use crate::db::{CombinedRow, ItemDropRow, Location, MissionTypeRow, fold_text};
+use crate::db::{
+    CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, SpecialFilter, fold_text,
+};
 use crate::model::{Rotation, RotationKind, TableRole};
 
 /// Shown in place of a missing value.
@@ -91,6 +93,40 @@ pub enum SearchMode {
     #[default]
     ByItem,
     Combined,
+}
+
+impl SearchMode {
+    /// From the index of the mode selector: "Par objet", "Combiné".
+    pub fn from_index(index: i32) -> Self {
+        if index == 1 {
+            SearchMode::Combined
+        } else {
+            SearchMode::ByItem
+        }
+    }
+}
+
+/// From the index of the special missions selector: "Incluses", "Exclues", "Uniquement".
+pub fn specials_from_index(index: i32) -> SpecialFilter {
+    match index {
+        1 => SpecialFilter::Exclude,
+        2 => SpecialFilter::Only,
+        _ => SpecialFilter::Include,
+    }
+}
+
+/// Line of the autocompletion list.
+pub fn suggestion_label(hit: &ItemHit) -> String {
+    format!("{} · {}", hit.name, hit.category)
+}
+
+/// Line above the result table.
+pub fn summary(selected_items: usize, results: usize) -> String {
+    if selected_items == 0 {
+        "Ajoutez un ou plusieurs objets pour lancer la recherche.".to_owned()
+    } else {
+        format!("Résultats : {results}")
+    }
 }
 
 /// Meaning of the pool, from the table kind (rule 5) and the node's link to the table.
@@ -349,6 +385,25 @@ mod tests {
         );
         assert_eq!(choices[0].id, None);
         assert_eq!(choices[1].id, Some(4));
+    }
+
+    #[test]
+    fn maps_selector_indexes() {
+        assert_eq!(SearchMode::from_index(0), SearchMode::ByItem);
+        assert_eq!(SearchMode::from_index(1), SearchMode::Combined);
+        assert_eq!(specials_from_index(0), SpecialFilter::Include);
+        assert_eq!(specials_from_index(1), SpecialFilter::Exclude);
+        assert_eq!(specials_from_index(2), SpecialFilter::Only);
+        assert_eq!(specials_from_index(-1), SpecialFilter::Include);
+    }
+
+    #[test]
+    fn summarises_search() {
+        assert_eq!(
+            summary(0, 0),
+            "Ajoutez un ou plusieurs objets pour lancer la recherche."
+        );
+        assert_eq!(summary(2, 15), "Résultats : 15");
     }
 
     #[test]

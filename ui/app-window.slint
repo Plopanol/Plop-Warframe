@@ -1,6 +1,11 @@
 import {
     Button,
+    CheckBox,
+    ComboBox,
     GroupBox,
+    LineEdit,
+    ScrollView,
+    StandardTableView,
     ListView,
     ProgressIndicator,
     TabWidget,
@@ -166,10 +171,249 @@ component DataTab inherits VerticalBox {
     }
 }
 
+// Removable chip of a chosen item.
+component Chip inherits Rectangle {
+    in property <string> text;
+    in property <bool> enabled;
+    callback remove();
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: #8080a0;
+    background: #8080a020;
+    HorizontalLayout {
+        padding-left: 10px;
+        padding-right: 2px;
+        spacing: 4px;
+        alignment: start;
+        Text {
+            text: root.text;
+            vertical-alignment: center;
+        }
+
+        Button {
+            accessible-id: "remove-item";
+            accessible-label: "Retirer " + root.text;
+            text: "✕";
+            enabled: root.enabled;
+            clicked => {
+                root.remove();
+            }
+        }
+    }
+}
+
+// Search tab: state and queries live in Rust (src/ui_bridge.rs, src/search_view.rs).
+component SearchTab inherits VerticalBox {
+    in property <bool> has-data;
+    in property <bool> enabled;
+    in property <[string]> mission-types;
+    in-out property <int> mission-type-index;
+    in-out property <int> mode-index;
+    in-out property <int> specials-index;
+    in-out property <bool> rotation-a;
+    in-out property <bool> rotation-b;
+    in-out property <bool> rotation-c;
+    in-out property <string> query;
+    in property <[string]> suggestions;
+    in property <[string]> selected-items;
+    in property <string> summary;
+    in property <[TableColumn]> columns;
+    in property <[[StandardListViewItem]]> rows;
+    callback query-edited(string);
+    callback add-suggestion(int);
+    callback remove-item(int);
+    callback filters-changed();
+    callback sort-ascending(int);
+    callback sort-descending(int);
+
+    if !root.has-data: Text {
+        text: "Lancez un import depuis l'onglet Données.";
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        vertical-stretch: 1;
+    }
+    if root.has-data: VerticalLayout {
+        spacing: 8px;
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "Type de mission";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "mission-type";
+                model: root.mission-types;
+                current-index <=> root.mission-type-index;
+                enabled: root.enabled;
+                horizontal-stretch: 2;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+
+            Text {
+                text: "Mode";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "search-mode";
+                model: ["Par objet", "Combiné"];
+                current-index <=> root.mode-index;
+                enabled: root.enabled;
+                horizontal-stretch: 1;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "Rotations";
+                vertical-alignment: center;
+            }
+
+            CheckBox {
+                accessible-id: "rotation-a";
+                text: "A";
+                checked <=> root.rotation-a;
+                enabled: root.enabled;
+                toggled => {
+                    root.filters-changed();
+                }
+            }
+
+            CheckBox {
+                accessible-id: "rotation-b";
+                text: "B";
+                checked <=> root.rotation-b;
+                enabled: root.enabled;
+                toggled => {
+                    root.filters-changed();
+                }
+            }
+
+            CheckBox {
+                accessible-id: "rotation-c";
+                text: "C";
+                checked <=> root.rotation-c;
+                enabled: root.enabled;
+                toggled => {
+                    root.filters-changed();
+                }
+            }
+
+            Rectangle {
+                width: 16px;
+            }
+
+            Text {
+                text: "Missions spéciales";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "special-missions";
+                model: ["Incluses", "Exclues", "Uniquement"];
+                current-index <=> root.specials-index;
+                enabled: root.enabled;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "Objets";
+                vertical-alignment: center;
+            }
+
+            LineEdit {
+                accessible-id: "item-query";
+                placeholder-text: "Ajouter un objet (nom ou partie du nom)…";
+                text <=> root.query;
+                enabled: root.enabled;
+                edited(text) => {
+                    root.query-edited(text);
+                }
+                accepted => {
+                    root.add-suggestion(0);
+                }
+            }
+        }
+
+        if root.suggestions.length > 0: Rectangle {
+            border-width: 1px;
+            border-color: #808080;
+            height: min(root.suggestions.length, 8) * 28px + 4px;
+            ListView {
+                accessible-id: "item-suggestions";
+                for suggestion[index] in root.suggestions: Rectangle {
+                    height: 28px;
+                    background: suggestion-touch.has-hover ? #8080a030 : transparent;
+                    suggestion-touch := TouchArea {
+                        accessible-role: button;
+                        accessible-label: suggestion;
+                        enabled: root.enabled;
+                        clicked => {
+                            root.add-suggestion(index);
+                        }
+                    }
+
+                    Text {
+                        x: 8px;
+                        text: suggestion;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+
+        if root.selected-items.length > 0: ScrollView {
+            height: 44px;
+            HorizontalLayout {
+                spacing: 6px;
+                padding: 4px;
+                alignment: start;
+                for item[index] in root.selected-items: Chip {
+                    text: item;
+                    enabled: root.enabled;
+                    remove => {
+                        root.remove-item(index);
+                    }
+                }
+            }
+        }
+
+        Text {
+            text: root.summary;
+            color: #808080;
+        }
+
+        StandardTableView {
+            accessible-id: "search-results";
+            vertical-stretch: 1;
+            columns: root.columns;
+            rows: root.rows;
+            sort-ascending(column) => {
+                root.sort-ascending(column);
+            }
+            sort-descending(column) => {
+                root.sort-descending(column);
+            }
+        }
+    }
+}
+
 export component AppWindow inherits Window {
     title: "Plop-Warframe";
-    preferred-width: 900px;
-    preferred-height: 700px;
+    preferred-width: 1100px;
+    preferred-height: 750px;
 
     in property <DataStatus> data-status;
     in property <bool> busy;
@@ -177,6 +421,29 @@ export component AppWindow inherits Window {
     in property <[string]> log-lines;
     callback update-from-wiki();
     callback reimport-from-cache();
+    // Raised by Rust once an import has ended, to reload the Search tab.
+    callback import-finished();
+
+    in property <bool> search-has-data;
+    in property <[string]> search-mission-types;
+    in-out property <int> search-mission-type-index;
+    in-out property <int> search-mode-index;
+    in-out property <int> search-specials-index;
+    in-out property <bool> search-rotation-a: true;
+    in-out property <bool> search-rotation-b: true;
+    in-out property <bool> search-rotation-c: true;
+    in-out property <string> search-query;
+    in property <[string]> search-suggestions;
+    in property <[string]> search-selected-items;
+    in property <string> search-summary;
+    in property <[TableColumn]> search-columns;
+    in property <[[StandardListViewItem]]> search-rows;
+    callback search-query-edited(string);
+    callback search-add-suggestion(int);
+    callback search-remove-item(int);
+    callback search-filters-changed();
+    callback search-sort-ascending(int);
+    callback search-sort-descending(int);
 
     TabWidget {
         Tab {
@@ -197,9 +464,39 @@ export component AppWindow inherits Window {
 
         Tab {
             title: "Recherche";
-            VerticalBox {
-                Text {
-                    text: "La recherche arrive dans une prochaine version.";
+            SearchTab {
+                has-data: root.search-has-data;
+                enabled: !root.busy;
+                mission-types: root.search-mission-types;
+                mission-type-index <=> root.search-mission-type-index;
+                mode-index <=> root.search-mode-index;
+                specials-index <=> root.search-specials-index;
+                rotation-a <=> root.search-rotation-a;
+                rotation-b <=> root.search-rotation-b;
+                rotation-c <=> root.search-rotation-c;
+                query <=> root.search-query;
+                suggestions: root.search-suggestions;
+                selected-items: root.search-selected-items;
+                summary: root.search-summary;
+                columns: root.search-columns;
+                rows: root.search-rows;
+                query-edited(text) => {
+                    root.search-query-edited(text);
+                }
+                add-suggestion(index) => {
+                    root.search-add-suggestion(index);
+                }
+                remove-item(index) => {
+                    root.search-remove-item(index);
+                }
+                filters-changed => {
+                    root.search-filters-changed();
+                }
+                sort-ascending(column) => {
+                    root.search-sort-ascending(column);
+                }
+                sort-descending(column) => {
+                    root.search-sort-descending(column);
                 }
             }
         }
