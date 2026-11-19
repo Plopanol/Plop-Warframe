@@ -2,6 +2,10 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.3
+
+- Requêtes de recherche dans la base : autocomplétion d'objets « contient » insensible à la casse et aux accents, liste des types de mission, recherche par objet et combinée (somme des chances par nœud et rotation) avec chance par cycle AABC des missions sans fin, filtres de type de mission, de rotation et de missions spéciales.
+
 ## v0.1.2
 
 - En construction de développement, le dossier de données par défaut est `data/` à la racine du dépôt (ignoré par Git, conservé par `cargo clean`), pour réimporter depuis le cache sans rappeler le wiki.

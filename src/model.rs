@@ -19,6 +19,17 @@ impl Rotation {
             Rotation::None => "NONE",
         }
     }
+
+    /// Inverse of [`Self::code`].
+    pub fn from_code(code: &str) -> Option<Self> {
+        match code {
+            "A" => Some(Rotation::A),
+            "B" => Some(Rotation::B),
+            "C" => Some(Rotation::C),
+            "NONE" => Some(Rotation::None),
+            _ => None,
+        }
+    }
 }
 
 /// Meaning of the A/B/C pools of a table.
@@ -41,6 +52,17 @@ impl RotationKind {
             RotationKind::Cache => "cache",
             RotationKind::Stage => "stage",
             RotationKind::None => "none",
+        }
+    }
+
+    /// Inverse of [`Self::code`].
+    pub fn from_code(code: &str) -> Option<Self> {
+        match code {
+            "rotation" => Some(RotationKind::Rotation),
+            "cache" => Some(RotationKind::Cache),
+            "stage" => Some(RotationKind::Stage),
+            "none" => Some(RotationKind::None),
+            _ => None,
         }
     }
 }
@@ -93,6 +115,20 @@ impl Rarity {
         }
     }
 
+    /// Inverse of [`Self::code`].
+    pub fn from_code(code: &str) -> Option<Self> {
+        match code {
+            "very_common" => Some(Rarity::VeryCommon),
+            "common" => Some(Rarity::Common),
+            "uncommon" => Some(Rarity::Uncommon),
+            "rare" => Some(Rarity::Rare),
+            "ultra_rare" => Some(Rarity::UltraRare),
+            "legendary" => Some(Rarity::Legendary),
+            "beyond_legendary" => Some(Rarity::BeyondLegendary),
+            _ => None,
+        }
+    }
+
     /// French label shown in the UI.
     pub fn label(self) -> &'static str {
         match self {
@@ -121,6 +157,16 @@ impl TableRole {
             TableRole::Main => "main",
             TableRole::Cache => "cache",
             TableRole::Extra => "extra",
+        }
+    }
+
+    /// Inverse of [`Self::code`].
+    pub fn from_code(code: &str) -> Option<Self> {
+        match code {
+            "main" => Some(TableRole::Main),
+            "cache" => Some(TableRole::Cache),
+            "extra" => Some(TableRole::Extra),
+            _ => None,
         }
     }
 }
