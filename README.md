@@ -1,6 +1,16 @@
 # Plop-Warframe
 
-Application de bureau qui importe les tables de drop de Warframe depuis le [wiki officiel](https://wiki.warframe.com/) dans une base SQLite locale, puis indique, pour un type de mission et des objets choisis, les nœuds et les ennemis au meilleur taux de drop. Détail du produit : [docs/01-PRODUIT.md](docs/01-PRODUIT.md).
+Application de bureau qui répond à la question « où farmer cet objet ? » dans Warframe. Elle importe les tables de drop du [wiki officiel](https://wiki.warframe.com/) dans une base SQLite locale, puis indique, pour un type de mission et des objets choisis, les nœuds et les ennemis au meilleur taux de drop, consultables hors ligne.
+
+Interface en français ; Windows (Linux prévu). Détail du produit : [docs/01-PRODUIT.md](docs/01-PRODUIT.md).
+
+## Fonctionnalités
+
+- **Données** : import des modules Lua du wiki (`Module:DropTables/data`, `Module:Missions/data`, `Module:Enemies/data/<faction>`), réimport depuis le cache sans réseau, historique des imports.
+- **Recherche Mission** : pour un type de mission (Survie, Défense, Excavation…) et des objets, nœuds triés par chance, avec filtres de rotation et de missions spéciales (primes, Sortie, Arbitrages, Cauchemar…) ; mode par objet ou combiné, chance par cycle AABC des missions sans fin.
+- **Recherche Spot** : ennemis au meilleur taux par kill pour les objets choisis, puis nœuds où ils apparaissent, filtrés par type de mission et planète.
+
+Les noms d'objets et de nœuds restent en anglais, comme dans le jeu.
 
 ## Utiliser la version Windows
 
@@ -35,8 +45,17 @@ Prérequis : la toolchain Rust épinglée par `rust-toolchain.toml` (installée 
 cargo build --release --locked
 ```
 
-L'exécutable est `target/release/plop-warframe.exe`. En construction de développement (`cargo run`), le dossier de données par défaut est `data/` à la racine du dépôt. Autres commandes (import en ligne de commande, licences) : [docs/06-CONVENTIONS.md](docs/06-CONVENTIONS.md) ; contrôles : `## Commandes et contrôles` d'[AGENTS.md](AGENTS.md) ; production de l'archive : [docs/RELEASE.md](docs/RELEASE.md).
+L'exécutable est `target/release/plop-warframe.exe`. En construction de développement (`cargo run`), le dossier de données par défaut est `data/` à la racine du dépôt. Les tests (`cargo test`) tournent hors ligne sur les copies figées de `tests/fixtures/`. Autres commandes (import en ligne de commande, licences) : [docs/06-CONVENTIONS.md](docs/06-CONVENTIONS.md) ; contrôles : `## Commandes et contrôles` d'[AGENTS.md](AGENTS.md) ; production de l'archive : [docs/RELEASE.md](docs/RELEASE.md).
 
-## Licences
+## Contribuer
 
-Code sous licence MIT (`Cargo.toml`). Les données affichées proviennent du wiki Warframe, écrit par ses contributeurs sous licence [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/) ; elles ne sont pas incluses dans le dépôt ni dans l'archive. Plop-Warframe n'est ni affilié ni approuvé par Digital Extremes ou par le wiki. Licences des bibliothèques embarquées : [NOTICES.md](NOTICES.md), régénéré par `pwsh -NoProfile -File tools/New-Notices.ps1`.
+Le dépôt suit les règles d'[AGENTS.md](AGENTS.md) : une fiche par tâche dans [docs/tasks/](docs/tasks/INDEX.md), une par anomalie dans [docs/bugs/](docs/bugs/INDEX.md), décisions dans [docs/adr/](docs/adr/INDEX.md). Point d'entrée de la documentation : [docs/PROJECT-MEMORY.md](docs/PROJECT-MEMORY.md).
+
+## Licences et mentions
+
+- **Code** : licence MIT, voir [LICENSE](LICENSE).
+- **Données du wiki** : écrites par les contributeurs du wiki Warframe, sous licence [CC BY-NC-SA 3.0](https://creativecommons.org/licenses/by-nc-sa/3.0/). L'archive n'en contient aucune ; l'application les télécharge à la demande. Le dépôt en contient des copies figées pour les tests, dans `tests/fixtures/`, qui restent sous cette licence ; provenance et date : [tests/fixtures/README.md](tests/fixtures/README.md).
+- **Polices** : Roboto et Quantico, licence SIL OFL 1.1 (`ui/fonts/`).
+- **Bibliothèques embarquées** : [NOTICES.md](NOTICES.md), régénéré par `pwsh -NoProfile -File tools/New-Notices.ps1`.
+
+Warframe est une marque de Digital Extremes Ltd. Plop-Warframe est un projet de fan non commercial, ni affilié ni approuvé par Digital Extremes ou par le wiki.
