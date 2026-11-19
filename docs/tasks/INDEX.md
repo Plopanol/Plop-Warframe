@@ -10,7 +10,6 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-014](TASK-014-theme-wiki.md) | Apparence du wiki | À faire | Phase 2 — Interface | Normale |
 | [TASK-015](TASK-015-icone-coffre.md) | Icône en forme de coffre de loot | À faire | Phase 2 — Interface | Normale |
 
 ## Reportées
@@ -23,6 +22,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-014](TASK-014-theme-wiki.md) | Apparence du wiki | Terminée | Phase 2 — Interface | Normale |
 | [TASK-013](TASK-013-filtre-type-objet.md) | Filtre par type d'objet | Terminée | Phase 2 — Interface | Normale |
 | [TASK-008](TASK-008-finitions.md) | Finitions | Terminée | Phase 2 — Interface | Normale |
 | [TASK-011](TASK-011-onglet-recherche-spot.md) | Onglet Recherche Spot | Terminée | Phase 2 — Interface | Normale |

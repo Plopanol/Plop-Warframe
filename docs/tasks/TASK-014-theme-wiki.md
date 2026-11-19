@@ -1,6 +1,6 @@
 # TASK-014 — Apparence du wiki
 
-- **Statut :** À faire
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-008
@@ -12,13 +12,23 @@ Interface sombre aux couleurs du wiki (wiki.warframe.com, relevé du 2026-11-19 
 
 ## Critères d'acceptation
 
-- [ ] Style `fluent-dark`, couleurs du wiki sur les fonds, textes, puces et listes de suggestions.
-- [ ] Polices Roboto et Quantico embarquées, licence OFL dans `NOTICES.md`.
-- [ ] Contrôle complet vert ; validation manuelle par l'utilisateur.
+- [x] Style `fluent-dark`, couleurs du wiki sur les fonds, textes, puces et listes de suggestions.
+- [x] Polices Roboto et Quantico embarquées, licence OFL dans `NOTICES.md`.
+- [x] Contrôle complet vert ; validation manuelle par l'utilisateur.
+
+## Réalisation
+
+- `ui/theme.slint` : global `Theme` (couleurs du wiki, polices) et composant `Heading` en Quantico ; polices importées depuis `ui/fonts/` (Roboto variable et Quantico, dépôt google/fonts, avec leurs textes OFL).
+- Fenêtre en Roboto sur fond `#19262f`, bandeau de titre sombre souligné d'accent ; libellés, puces, suggestions, résumés et titres de l'onglet Spot et d'« À propos » aux couleurs du thème ; style `fluent-dark` (`build.rs`).
+- `tools/New-Notices.ps1` ajoute la section « Polices » à `NOTICES.md`.
 
 ## Validation et preuves
 
-Non exécutée.
+2026-11-19 :
+
+- Contrôle complet (`tools/Test-Projet.ps1 -Complet`) réussi : fmt, Clippy, tests, construction release, licences, `NOTICES.md` à jour, Test-Docs.
+- Validation manuelle par l'utilisateur, réussie : couleurs, polices et bandeau sur les quatre onglets.
+- Contrôle complet de clôture réussi sur l'état final (version 0.1.10).
 
 ## Obstacles et reprise
 
