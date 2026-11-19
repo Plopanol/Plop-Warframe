@@ -24,10 +24,37 @@ pub const DATABASE_FILE: &str = "plop-warframe.sqlite3";
 
 #[derive(Debug, thiserror::Error)]
 pub enum DbError {
-    #[error("base de données : {0}")]
+    #[error("base de données : {}", sqlite_reason(.0))]
     Sqlite(#[from] rusqlite::Error),
-    #[error("version de base {found} plus récente que celle de l'application ({supported})")]
+    #[error(
+        "version de base {found} plus récente que celle de l'application ({supported}) : mettez à jour l'application"
+    )]
     TooNew { found: i64, supported: i64 },
+}
+
+/// French explanation of the SQLite failures a user can act on; others keep SQLite's text.
+fn sqlite_reason(error: &rusqlite::Error) -> String {
+    use rusqlite::ErrorCode;
+    let code = match error {
+        rusqlite::Error::SqliteFailure(failure, _) => failure.code,
+        other => return other.to_string(),
+    };
+    match code {
+        ErrorCode::DatabaseBusy | ErrorCode::DatabaseLocked => {
+            "fichier occupé par un autre programme, fermez-le puis réessayez".to_owned()
+        }
+        ErrorCode::ReadOnly | ErrorCode::PermissionDenied => {
+            "écriture refusée, vérifiez les droits sur le dossier de données".to_owned()
+        }
+        ErrorCode::CannotOpen => {
+            "ouverture du fichier impossible, vérifiez le dossier de données".to_owned()
+        }
+        ErrorCode::DiskFull => "disque plein".to_owned(),
+        ErrorCode::DatabaseCorrupt | ErrorCode::NotADatabase => {
+            "fichier endommagé ou d'un autre format ; supprimez-le puis réimportez".to_owned()
+        }
+        _ => error.to_string(),
+    }
 }
 
 /// Migrations in order; migration `n` (1-based) brings `user_version` from `n - 1` to `n`.
@@ -138,4 +165,37 @@ pub fn stats(conn: &Connection) -> Result<Stats, DbError> {
         drops: count("SELECT count(*) FROM \"drop\"")?,
         last_run,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn foreign_file_gets_a_readable_error() -> Result<(), Box<dyn std::error::Error>> {
+        let dir = tempfile::tempdir()?;
+        let path = dir.path().join(DATABASE_FILE);
+        std::fs::write(
+            &path,
+            "pas une base SQLite, mais un texte assez long pour un en-tête",
+        )?;
+        let message = open(&path).err().map(|error| error.to_string());
+        assert_eq!(
+            message.as_deref(),
+            Some(
+                "base de données : fichier endommagé ou d'un autre format ; supprimez-le puis \
+                 réimportez"
+            )
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn busy_database_is_explained() {
+        let error = rusqlite::Error::SqliteFailure(
+            rusqlite::ffi::Error::new(rusqlite::ffi::SQLITE_BUSY),
+            None,
+        );
+        assert!(DbError::from(error).to_string().contains("autre programme"));
+    }
 }

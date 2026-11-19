@@ -1,20 +1,22 @@
 # Index des tâches
 
-Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-012.
+Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-013.
 
 ## Actives
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-008](TASK-008-finitions.md) | Finitions | En cours | Phase 2 — Interface | Normale |
 
 ## À faire
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-008](TASK-008-finitions.md) | Finitions et contrôle Linux | À faire | Phase 2 — Interface | Normale |
+Aucune.
 
 ## Reportées
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-012](TASK-012-controle-linux.md) | Contrôle Linux | Reportée | Phase 2 — Interface | Normale |
 
 ## Terminées
 

@@ -20,19 +20,25 @@ try { [Console]::OutputEncoding = [Text.UTF8Encoding]::new() } catch { }
 $ErrorActionPreference = 'Stop'
 
 # --- À COMPLÉTER : identité du livrable ---------------------------------------------------------------
-$Project = 'NOM-DU-PROJET'
-$VersionFile = 'FICHIER-DE-VERSION'                         # même fichier que « Version : » dans AGENTS.md
+$Project = 'plop-warframe'
+$VersionFile = 'Cargo.toml'                                  # même fichier que « Version : » dans AGENTS.md
 $VersionPattern = '(?m)^version\s*=\s*"(?<v>\d+\.\d+\.\d+)"'  # groupe nommé v ; adapter au format du fichier
 $Target = 'x86_64-pc-windows-msvc'                      # cible nommée en triplet, ou avec un tiret bas : « windows-x64 » ferait lire « 0.1.0-windows » comme version
 $Extension = 'zip'                                           # zip, ou autre pour un fichier unique
-$Expected = @()                                              # noms exacts attendus dans l'archive (Verify-Livrable -Expected)
-$Notices = $false                                            # $true si des dépendances tierces sont embarquées (NOTICES.md)
+$Expected = @('plop-warframe.exe', 'CHANGELOG.md', 'NOTICES.md') # noms exacts attendus dans l'archive (Verify-Livrable -Expected)
+$Notices = $true                                         # $true si des dépendances tierces sont embarquées (NOTICES.md)
 $AllowPath = @()                                             # entrées exemptées du refus data/ (Verify-Livrable -AllowPath), justifiées ici
 
-# Construction release : à COMPLÉTER. Appeler l'outil du projet (cargo, flutter, npm, pyinstaller...) et déposer
-# dans $Staging les fichiers du livrable, sans donnée utilisateur.
+# Construction release sur l'hôte Windows x64 (= $Target). NOTICES.md doit refléter le graphe Cargo construit ;
+# seul l'exécutable est déposé : data/ se crée à côté de lui au premier lancement, jamais dans le paquet.
 function Invoke-ProjectBuild([string]$Staging, [string]$Version) {
-    throw "À compléter : Invoke-ProjectBuild dans tools/livrable.ps1 doit construire le projet dans $Staging."
+    & pwsh -NoProfile -File (Join-Path $root 'tools/New-Notices.ps1') -Check
+    if ($LASTEXITCODE -ne 0) { throw 'NOTICES.md n''est pas à jour : lancer tools/New-Notices.ps1.' }
+    & cargo build --release --locked
+    if ($LASTEXITCODE -ne 0) { throw "cargo build a échoué (code $LASTEXITCODE)." }
+    $exe = Join-Path $root 'target/release/plop-warframe.exe'
+    if (-not (Test-Path -LiteralPath $exe)) { throw "Exécutable introuvable : $exe" }
+    Copy-Item -LiteralPath $exe -Destination $Staging
 }
 
 # --- Socle commun : ne pas modifier ---------------------------------------------------------------------

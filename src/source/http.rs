@@ -18,14 +18,40 @@ const USER_AGENT: &str = concat!(
 pub enum FetchError {
     #[error("client HTTP : {0}")]
     Client(#[source] reqwest::Error),
-    #[error("téléchargement de « {page} » : {source}")]
+    #[error("téléchargement de « {page} » : {}", request_reason(.source))]
     Request {
         page: String,
         #[source]
         source: reqwest::Error,
     },
-    #[error("téléchargement de « {page} » : réponse HTTP {status}")]
+    #[error("téléchargement de « {page} » : {}", status_reason(*.status))]
     Status { page: String, status: u16 },
+}
+
+/// French explanation of a transport failure; reqwest's own text is English and technical.
+fn request_reason(error: &reqwest::Error) -> String {
+    transport_reason(error.is_timeout(), error.is_connect(), &error.to_string())
+}
+
+fn transport_reason(timeout: bool, connect: bool, detail: &str) -> String {
+    if timeout {
+        "le wiki ne répond pas dans les délais, réessayez plus tard".to_owned()
+    } else if connect {
+        "connexion au wiki impossible, vérifiez l'accès à Internet".to_owned()
+    } else {
+        format!("erreur réseau ({detail})")
+    }
+}
+
+fn status_reason(status: u16) -> String {
+    match status {
+        404 => "page introuvable sur le wiki (réponse HTTP 404)".to_owned(),
+        429 => "le wiki limite les requêtes, réessayez plus tard (réponse HTTP 429)".to_owned(),
+        500..=599 => {
+            format!("le wiki est indisponible, réessayez plus tard (réponse HTTP {status})")
+        }
+        _ => format!("réponse HTTP {status} inattendue du wiki"),
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -94,5 +120,32 @@ impl ModuleFetcher {
             text,
             last_modified,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn explains_transport_failures() {
+        assert!(transport_reason(true, false, "x").contains("délais"));
+        assert!(transport_reason(false, true, "x").contains("Internet"));
+        assert_eq!(transport_reason(false, false, "x"), "erreur réseau (x)");
+    }
+
+    #[test]
+    fn explains_http_statuses() {
+        let error = FetchError::Status {
+            page: "Module:A".into(),
+            status: 503,
+        };
+        assert_eq!(
+            error.to_string(),
+            "téléchargement de « Module:A » : le wiki est indisponible, réessayez plus tard (réponse HTTP 503)"
+        );
+        assert!(status_reason(404).contains("introuvable"));
+        assert!(status_reason(429).contains("limite"));
+        assert_eq!(status_reason(302), "réponse HTTP 302 inattendue du wiki");
     }
 }

@@ -36,6 +36,7 @@ Lancement, construction, outils. La vérification rapide et le contrôle complet
 | Télécharger depuis le wiki puis importer (sur demande seulement) | `cargo run -- [--data-dir <dossier>] --import` |
 | Construire | `cargo build --release --locked` |
 | Licences des dépendances | `cargo deny check licenses` |
+| Régénérer les notices de licences (après un changement de `Cargo.lock`) | `pwsh -NoProfile -File tools/New-Notices.ps1` |
 
 ## Commits
 

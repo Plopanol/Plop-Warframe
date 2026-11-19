@@ -198,7 +198,7 @@ Pour un projet à plusieurs phases, couches ou domaines.
 Seule autorité de ces deux commandes ; le hook pre-commit commun lance en plus Test-Docs.
 
 - Vérification rapide (moins de 2 minutes à cache Cargo chaud, avant chaque commit) : `pwsh -NoProfile -File tools/Test-Projet.ps1` (fmt, Clippy, tests verrouillés).
-- Contrôle complet (une fois par tâche, avant fusion) : `pwsh -NoProfile -File tools/Test-Projet.ps1 -Complet` (vérification rapide, construction release, licences, Test-Docs), puis, si l'écran est touché, la validation manuelle du socle.
+- Contrôle complet (une fois par tâche, avant fusion) : `pwsh -NoProfile -File tools/Test-Projet.ps1 -Complet` (vérification rapide, construction release, licences, NOTICES.md à jour, Test-Docs), puis, si l'écran est touché, la validation manuelle du socle.
 
 Autres commandes (lancement, construction, outils) : docs/06-CONVENTIONS.md.
 
