@@ -10,9 +10,17 @@ const MEMORY_LIMIT: usize = 512 * 1024 * 1024;
 /// Globals of the base library that reach the file system or load arbitrary code.
 const REMOVED_GLOBALS: [&str; 4] = ["dofile", "loadfile", "load", "require"];
 
+/// Lua failure, kept as text: `mlua::Error` is neither `Send` nor `Sync`, and errors must
+/// travel from the import thread to the UI.
 #[derive(Debug, thiserror::Error)]
 #[error("{0}")]
-pub struct LuaError(#[from] mlua::Error);
+pub struct LuaError(String);
+
+impl From<mlua::Error> for LuaError {
+    fn from(error: mlua::Error) -> Self {
+        Self(error.to_string())
+    }
+}
 
 /// Lua 5.4 without `io`, `os`, `package` nor `debug`, because the code comes from an editable wiki.
 pub struct SandboxedLua {

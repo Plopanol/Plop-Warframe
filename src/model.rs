@@ -80,6 +80,19 @@ impl Rarity {
         }
     }
 
+    /// Database code.
+    pub fn code(self) -> &'static str {
+        match self {
+            Rarity::VeryCommon => "very_common",
+            Rarity::Common => "common",
+            Rarity::Uncommon => "uncommon",
+            Rarity::Rare => "rare",
+            Rarity::UltraRare => "ultra_rare",
+            Rarity::Legendary => "legendary",
+            Rarity::BeyondLegendary => "beyond_legendary",
+        }
+    }
+
     /// French label shown in the UI.
     pub fn label(self) -> &'static str {
         match self {

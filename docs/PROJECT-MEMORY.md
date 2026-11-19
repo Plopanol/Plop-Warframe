@@ -4,7 +4,7 @@ Carte d'orientation non normative. En cas de contradiction, l'autorité citée p
 
 ## État courant
 
-- Stade : développement, phase 1 (données) ; question bloquante [Q-001](QUESTIONS.md#q-001) pour l'emplacement de la base.
+- Stade : développement, phase 1 (données).
 - Version : voir `Cargo.toml` (ne pas recopier le numéro ici).
 - Livrables : aucun.
 - Tâches et anomalies ouvertes : [tasks/INDEX.md](tasks/INDEX.md), [bugs/INDEX.md](bugs/INDEX.md).
@@ -18,6 +18,7 @@ Carte d'orientation non normative. En cas de contradiction, l'autorité citée p
 | Composants et contraintes techniques | [Architecture](02-ARCHITECTURE.md) |
 | Ordre des travaux, prochaine tâche | [Roadmap](03-ROADMAP.md) |
 | Sources du wiki, mapping, rotations, rareté | [Règles des drops](04-REGLES-DROPS.md) |
+| Base SQLite, migrations, cache | [Schémas de données](05-DATA-SCHEMAS.md) |
 | Style, tests, autres commandes, « terminé » | [Conventions](06-CONVENTIONS.md) |
 | Production d'une version | [Release](RELEASE.md) |
 | Arbitrages en attente | [Questions](QUESTIONS.md) |

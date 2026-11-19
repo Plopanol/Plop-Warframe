@@ -10,7 +10,6 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-004](TASK-004-base-sqlite-import.md) | Base SQLite et import transactionnel | À faire | Phase 1 — Données | Haute |
 | [TASK-005](TASK-005-requetes-recherche.md) | Requêtes de recherche | À faire | Phase 1 — Données | Haute |
 | [TASK-006](TASK-006-onglet-donnees.md) | Onglet Données | À faire | Phase 2 — Interface | Normale |
 | [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | À faire | Phase 2 — Interface | Normale |
@@ -24,6 +23,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-004](TASK-004-base-sqlite-import.md) | Base SQLite et import transactionnel | Terminée | Phase 1 — Données | Haute |
 | [TASK-003](TASK-003-parseur-modules-lua.md) | Parseur des modules Lua du wiki | Terminée | Phase 1 — Données | Haute |
 | [TASK-001](TASK-001-initialiser-le-projet.md) | Initialiser le projet | Terminée | Phase 0 — Cadrage | Haute |
 | [TASK-002](TASK-002-analyser-sources-wiki.md) | Analyser les sources du wiki | Terminée | Phase 0 — Cadrage | Haute |
