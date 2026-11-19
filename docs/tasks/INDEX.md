@@ -10,7 +10,6 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-006](TASK-006-onglet-donnees.md) | Onglet Données | À faire | Phase 2 — Interface | Normale |
 | [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | À faire | Phase 2 — Interface | Normale |
 | [TASK-008](TASK-008-finitions.md) | Finitions et contrôle Linux | À faire | Phase 2 — Interface | Normale |
 
@@ -22,6 +21,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-006](TASK-006-onglet-donnees.md) | Onglet Données | Terminée | Phase 2 — Interface | Normale |
 | [TASK-005](TASK-005-requetes-recherche.md) | Requêtes de recherche | Terminée | Phase 1 — Données | Haute |
 | [TASK-009](TASK-009-donnees-de-developpement.md) | Conserver les données de développement | Terminée | Phase 1 — Données | Haute |
 | [TASK-004](TASK-004-base-sqlite-import.md) | Base SQLite et import transactionnel | Terminée | Phase 1 — Données | Haute |

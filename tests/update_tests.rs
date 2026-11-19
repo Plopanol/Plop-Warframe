@@ -62,14 +62,21 @@ fn import_from_cache_fills_the_database() {
             .expect("store");
     }
 
-    let mut lines = Vec::new();
-    let report = update::run_import(&paths, Origin::Cache, &clock, &mut |line| {
-        lines.push(line.to_owned())
+    let mut steps = Vec::new();
+    let report = update::run_import(&paths, Origin::Cache, &clock, &mut |progress| {
+        steps.push((progress.done, progress.total, progress.message.to_owned()))
     })
     .expect("import");
     assert_eq!(report.summary.nodes, 524);
     assert_eq!(report.warnings.len(), report.summary.warnings);
-    assert!(!lines.is_empty());
+    let total = update::step_count(Origin::Cache);
+    assert_eq!(steps.len(), total);
+    assert!(
+        steps
+            .iter()
+            .enumerate()
+            .all(|(index, (done, steps_total, _))| *done == index && *steps_total == total)
+    );
 
     let conn = db::open(&paths.database).expect("open");
     let run = db::stats(&conn).expect("stats").last_run.expect("run");
@@ -88,4 +95,21 @@ fn utc_formatting() {
     assert_eq!(update::format_utc(0), "1970-01-01 00:00:00 UTC");
     assert_eq!(update::format_utc(951_782_400), "2000-02-29 00:00:00 UTC");
     assert_eq!(update::format_utc(1_763_500_000), "2025-11-18 21:06:40 UTC");
+}
+
+#[test]
+fn progress_fraction_is_bounded() {
+    let at = |done, total| {
+        update::Progress {
+            done,
+            total,
+            message: "",
+        }
+        .fraction()
+    };
+    assert_eq!(at(0, 4), 0.0);
+    assert_eq!(at(2, 4), 0.5);
+    assert_eq!(at(5, 4), 1.0);
+    assert_eq!(at(0, 0), 1.0);
+    assert_eq!(update::step_count(Origin::Wiki), update::MODULES.len() + 2);
 }
