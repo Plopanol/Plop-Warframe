@@ -5,7 +5,6 @@ Arbitrages en attente. Une question bloquante reste ouverte jusqu'à décision e
 | ID | Sujet | Bloquante | Responsable | État |
 |---|---|---|---|---|
 | [Q-002](#q-002--version-de-slint-lsp) | Version de `slint-lsp` | Non | Utilisateur | Ouverte |
-| [Q-003](#q-003--console-windows-en-release) | Console Windows en release | Non | Utilisateur | Ouverte |
 
 <a id="q-002--version-de-slint-lsp"></a>
 
@@ -13,12 +12,5 @@ Arbitrages en attente. Une question bloquante reste ouverte jusqu'à décision e
 
 - Statut : ouverte, non bloquante.
 - Constat (TASK-006, 2026-11-19) : `slint-lsp` installé sur le poste est en 1.17.1, alors que le projet épingle Slint 1.18.1 et que le socle demande le formateur de la même version.
-- Proposition : `cargo install slint-lsp --version 1.18.1 --locked` ; l'installation modifie le poste et attend l'accord de l'utilisateur.
-
-<a id="q-003--console-windows-en-release"></a>
-
-## Q-003 — Console Windows en release
-
-- Statut : ouverte, non bloquante.
-- Constat (TASK-006, 2026-11-19) : l'exécutable est une application console ; lancé par double clic, il ouvre une console à côté de la fenêtre.
-- Option : `windows_subsystem = "windows"` en release, au prix de la sortie de `--import`, `--import-cache` et `--stats` dans un terminal. À trancher avant TASK-008.
+- Accord de principe de l'utilisateur le 2026-11-19 pour se mettre à jour.
+- Impact : `slint-lsp` est un binaire unique pour tout le poste, et Plop-Ogame et Plop-Manga épinglent encore Slint 1.17.1 ; le remplacer décalerait leur formatage. Reste à choisir entre remplacer le binaire global et installer la 1.18.1 à côté (`--root`).

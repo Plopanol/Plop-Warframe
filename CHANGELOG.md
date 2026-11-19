@@ -2,6 +2,10 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.5
+
+- Sous Windows, l'exécutable release s'ouvre sans console ; la ligne de commande (`--import`, `--import-cache`, `--stats`) s'utilise avec une construction debug.
+
 ## v0.1.4
 
 - Fenêtre Slint à deux onglets ; onglet Données : base, volumes, dernier import (statut, dates, source, révision), boutons « Mettre à jour depuis le wiki » et « Réimporter depuis le cache », barre de progression et journal ; import en arrière-plan, fenêtre réactive.
