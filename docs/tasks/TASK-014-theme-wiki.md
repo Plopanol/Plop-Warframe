@@ -1,6 +1,6 @@
 # TASK-014 — Apparence du wiki
 
-- **Statut :** À valider
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-008
@@ -14,7 +14,7 @@ Interface sombre aux couleurs du wiki (wiki.warframe.com, relevé du 2026-11-19 
 
 - [x] Style `fluent-dark`, couleurs du wiki sur les fonds, textes, puces et listes de suggestions.
 - [x] Polices Roboto et Quantico embarquées, licence OFL dans `NOTICES.md`.
-- [ ] Contrôle complet vert ; validation manuelle par l'utilisateur.
+- [x] Contrôle complet vert ; validation manuelle par l'utilisateur.
 
 ## Réalisation
 
@@ -27,7 +27,8 @@ Interface sombre aux couleurs du wiki (wiki.warframe.com, relevé du 2026-11-19 
 2026-11-19 :
 
 - Contrôle complet (`tools/Test-Projet.ps1 -Complet`) réussi : fmt, Clippy, tests, construction release, licences, `NOTICES.md` à jour, Test-Docs.
-- Validation manuelle : en attente de l'utilisateur.
+- Validation manuelle par l'utilisateur, réussie : couleurs, polices et bandeau sur les quatre onglets.
+- Contrôle complet de clôture réussi sur l'état final (version 0.1.10).
 
 ## Obstacles et reprise
 
