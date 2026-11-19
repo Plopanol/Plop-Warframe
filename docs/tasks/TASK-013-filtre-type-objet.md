@@ -1,6 +1,6 @@
 # TASK-013 — Filtre par type d'objet
 
-- **Statut :** À valider
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-011
@@ -15,7 +15,7 @@ Dans les onglets Recherche Mission et Recherche Spot, une liste « Type » (Mods
 - [x] Liste « Type » dans les deux onglets, libellés français, premier choix « Tous les types ».
 - [x] Suggestions filtrées par type ; champ vide et type choisi : objets du type.
 - [x] Tests de requête et de libellés.
-- [ ] Contrôle complet vert ; validation manuelle par l'utilisateur.
+- [x] Contrôle complet vert ; validation manuelle par l'utilisateur.
 
 ## Réalisation
 
@@ -28,7 +28,8 @@ Dans les onglets Recherche Mission et Recherche Spot, une liste « Type » (Mods
 2026-11-19 :
 
 - Contrôle complet (`tools/Test-Projet.ps1 -Complet`) : fmt, Clippy, tests, construction release, licences, `NOTICES.md` réussis ; Test-Docs réussi après indexation de TASK-014 et TASK-015.
-- Validation manuelle : en attente de l'utilisateur.
+- Validation manuelle par l'utilisateur, réussie : liste « Type » dans les deux onglets, parcours d'un type champ vide, saisie filtrée, ajout en puce.
+- Contrôle complet de clôture réussi sur l'état final (version 0.1.9).
 
 ## Obstacles et reprise
 
