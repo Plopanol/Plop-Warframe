@@ -5,7 +5,7 @@ use std::path::Path;
 use std::time::{Duration, Instant};
 
 use plop_warframe::db::{
-    self, CombinedRow, ImportRun, ItemDropRow, RotationFilter, SearchFilter, SpecialFilter,
+    self, CombinedRow, ImportRun, ItemDropRow, NodeFilter, RotationFilter, SearchFilter,
 };
 use plop_warframe::model::{
     DropDataset, DropEntry, DropTable, MissionType, Node, NodeTable, Rarity, Rotation,
@@ -59,7 +59,7 @@ fn node(key: &str, mission_type: &str, is_special: bool, tables: &[(&str, TableR
     }
 }
 
-/// Survival (endless, rotations) shared by two nodes, Capture with a single pool and resource
+/// Survival (endless, rotations) shared by two nodes, one of them a Dark Sector, Capture with a single pool and resource
 /// caches, a special bounty with stages.
 #[cfg(test)]
 fn database() -> Connection {
@@ -77,7 +77,10 @@ fn database() -> Connection {
         ],
         nodes: vec![
             node("Mot", "Survival", false, &[("Surv", TableRole::Main)]),
-            node("Zeta", "Survival", false, &[("Surv", TableRole::Main)]),
+            Node {
+                is_dark_sector: true,
+                ..node("Zeta", "Survival", false, &[("Surv", TableRole::Main)])
+            },
             node(
                 "Cap",
                 "Capture",
@@ -374,12 +377,12 @@ fn special_and_mission_type_filters() {
     let base = filter(&conn, &["Relic X"]);
     assert_eq!(nodes(&base), ["Cap", "Mot", "Zeta", "special:Bounty"]);
     let exclude = SearchFilter {
-        specials: SpecialFilter::Exclude,
+        specials: NodeFilter::Exclude,
         ..base.clone()
     };
     assert_eq!(nodes(&exclude), ["Cap", "Mot", "Zeta"]);
     let only = SearchFilter {
-        specials: SpecialFilter::Only,
+        specials: NodeFilter::Only,
         ..base.clone()
     };
     assert_eq!(nodes(&only), ["special:Bounty"]);
@@ -388,6 +391,36 @@ fn special_and_mission_type_filters() {
         ..base
     };
     assert_eq!(nodes(&survival), ["Mot", "Zeta"]);
+}
+
+#[test]
+fn dark_sector_filter_and_flag() {
+    let conn = database();
+    let nodes = |search: &SearchFilter| -> Vec<(String, bool)> {
+        let mut keys: Vec<(String, bool)> = db::search_by_item(&conn, search)
+            .expect("search")
+            .into_iter()
+            .map(|row| (row.location.node_key, row.location.is_dark_sector))
+            .collect();
+        keys.sort();
+        keys.dedup();
+        keys
+    };
+    let base = filter(&conn, &["Relic X"]);
+    let all = nodes(&base);
+    assert!(all.contains(&("Zeta".to_owned(), true)));
+    assert!(all.contains(&("Mot".to_owned(), false)));
+    let exclude = SearchFilter {
+        dark_sectors: NodeFilter::Exclude,
+        ..base.clone()
+    };
+    assert!(nodes(&exclude).iter().all(|(key, _)| key != "Zeta"));
+    assert_eq!(nodes(&exclude).len(), all.len() - 1);
+    let only = SearchFilter {
+        dark_sectors: NodeFilter::Only,
+        ..base
+    };
+    assert_eq!(nodes(&only), [("Zeta".to_owned(), true)]);
 }
 
 #[test]

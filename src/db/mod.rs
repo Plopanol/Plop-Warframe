@@ -7,8 +7,8 @@ mod spot;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
 pub use search::{
-    CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, RotationFilter, SearchFilter,
-    SpecialFilter, fold_text, item_categories, mission_types, search_by_item, search_combined,
+    CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, NodeFilter, RotationFilter,
+    SearchFilter, fold_text, item_categories, mission_types, search_by_item, search_combined,
     search_items,
 };
 pub use spot::{

@@ -6,3 +6,15 @@ Idées hors périmètre : non planifiées, jamais implémentées d'office. Une i
 |---|---|---|
 | Drops des conteneurs (section `Containers`) | TASK-002 | Couvrir les objets des caisses et coffres |
 | Source alternative : tables officielles de DE (`warframe.com/droptables`) | Cadrage initial | Recouper ou remplacer le wiki derrière `DropSource` |
+
+## Idées notées
+
+### 2026-11-19 — Filtre par level
+
+### 2026-11-19 — Ajouter une liste d'objet favoris
+
+### 2026-11-19 — Ajouter un recap des objets suivi
+
+### 2026-11-19 — Ajouter un resumé des objets complets à farmer avec les spot pour un Blueprints selectionner
+
+### 2026-11-19 — Listes des relics pour une warframe precise
