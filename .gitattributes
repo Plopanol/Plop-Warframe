@@ -1,0 +1,50 @@
+# commun:debut v6
+# LF in the repository and in the working tree: Git's LF to CRLF conversion changed bytes and broke hash comparisons.
+* text=auto eol=lf
+
+# Windows shells need CRLF; PowerShell reads LF scripts fine.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=lf
+*.sh text eol=lf
+
+# Binary files: never converted, never diffed as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.bmp binary
+*.ico binary
+*.icns binary
+*.pdf binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.7z binary
+*.gz binary
+*.tar binary
+*.jar binary
+*.apk binary
+*.aab binary
+*.jks binary
+*.keystore binary
+*.mp3 binary
+*.ogg binary
+*.wav binary
+*.flac binary
+*.mp4 binary
+*.webm binary
+*.exe binary
+*.dll binary
+*.pdb binary
+*.lib binary
+*.so binary
+*.dylib binary
+*.sqlite binary
+*.db binary
+*.wasm binary
+# commun:fin

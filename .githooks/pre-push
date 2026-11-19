@@ -1,0 +1,46 @@
+#!/bin/sh
+# Common pre-push hook, copied by Sync-Commun.ps1 into .githooks/ (core.hooksPath).
+# Before anything leaves the machine, runs Test-Publication.ps1 on the files and the whole history:
+# values of the local forbidden list (.publication-interdits.txt, never versioned), secrets, private
+# addresses and personal paths. Matches are reported without the value. Git's own bypass: --no-verify.
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "pre-push: not inside a Git repository" >&2; exit 1; }
+cd "$root" || exit 1
+trap "" PIPE
+
+tool=""
+for f in tools/commun/Test-Publication.ps1 tool/commun/Test-Publication.ps1 outils/Test-Publication.ps1; do
+    if [ -f "$f" ]; then tool=$f; break; fi
+done
+if [ -z "$tool" ]; then
+    echo "pre-push: Test-Publication.ps1 not found; run Sync-Commun.ps1 -Apply from _modele-projet" >&2
+    exit 1
+fi
+
+# The forbidden list is the point of this check: without it, refuse instead of passing silently.
+list=""
+for f in "$root/.publication-interdits.txt" "$(dirname "$root")/.publication-interdits.txt"; do
+    if [ -f "$f" ]; then list=$f; break; fi
+done
+if [ -z "$list" ]; then
+    echo "pre-push: .publication-interdits.txt not found in the repository or its parent folder; push refused" >&2
+    exit 1
+fi
+
+if command -v pwsh >/dev/null 2>&1; then
+    ps=pwsh
+elif command -v powershell.exe >/dev/null 2>&1; then
+    ps=powershell.exe
+else
+    echo "pre-push: neither pwsh nor powershell.exe found in PATH" >&2
+    exit 1
+fi
+
+out=$("$ps" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$tool" -Path . -History -ForbiddenList "$list" 2>&1)
+code=$?
+if [ "$code" -ne 0 ]; then
+    echo "pre-push: FAILED: Test-Publication (exit $code), push refused" >&2
+    printf '%s\n' "$out" >&2
+    exit 1
+fi
+exit 0

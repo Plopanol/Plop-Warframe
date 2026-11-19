@@ -1,0 +1,19 @@
+# Read-only commands and the common documentation checks, allowed without approval.
+# Same list as .claude/settings.json.
+
+prefix_rule(pattern = ["git", "status"], decision = "allow")
+prefix_rule(pattern = ["git", "diff"], decision = "allow")
+prefix_rule(pattern = ["git", "log"], decision = "allow")
+prefix_rule(pattern = ["git", "show"], decision = "allow")
+prefix_rule(pattern = ["git", "branch", "--show-current"], decision = "allow")
+prefix_rule(pattern = ["git", "ls-files"], decision = "allow")
+prefix_rule(pattern = ["git", "rev-parse"], decision = "allow")
+
+prefix_rule(pattern = ["pwsh", "-File", "tools/commun/Test-Docs.ps1", "-Path", "."], decision = "allow")
+prefix_rule(pattern = ["pwsh", "-File", "tool/commun/Test-Docs.ps1", "-Path", "."], decision = "allow")
+prefix_rule(pattern = ["pwsh", "-File", "tools/commun/Test-Liens.ps1", "-Path", "."], decision = "allow")
+prefix_rule(pattern = ["pwsh", "-File", "tool/commun/Test-Liens.ps1", "-Path", "."], decision = "allow")
+prefix_rule(pattern = ["node", "tools/commun/check_docs.mjs"], decision = "allow")
+prefix_rule(pattern = ["node", "tool/commun/check_docs.mjs"], decision = "allow")
+prefix_rule(pattern = ["node", "tools/commun/check_roadmap.mjs"], decision = "allow")
+prefix_rule(pattern = ["node", "tool/commun/check_roadmap.mjs"], decision = "allow")

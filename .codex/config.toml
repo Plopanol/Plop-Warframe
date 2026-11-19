@@ -1,0 +1,6 @@
+# commun:debut v6
+# Writes stay inside the repository, which is what the pre-commit hook and tools/commun/ need;
+# commands outside .codex/rules/commun.rules still ask for approval.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+# commun:fin

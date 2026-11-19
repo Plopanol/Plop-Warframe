@@ -1,0 +1,24 @@
+# commun:debut v6
+# Deliverables are rebuilt by tools/livrable.ps1 and never tracked.
+/livrable/
+
+# Claude Code: personal settings and agent worktrees stay local.
+.claude/worktrees/
+.claude/settings.local.json
+
+# Secrets and local environment.
+.env
+.env.*
+!.env.example
+
+# Editors and OS.
+.idea/
+.vscode/
+*.swp
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Rust
+/target/
+# commun:fin

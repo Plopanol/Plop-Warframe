@@ -1,0 +1,2 @@
+# Edition and width come from Cargo.toml and rustfmt defaults; only the line ending is pinned.
+newline_style = "Unix"

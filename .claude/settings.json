@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch --show-current)",
+      "Bash(git ls-files:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(pwsh -File tools/commun/Test-Docs.ps1 -Path .)",
+      "Bash(pwsh -File tool/commun/Test-Docs.ps1 -Path .)",
+      "Bash(pwsh -File tools/commun/Test-Liens.ps1 -Path .)",
+      "Bash(pwsh -File tool/commun/Test-Liens.ps1 -Path .)",
+      "Bash(node tools/commun/check_docs.mjs)",
+      "Bash(node tool/commun/check_docs.mjs)",
+      "Bash(node tools/commun/check_roadmap.mjs)",
+      "Bash(node tool/commun/check_roadmap.mjs)",
+      "PowerShell(git status:*)",
+      "PowerShell(git diff:*)",
+      "PowerShell(git log:*)",
+      "PowerShell(git show:*)",
+      "PowerShell(git branch --show-current)",
+      "PowerShell(git ls-files:*)",
+      "PowerShell(git rev-parse:*)",
+      "PowerShell(pwsh -File tools/commun/Test-Docs.ps1 -Path .)",
+      "PowerShell(pwsh -File tool/commun/Test-Docs.ps1 -Path .)",
+      "PowerShell(pwsh -File tools/commun/Test-Liens.ps1 -Path .)",
+      "PowerShell(pwsh -File tool/commun/Test-Liens.ps1 -Path .)",
+      "PowerShell(node tools/commun/check_docs.mjs)",
+      "PowerShell(node tool/commun/check_docs.mjs)",
+      "PowerShell(node tools/commun/check_roadmap.mjs)",
+      "PowerShell(node tool/commun/check_roadmap.mjs)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  }
+}

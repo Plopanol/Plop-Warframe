@@ -1,0 +1,159 @@
+#!/bin/sh
+# Common pre-commit hook, copied by Sync-Commun.ps1 into .githooks/ (core.hooksPath).
+# Runs the same way for a human, Claude and Codex: Git for Windows executes it with its own sh.
+#   1. always: pwsh -File tools/commun/Test-Docs.ps1 -Path .
+#   2. only for the languages the commit touches (*.py, *.rs, *.slint...) and that are declared on the
+#      `<!-- commun: ... -->` line of AGENTS.md: format and lint (checks only, nothing is rewritten).
+# The only way around it is Git's own: git commit --no-verify.
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "pre-commit: not inside a Git repository" >&2; exit 1; }
+cd "$root" || exit 1
+
+# A reader that stops early (a pipe closed by head, a tool that quits) must not turn a refusal into a pass.
+trap "" PIPE
+failures=""
+export CARGO_TERM_COLOR=never NO_COLOR=1
+fail() {
+    failures="$failures
+  - $1"
+}
+
+# Runs one check; prints its output only when it fails, to stay quiet and fast on success.
+step() {
+    label=$1
+    shift
+    out=$("$@" 2>&1)
+    code=$?
+    if [ "$code" -ne 0 ]; then
+        echo "pre-commit: FAILED: $label (exit $code)" >&2
+        printf '%s\n' "$out" >&2
+        fail "$label"
+    fi
+}
+
+# --- 1. Documentation checks, always -------------------------------------------------------------
+docs=""
+for dir in tools tool; do
+    if [ -f "$dir/commun/Test-Docs.ps1" ]; then docs="$dir/commun/Test-Docs.ps1"; break; fi
+done
+if [ -z "$docs" ]; then
+    echo "pre-commit: tools/commun/Test-Docs.ps1 not found; run Sync-Commun.ps1 -Apply from _modele-projet" >&2
+    exit 1
+fi
+if command -v pwsh >/dev/null 2>&1; then
+    step "Test-Docs (documentation checks)" pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$docs" -Path .
+elif command -v powershell.exe >/dev/null 2>&1; then
+    step "Test-Docs (documentation checks)" powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$docs" -Path .
+else
+    echo "pre-commit: neither pwsh nor powershell.exe found in PATH" >&2
+    exit 1
+fi
+
+# --- 2. Code checks, only for the languages the commit touches ------------------------------------
+# A commit that only touches .md, docs/, .ps1 or the common tools runs nothing more than Test-Docs.
+staged=$(git diff --cached --name-only --diff-filter=ACMRD)
+touched=" "
+oldifs=$IFS
+IFS='
+'
+for f in $staged; do
+    case "$f" in
+        tools/commun/* | tool/commun/* | .githooks/*) continue ;;
+    esac
+    case "$f" in
+        *.py | pyproject.toml | */pyproject.toml | ruff.toml | */ruff.toml) touched="${touched}python " ;;
+        *.rs | Cargo.toml | */Cargo.toml | Cargo.lock | */Cargo.lock | rustfmt.toml | */rustfmt.toml | clippy.toml | */clippy.toml) touched="${touched}rust " ;;
+        *.slint) touched="${touched}slint " ;;
+        *.dart | pubspec.yaml | */pubspec.yaml | pubspec.lock | */pubspec.lock | analysis_options.yaml | */analysis_options.yaml) touched="${touched}dart " ;;
+        *.ts | *.tsx | *.js | *.mjs | *.cjs | *.svelte | package.json | */package.json | .prettierrc* | */.prettierrc*) touched="${touched}typescript " ;;
+        *.kt | *.kts) touched="${touched}kotlin " ;;
+    esac
+done
+IFS=$oldifs
+
+langages=""
+if [ "$touched" != " " ] && [ -f AGENTS.md ]; then
+    langages=$(grep -m1 -E '^<!--[[:space:]]*commun[[:space:]]*:' AGENTS.md | sed -n 's/.*langages\{0,1\}[[:space:]]\{1,\}\([^;>-]*\).*/\1/p')
+fi
+for lang in $langages; do
+    case "$touched" in
+        *" $lang "*) ;;
+        *) continue ;;
+    esac
+    case "$lang" in
+        rust)
+            # Whole-project tools: global, but only when Rust is touched and the crate's Cargo.toml is found
+            # at the root or one level down (src-tauri/ for Tauri); a project that declares Rust before
+            # creating its crate has nothing to check yet.
+            manifest=""
+            for candidate in Cargo.toml src-tauri/Cargo.toml; do
+                if [ -f "$candidate" ]; then manifest=$candidate; break; fi
+            done
+            if [ -z "$manifest" ]; then
+                for candidate in */Cargo.toml; do
+                    if [ -f "$candidate" ]; then manifest=$candidate; break; fi
+                done
+            fi
+            if [ -n "$manifest" ]; then
+                step "cargo fmt --check" cargo fmt --all --manifest-path "$manifest" --check -- --color never
+                step "cargo clippy" cargo clippy --manifest-path "$manifest" --all-targets -- -D warnings
+            else
+                echo "pre-commit: no Cargo.toml at the root or one level down, Rust checks skipped" >&2
+            fi
+            ;;
+        slint)
+            if command -v slint-lsp >/dev/null 2>&1; then
+                for f in $(git diff --cached --name-only --diff-filter=ACMR -- '*.slint'); do
+                    if ! slint-lsp format "$f" 2>/dev/null | diff -q - "$f" >/dev/null 2>&1; then
+                        echo "pre-commit: FAILED: slint-lsp format: $f is not formatted" >&2
+                        fail "slint-lsp format ($f)"
+                    fi
+                done
+            else
+                echo "pre-commit: slint-lsp not found, .slint formatting not checked" >&2
+            fi
+            ;;
+        python)
+            # ruff, else python -m ruff (pip puts ruff outside PATH on Windows), else py -m ruff.
+            if command -v ruff >/dev/null 2>&1; then ruff_cmd="ruff"
+            elif command -v python >/dev/null 2>&1; then ruff_cmd="python -m ruff"
+            else ruff_cmd="py -m ruff"; fi
+            # Only the staged .py files; the config alone changed: the whole project.
+            py_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.py')
+            oldifs=$IFS
+            IFS='
+'
+            set -f
+            # shellcheck disable=SC2086
+            set -- $py_files
+            set +f
+            IFS=$oldifs
+            [ "$#" -eq 0 ] && set -- .
+            # shellcheck disable=SC2086
+            step "ruff format --check" $ruff_cmd format --check "$@"
+            # shellcheck disable=SC2086
+            step "ruff check" $ruff_cmd check "$@"
+            ;;
+        dart)
+            step "dart format --set-exit-if-changed" dart format --set-exit-if-changed .
+            step "flutter analyze" flutter analyze
+            ;;
+        kotlin)
+            step "gradlew ktlintCheck" ./gradlew --quiet ktlintCheck
+            ;;
+        typescript)
+            step "prettier --check" npx --no-install prettier --check .
+            ;;
+        *)
+            echo "pre-commit: language '$lang' has no check in this hook" >&2
+            ;;
+    esac
+done
+
+if [ -n "$failures" ]; then
+    echo "" >&2
+    echo "pre-commit: commit refused, failed checks:$failures" >&2
+    echo "pre-commit: fix them and commit again (git commit --no-verify skips this hook)." >&2
+    exit 1
+fi
+exit 0
