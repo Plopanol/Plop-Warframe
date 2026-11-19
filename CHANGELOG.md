@@ -2,6 +2,12 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.7
+
+- Onglet « Recherche » renommé « Recherche Mission ».
+- Onglet « Recherche Spot » : pour des objets choisis, ennemis au meilleur taux par kill, puis nœuds où ils apparaissent (faction, planète, tileset du wiki), filtres type de mission et planète, clic sur un ennemi pour voir ses nœuds ; ressources de région estimées à parts égales entre les ressources de la planète.
+- Import des drops des ennemis, des ressources de région et des 12 modules `Module:Enemies/data/<faction>` ; base en version 2.
+
 ## v0.1.6
 
 - Onglet Recherche : type de mission traduit, autocomplétion des objets et sélection en puces supprimables, filtres de rotation (A, B, C) et de missions spéciales, modes « Par objet » et « Combiné », tableau triable par colonne avec pool, chance, rareté et chance AABC ; message invitant à importer si la base est vide ; sélection conservée après un import.

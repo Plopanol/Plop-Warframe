@@ -1,6 +1,6 @@
 # TASK-011 — Onglet Recherche Spot
 
-- **Statut :** En cours
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-007
@@ -18,11 +18,11 @@ L'onglet « Recherche » devient « Recherche Mission ». Un onglet « Recherche
 
 ## Critères d'acceptation
 
-- [ ] Onglet renommé « Recherche Mission », comportement inchangé.
-- [ ] Taux par kill d'un mod d'ennemi conforme au wiki (Gladiator Rush sur Aerial Commander : 100 % × 37,94 %).
-- [ ] Ressource de région (Neurodes sur Terre) trouvée avec la mention « estimé ».
-- [ ] Filtres Type de mission et Planète appliqués aux spots.
-- [ ] Validation manuelle demandée à l'utilisateur.
+- [x] Onglet renommé « Recherche Mission », comportement inchangé.
+- [x] Taux par kill d'un mod d'ennemi conforme au wiki (Gladiator Rush sur Aerial Commander : 100 % × 37,94 %).
+- [x] Ressource de région (Neurodes sur Terre) trouvée avec la mention « estimé ».
+- [x] Filtres Type de mission et Planète appliqués aux spots.
+- [x] Validation manuelle demandée à l'utilisateur.
 
 ## Exécution
 
@@ -30,7 +30,7 @@ L'onglet « Recherche » devient « Recherche Mission ». Un onglet « Recherche
 |---|---|---|---|---|
 | 1 | Données : modèle, lecture des ennemis, `RegionResources` et tilesets, 12 modules d'ennemis au téléchargement et au cache, migration 2, import, fixtures, règles 12 à 14 | Arbitrages | Vérification rapide, tests de parsing et d'import | Terminé |
 | 2 | Requêtes : planètes, ennemis par objet, spots par objet avec filtres, Region Resource étendue | Lot 1 | Vérification rapide, tests sur fixtures | Terminé |
-| 3 | Interface : renommage, onglet Recherche Spot (`src/spot_view.rs`, `src/ui_bridge/spot.rs`, `ui/app-window.slint`) | Lot 2 ; modules d'ennemis dans `data/cache/` | Vérification rapide, contrôle complet, validation manuelle | Implémenté, validation manuelle en attente |
+| 3 | Interface : renommage, onglet Recherche Spot (`src/spot_view.rs`, `src/ui_bridge/spot.rs`, `ui/app-window.slint`) | Lot 2 ; modules d'ennemis dans `data/cache/` | Vérification rapide, contrôle complet, validation manuelle | Terminé |
 
 ## Journal des lots
 
@@ -47,8 +47,9 @@ L'onglet « Recherche » devient « Recherche Mission ». Un onglet « Recherche
 - Import de `data/` depuis le cache : 524 nœuds, 1880 objets ; 71 ennemis de drop sans emplacement dans `Module:Enemies/data`.
 - `slint-lsp format` 1.18.1 appliqué à `ui/app-window.slint`.
 - Lancement de fumée de l'exe debug : fenêtre ouverte, aucune erreur au journal ; aucune action d'interface exécutée par l'agent.
-- Validation manuelle : en attente.
+- Validation manuelle : parcours de l'onglet Recherche Spot (Gladiator Rush, Neurodes estimé, filtres type de mission et planète, tri, clic sur un ennemi, « Tous les ennemis », retrait d'objet, réimport) et non-régression de Recherche Mission validés par l'utilisateur.
+- Clôture (version 0.1.7) : contrôle complet relancé sur l'état final.
 
 ## Obstacles et reprise
 
-Aucun obstacle ; reste la validation manuelle par l'utilisateur, puis la clôture (version, CHANGELOG, fusion).
+Aucun obstacle.
