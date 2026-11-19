@@ -8,16 +8,19 @@ use rusqlite::Connection;
 use slint::SharedString;
 
 use super::AppWindow;
-use super::search::{columns, resolve_by_name, rows, strings, with_state};
+use super::search::{
+    columns, resolve_by_name, rows, selected_category, strings, suggestion_limit, with_state,
+};
 use crate::db::{self, DbError, ItemHit, SpotFilter};
-use crate::search_view::{MissionTypeChoice, ResultTable, mission_type_choices, suggestion_label};
+use crate::search_view::{
+    CategoryChoice, MissionTypeChoice, ResultTable, category_choices, mission_type_choices,
+    suggestion_label,
+};
 use crate::spot_view::{
     PlanetChoice, empty_enemies, empty_nodes, enemy_table, node_table, nodes_title, planet_choices,
     summary,
 };
 use crate::update::DataPaths;
-
-const SUGGESTION_LIMIT: usize = 20;
 
 /// Enemy picked in the enemy table, which restricts the node table.
 #[derive(Debug, Clone)]
@@ -31,6 +34,7 @@ pub struct SpotState {
     conn: Option<Connection>,
     mission_types: Vec<MissionTypeChoice>,
     planets: Vec<PlanetChoice>,
+    categories: Vec<CategoryChoice>,
     suggestions: Vec<ItemHit>,
     selected: Vec<ItemHit>,
     enemies: ResultTable,
@@ -48,6 +52,7 @@ pub fn install(window: &AppWindow, paths: DataPaths) -> (SharedSpot, Vec<String>
         conn: None,
         mission_types: Vec::new(),
         planets: Vec::new(),
+        categories: Vec::new(),
         suggestions: Vec::new(),
         selected: Vec::new(),
         enemies: empty_enemies(),
@@ -62,6 +67,11 @@ pub fn install(window: &AppWindow, paths: DataPaths) -> (SharedSpot, Vec<String>
             state.update_suggestions(window, text.as_str());
         },
     ));
+    let category_changed = with_state(window, &state, |window, state: &mut SpotState, ()| {
+        let text = window.get_spot_query();
+        state.update_suggestions(window, text.as_str());
+    });
+    window.on_spot_category_changed(move || category_changed(()));
     window.on_spot_add_suggestion(with_state(
         window,
         &state,
@@ -159,23 +169,29 @@ impl SpotState {
         let previous_planet = label_at(&self.planets, window.get_spot_planet_index(), |c| {
             c.id.map(|_| c.label.clone())
         });
+        let previous_category = label_at(&self.categories, window.get_spot_category_index(), |c| {
+            c.category.as_ref().map(|_| c.label.clone())
+        });
 
-        let (has_data, types, planets, selected) = match self.conn.as_ref().map(|conn| {
-            Ok::<_, DbError>((
-                db::stats(conn)?.items > 0,
-                db::mission_types(conn)?,
-                db::planets(conn)?,
-                resolve_by_name(conn, &self.selected)?,
-            ))
-        }) {
-            Some(Ok(loaded)) => loaded,
-            Some(Err(error)) => {
-                log::error!("Recherche Spot, lecture de la base : {error}");
-                lines.push(format!("Recherche Spot indisponible : {error}"));
-                (false, Vec::new(), Vec::new(), Vec::new())
-            }
-            None => (false, Vec::new(), Vec::new(), Vec::new()),
-        };
+        let (has_data, types, planets, categories, selected) =
+            match self.conn.as_ref().map(|conn| {
+                Ok::<_, DbError>((
+                    db::stats(conn)?.items > 0,
+                    db::mission_types(conn)?,
+                    db::planets(conn)?,
+                    db::item_categories(conn)?,
+                    resolve_by_name(conn, &self.selected)?,
+                ))
+            }) {
+                Some(Ok(loaded)) => loaded,
+                Some(Err(error)) => {
+                    log::error!("Recherche Spot, lecture de la base : {error}");
+                    lines.push(format!("Recherche Spot indisponible : {error}"));
+                    (false, Vec::new(), Vec::new(), Vec::new(), Vec::new())
+                }
+                None => (false, Vec::new(), Vec::new(), Vec::new(), Vec::new()),
+            };
+        self.categories = category_choices(&categories);
         self.mission_types = mission_type_choices(&types);
         self.planets = planet_choices(&planets);
         self.selected = selected;
@@ -183,6 +199,9 @@ impl SpotState {
 
         let type_index = index_of(&self.mission_types, previous_type, |c| &c.label);
         let planet_index = index_of(&self.planets, previous_planet, |c| &c.label);
+        let category_index = index_of(&self.categories, previous_category, |c| &c.label);
+        window.set_spot_categories(strings(self.categories.iter().map(|c| c.label.as_str())));
+        window.set_spot_category_index(category_index);
         window.set_spot_has_data(has_data);
         window.set_spot_mission_types(strings(self.mission_types.iter().map(|c| c.label.as_str())));
         window.set_spot_mission_type_index(type_index);
@@ -205,14 +224,21 @@ impl SpotState {
     }
 
     fn update_suggestions(&mut self, window: &AppWindow, text: &str) {
+        let category = selected_category(&self.categories, window.get_spot_category_index());
         self.suggestions = match &self.conn {
             Some(conn) => {
-                let limit = SUGGESTION_LIMIT + self.selected.len();
-                match db::search_items(conn, text, u32::try_from(limit).unwrap_or(u32::MAX)) {
+                let shown = suggestion_limit(text);
+                let limit = shown + self.selected.len();
+                match db::search_items(
+                    conn,
+                    text,
+                    category,
+                    u32::try_from(limit).unwrap_or(u32::MAX),
+                ) {
                     Ok(hits) => hits
                         .into_iter()
                         .filter(|hit| !self.selected.iter().any(|s| s.id == hit.id))
-                        .take(SUGGESTION_LIMIT)
+                        .take(shown)
                         .collect(),
                     Err(error) => {
                         log::error!("Autocomplétion (spot) : {error}");

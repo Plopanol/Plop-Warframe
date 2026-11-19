@@ -214,6 +214,8 @@ component SearchTab inherits VerticalBox {
     in-out property <bool> rotation-a;
     in-out property <bool> rotation-b;
     in-out property <bool> rotation-c;
+    in property <[string]> categories;
+    in-out property <int> category-index;
     in-out property <string> query;
     in property <[string]> suggestions;
     in property <[string]> selected-items;
@@ -221,6 +223,7 @@ component SearchTab inherits VerticalBox {
     in property <[TableColumn]> columns;
     in property <[[StandardListViewItem]]> rows;
     callback query-edited(string);
+    callback category-changed();
     callback add-suggestion(int);
     callback remove-item(int);
     callback filters-changed();
@@ -334,6 +337,18 @@ component SearchTab inherits VerticalBox {
                 vertical-alignment: center;
             }
 
+            ComboBox {
+                accessible-id: "item-category";
+                model: root.categories;
+                current-index <=> root.category-index;
+                enabled: root.enabled;
+                min-width: 180px;
+                horizontal-stretch: 0;
+                selected => {
+                    root.category-changed();
+                }
+            }
+
             LineEdit {
                 accessible-id: "item-query";
                 placeholder-text: "Ajouter un objet (nom ou partie du nom)…";
@@ -420,6 +435,8 @@ component SpotTab inherits VerticalBox {
     in-out property <int> mission-type-index;
     in property <[string]> planets;
     in-out property <int> planet-index;
+    in property <[string]> categories;
+    in-out property <int> category-index;
     in-out property <string> query;
     in property <[string]> suggestions;
     in property <[string]> selected-items;
@@ -432,6 +449,7 @@ component SpotTab inherits VerticalBox {
     in property <[TableColumn]> node-columns;
     in property <[[StandardListViewItem]]> node-rows;
     callback query-edited(string);
+    callback category-changed();
     callback add-suggestion(int);
     callback remove-item(int);
     callback filters-changed();
@@ -490,6 +508,18 @@ component SpotTab inherits VerticalBox {
             Text {
                 text: "Objets";
                 vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "spot-item-category";
+                model: root.categories;
+                current-index <=> root.category-index;
+                enabled: root.enabled;
+                min-width: 180px;
+                horizontal-stretch: 0;
+                selected => {
+                    root.category-changed();
+                }
             }
 
             LineEdit {
@@ -670,6 +700,8 @@ export component AppWindow inherits Window {
     in-out property <bool> search-rotation-a: true;
     in-out property <bool> search-rotation-b: true;
     in-out property <bool> search-rotation-c: true;
+    in property <[string]> search-categories;
+    in-out property <int> search-category-index;
     in-out property <string> search-query;
     in property <[string]> search-suggestions;
     in property <[string]> search-selected-items;
@@ -677,6 +709,7 @@ export component AppWindow inherits Window {
     in property <[TableColumn]> search-columns;
     in property <[[StandardListViewItem]]> search-rows;
     callback search-query-edited(string);
+    callback search-category-changed();
     callback search-add-suggestion(int);
     callback search-remove-item(int);
     callback search-filters-changed();
@@ -688,6 +721,8 @@ export component AppWindow inherits Window {
     in-out property <int> spot-mission-type-index;
     in property <[string]> spot-planets;
     in-out property <int> spot-planet-index;
+    in property <[string]> spot-categories;
+    in-out property <int> spot-category-index;
     in-out property <string> spot-query;
     in property <[string]> spot-suggestions;
     in property <[string]> spot-selected-items;
@@ -700,6 +735,7 @@ export component AppWindow inherits Window {
     in property <[TableColumn]> spot-node-columns;
     in property <[[StandardListViewItem]]> spot-node-rows;
     callback spot-query-edited(string);
+    callback spot-category-changed();
     callback spot-add-suggestion(int);
     callback spot-remove-item(int);
     callback spot-filters-changed();
@@ -739,6 +775,8 @@ export component AppWindow inherits Window {
                 rotation-a <=> root.search-rotation-a;
                 rotation-b <=> root.search-rotation-b;
                 rotation-c <=> root.search-rotation-c;
+                categories: root.search-categories;
+                category-index <=> root.search-category-index;
                 query <=> root.search-query;
                 suggestions: root.search-suggestions;
                 selected-items: root.search-selected-items;
@@ -747,6 +785,9 @@ export component AppWindow inherits Window {
                 rows: root.search-rows;
                 query-edited(text) => {
                     root.search-query-edited(text);
+                }
+                category-changed => {
+                    root.search-category-changed();
                 }
                 add-suggestion(index) => {
                     root.search-add-suggestion(index);
@@ -775,6 +816,8 @@ export component AppWindow inherits Window {
                 mission-type-index <=> root.spot-mission-type-index;
                 planets: root.spot-planets;
                 planet-index <=> root.spot-planet-index;
+                categories: root.spot-categories;
+                category-index <=> root.spot-category-index;
                 query <=> root.spot-query;
                 suggestions: root.spot-suggestions;
                 selected-items: root.spot-selected-items;
@@ -788,6 +831,9 @@ export component AppWindow inherits Window {
                 node-rows: root.spot-node-rows;
                 query-edited(text) => {
                     root.spot-query-edited(text);
+                }
+                category-changed => {
+                    root.spot-category-changed();
                 }
                 add-suggestion(index) => {
                     root.spot-add-suggestion(index);

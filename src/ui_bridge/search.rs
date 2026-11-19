@@ -11,17 +11,30 @@ use slint::{ModelRc, SharedString, StandardListViewItem, VecModel};
 use super::AppWindow;
 use crate::db::{self, DbError, ItemHit, RotationFilter, SearchFilter};
 use crate::search_view::{
-    MissionTypeChoice, ResultTable, SearchMode, mission_type_choices, specials_from_index,
-    suggestion_label, summary,
+    CategoryChoice, MissionTypeChoice, ResultTable, SearchMode, category_choices,
+    mission_type_choices, specials_from_index, suggestion_label, summary,
 };
 use crate::update::DataPaths;
 
 const SUGGESTION_LIMIT: usize = 20;
+/// Browsing a whole type with an empty query: the list scrolls, every item of the largest
+/// category fits.
+const BROWSE_LIMIT: usize = 2000;
+
+/// Number of suggestions shown for `text`.
+pub(super) fn suggestion_limit(text: &str) -> usize {
+    if text.trim().is_empty() {
+        BROWSE_LIMIT
+    } else {
+        SUGGESTION_LIMIT
+    }
+}
 
 pub struct SearchState {
     paths: DataPaths,
     conn: Option<Connection>,
     mission_types: Vec<MissionTypeChoice>,
+    categories: Vec<CategoryChoice>,
     suggestions: Vec<ItemHit>,
     selected: Vec<ItemHit>,
     table: ResultTable,
@@ -35,6 +48,7 @@ pub fn install(window: &AppWindow, paths: DataPaths) -> (SharedSearch, Vec<Strin
         paths,
         conn: None,
         mission_types: Vec::new(),
+        categories: Vec::new(),
         suggestions: Vec::new(),
         selected: Vec::new(),
         table: ResultTable::empty(SearchMode::ByItem),
@@ -47,6 +61,11 @@ pub fn install(window: &AppWindow, paths: DataPaths) -> (SharedSearch, Vec<Strin
             state.update_suggestions(window, text.as_str());
         },
     ));
+    let category_changed = with_state(window, &state, |window, state, ()| {
+        let text = window.get_search_query();
+        state.update_suggestions(window, text.as_str());
+    });
+    window.on_search_category_changed(move || category_changed(()));
     window.on_search_add_suggestion(with_state(window, &state, |window, state, index| {
         state.add_suggestion(window, index);
     }));
@@ -118,11 +137,17 @@ impl SearchState {
             .get(usize::try_from(window.get_search_mission_type_index()).unwrap_or(0))
             .filter(|choice| choice.id.is_some())
             .map(|choice| choice.label.clone());
+        let previous_category = self
+            .categories
+            .get(usize::try_from(window.get_search_category_index()).unwrap_or(0))
+            .filter(|choice| choice.category.is_some())
+            .map(|choice| choice.label.clone());
 
-        let (has_data, types, selected) = match self.conn.as_ref().map(|conn| {
+        let (has_data, types, categories, selected) = match self.conn.as_ref().map(|conn| {
             Ok::<_, DbError>((
                 db::stats(conn)?.items > 0,
                 db::mission_types(conn)?,
+                db::item_categories(conn)?,
                 resolve_by_name(conn, &self.selected)?,
             ))
         }) {
@@ -130,11 +155,12 @@ impl SearchState {
             Some(Err(error)) => {
                 log::error!("Recherche, lecture de la base : {error}");
                 lines.push(format!("Recherche indisponible : {error}"));
-                (false, Vec::new(), Vec::new())
+                (false, Vec::new(), Vec::new(), Vec::new())
             }
-            None => (false, Vec::new(), Vec::new()),
+            None => (false, Vec::new(), Vec::new(), Vec::new()),
         };
         self.mission_types = mission_type_choices(&types);
+        self.categories = category_choices(&categories);
         self.selected = selected;
         self.suggestions.clear();
 
@@ -149,6 +175,11 @@ impl SearchState {
         window
             .set_search_mission_types(strings(self.mission_types.iter().map(|c| c.label.as_str())));
         window.set_search_mission_type_index(i32::try_from(type_index).unwrap_or(0));
+        let category_index = previous_category
+            .and_then(|label| self.categories.iter().position(|c| c.label == label))
+            .unwrap_or(0);
+        window.set_search_categories(strings(self.categories.iter().map(|c| c.label.as_str())));
+        window.set_search_category_index(i32::try_from(category_index).unwrap_or(0));
         window.set_search_query(SharedString::new());
         window.set_search_suggestions(strings(std::iter::empty::<&str>()));
         self.show_selection(window);
@@ -166,14 +197,21 @@ impl SearchState {
     }
 
     fn update_suggestions(&mut self, window: &AppWindow, text: &str) {
+        let category = selected_category(&self.categories, window.get_search_category_index());
         self.suggestions = match &self.conn {
             Some(conn) => {
-                let limit = SUGGESTION_LIMIT + self.selected.len();
-                match db::search_items(conn, text, u32::try_from(limit).unwrap_or(u32::MAX)) {
+                let shown = suggestion_limit(text);
+                let limit = shown + self.selected.len();
+                match db::search_items(
+                    conn,
+                    text,
+                    category,
+                    u32::try_from(limit).unwrap_or(u32::MAX),
+                ) {
                     Ok(hits) => hits
                         .into_iter()
                         .filter(|hit| !self.selected.iter().any(|s| s.id == hit.id))
-                        .take(SUGGESTION_LIMIT)
+                        .take(shown)
                         .collect(),
                     Err(error) => {
                         log::error!("Autocomplétion : {error}");
@@ -269,7 +307,7 @@ pub(super) fn resolve_by_name(
     let mut found = Vec::with_capacity(selected.len());
     for item in selected {
         // Prefix matches come first by name, so the exact name is among the first hits.
-        if let Some(hit) = db::search_items(conn, &item.name, 10)?
+        if let Some(hit) = db::search_items(conn, &item.name, None, 10)?
             .into_iter()
             .find(|hit| hit.name == item.name)
         {
@@ -277,6 +315,14 @@ pub(super) fn resolve_by_name(
         }
     }
     Ok(found)
+}
+
+/// Category of the item type selector entry at `index`; `None` for "every type".
+pub(super) fn selected_category(choices: &[CategoryChoice], index: i32) -> Option<&str> {
+    usize::try_from(index)
+        .ok()
+        .and_then(|i| choices.get(i))
+        .and_then(|choice| choice.category.as_deref())
 }
 
 pub(super) fn columns(table: &ResultTable) -> ModelRc<TableColumn> {
