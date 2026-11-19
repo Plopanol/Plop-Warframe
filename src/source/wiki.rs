@@ -1,25 +1,43 @@
-//! Wiki source: `Module:DropTables/data` and `Module:Missions/data`, mapped according to
-//! `docs/04-REGLES-DROPS.md`.
+//! Wiki source: `Module:DropTables/data`, `Module:Missions/data` and the faction modules of
+//! `Module:Enemies/data`, mapped according to `docs/04-REGLES-DROPS.md`.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
 use mlua::Value;
 use serde::Deserialize;
 
-use super::lua::SandboxedLua;
+use super::lua::{LuaError, SandboxedLua};
 use super::{DropSource, SourceError};
 use crate::model::{
-    DropDataset, DropEntry, DropTable, MissionType, Node, NodeTable, Rarity, Rotation,
-    RotationKind, TableRole,
+    DropDataset, DropEntry, DropTable, Enemy, EnemyDrop, MissionType, Node, NodeTable, Rarity,
+    RegionResources, Rotation, RotationKind, TableRole, faction_code,
 };
 
 pub const DROP_TABLES_MODULE: &str = "Module:DropTables/data";
 pub const MISSIONS_MODULE: &str = "Module:Missions/data";
 
-/// Raw text of both modules, as downloaded with `?action=raw`.
+/// Faction sub-modules of `Module:Enemies/data`, in the order the wiki searches them.
+pub const ENEMY_FACTIONS: [&str; 12] = [
+    "grineer",
+    "corpus",
+    "infestation",
+    "orokin",
+    "sentient",
+    "stalker",
+    "narmer",
+    "themurmur",
+    "techrot",
+    "scaldra",
+    "anarchs",
+    "unaffiliated",
+];
+
+/// Raw text of the modules, as downloaded with `?action=raw`.
 pub struct WikiSource {
     drop_tables: String,
     missions: String,
+    /// `(page, text)` of the available `Module:Enemies/data/<faction>` modules.
+    enemy_modules: Vec<(String, String)>,
 }
 
 impl WikiSource {
@@ -27,7 +45,59 @@ impl WikiSource {
         Self {
             drop_tables: drop_tables.into(),
             missions: missions.into(),
+            enemy_modules: Vec::new(),
         }
+    }
+
+    /// Adds the enemy location modules; without them enemies keep their drops but get no spot.
+    pub fn with_enemy_modules(mut self, modules: Vec<(String, String)>) -> Self {
+        self.enemy_modules = modules;
+        self
+    }
+
+    /// Enemy locations by name; a module that cannot be read is reported and skipped,
+    /// because enemy drops remain useful without a spot.
+    fn enemy_infos(
+        &self,
+        lua: &SandboxedLua,
+        warnings: &mut Vec<String>,
+    ) -> BTreeMap<String, EnemyInfo> {
+        let mut infos = BTreeMap::new();
+        for (page, code) in &self.enemy_modules {
+            let entries = lua
+                .run_module(page, code)
+                .and_then(|value| lua.entries(&value));
+            let mut entries = match entries {
+                Ok(entries) => entries,
+                Err(error) => {
+                    warnings.push(format!("Module « {page} » illisible, ignoré : {error}"));
+                    continue;
+                }
+            };
+            // Lua iteration order is unspecified; sorting keeps the import deterministic.
+            entries.sort_by(|a, b| a.0.cmp(&b.0));
+            for (key, entry) in entries {
+                // Fields are read one by one: the module mixes shapes (`Planets = {}`, stray
+                // positional values) that a whole-table conversion would reject.
+                let info = match enemy_info(lua, &entry) {
+                    Ok(Some(info)) => info,
+                    Ok(None) => continue,
+                    Err(error) => {
+                        warnings.push(format!(
+                            "Module « {page} », ennemi « {key} » illisible, ignoré : {error}"
+                        ));
+                        continue;
+                    }
+                };
+                // The first module wins, as in the wiki's own lookup (Heavy Gunner is both
+                // Grineer and Unaffiliated).
+                if let Some(name) = info.name.clone().filter(|name| *name != key) {
+                    infos.entry(name).or_insert_with(|| info.clone());
+                }
+                infos.entry(key).or_insert(info);
+            }
+        }
+        infos
     }
 }
 
@@ -48,7 +118,78 @@ impl DropSource for WikiSource {
         let nodes: Vec<RawNode> =
             read_field(&lua, MISSIONS_MODULE, &mission_data, "MissionDetails")?;
 
-        Ok(build_dataset(tables, mission_types, nodes))
+        let mut dataset = build_dataset(tables, mission_types, nodes);
+
+        let regions: BTreeMap<String, Vec<String>> = read_optional_field(
+            &lua,
+            MISSIONS_MODULE,
+            &mission_data,
+            "RegionResources",
+            &mut dataset.warnings,
+        );
+        dataset.region_resources = regions
+            .into_iter()
+            .map(|(planet, resources)| RegionResources { planet, resources })
+            .collect();
+
+        let enemy_drops = read_enemy_drops(&lua, &drop_data, &mut dataset.warnings);
+        let infos = self.enemy_infos(&lua, &mut dataset.warnings);
+        dataset.enemies = build_enemies(enemy_drops, &infos, &mut dataset.warnings);
+        Ok(dataset)
+    }
+}
+
+/// Drop tables of `Enemies`, converted one by one so that a malformed enemy is reported and
+/// skipped without losing the others.
+fn read_enemy_drops(
+    lua: &SandboxedLua,
+    drop_data: &Value,
+    warnings: &mut Vec<String>,
+) -> BTreeMap<String, RawEnemyDrops> {
+    let entries = lua
+        .field(drop_data, "Enemies")
+        .and_then(|section| lua.entries(&section));
+    let entries = match entries {
+        Ok(entries) if !entries.is_empty() => entries,
+        Ok(_) => {
+            warnings.push(format!(
+                "structure inattendue dans « {DROP_TABLES_MODULE} » : champ « Enemies » absent"
+            ));
+            return BTreeMap::new();
+        }
+        Err(error) => {
+            warnings.push(format!(
+                "« {DROP_TABLES_MODULE} », section Enemies illisible : {error}"
+            ));
+            return BTreeMap::new();
+        }
+    };
+    let mut drops = BTreeMap::new();
+    for (key, value) in entries {
+        match lua.convert::<RawEnemyDrops>(value) {
+            Ok(raw) => {
+                drops.insert(key, raw);
+            }
+            Err(error) => warnings.push(format!("Ennemi « {key} » illisible, ignoré : {error}")),
+        }
+    }
+    drops
+}
+
+/// Reads a field whose absence only degrades the data: reported, then treated as empty.
+fn read_optional_field<T: serde::de::DeserializeOwned + Default>(
+    lua: &SandboxedLua,
+    module: &'static str,
+    root: &Value,
+    key: &str,
+    warnings: &mut Vec<String>,
+) -> T {
+    match read_field(lua, module, root, key) {
+        Ok(value) => value,
+        Err(error) => {
+            warnings.push(error.to_string());
+            T::default()
+        }
     }
 }
 
@@ -150,6 +291,65 @@ struct RawNode {
     drop_table_alias: Option<OneOrMany>,
     cache_drop_table_alias: Option<OneOrMany>,
     extra_drop_table_alias: Option<OneOrMany>,
+    tileset: Option<String>,
+}
+
+/// `General` part of a `Module:Enemies/data` entry.
+#[derive(Debug, Clone)]
+struct EnemyInfo {
+    name: Option<String>,
+    faction: Option<String>,
+    planets: Vec<String>,
+    tilesets: Vec<String>,
+}
+
+/// Reads the `General` fields of one enemy entry; `None` when it has no `General` table.
+fn enemy_info(lua: &SandboxedLua, entry: &Value) -> Result<Option<EnemyInfo>, LuaError> {
+    let general = lua.field(entry, "General")?;
+    if !general.is_table() {
+        return Ok(None);
+    }
+    let clean = |texts: Vec<String>| -> Vec<String> {
+        texts
+            .into_iter()
+            .map(|text| text.trim().to_owned())
+            .filter(|text| !text.is_empty())
+            .collect()
+    };
+    Ok(Some(EnemyInfo {
+        name: lua.text(&lua.field(&general, "Name")?),
+        faction: lua.text(&lua.field(&general, "Faction")?),
+        planets: clean(lua.texts(&lua.field(&general, "Planets")?)?),
+        tilesets: clean(lua.texts(&lua.field(&general, "TileSets")?)?),
+    }))
+}
+
+/// Drops of one enemy: each category has its own chance per kill, then a pool.
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+struct RawEnemyDrops {
+    name: Option<String>,
+    mod_chance: Option<Field>,
+    #[serde(default)]
+    mods: Vec<Vec<Field>>,
+    resource_chance: Option<Field>,
+    #[serde(default)]
+    resources: Vec<Vec<Field>>,
+    blueprint_chance: Option<Field>,
+    #[serde(default)]
+    blueprints: Vec<Vec<Field>>,
+    item_chance: Option<Field>,
+    #[serde(default)]
+    items: Vec<Vec<Field>>,
+    relic_chance: Option<Field>,
+    #[serde(default)]
+    relics: Vec<Vec<Field>>,
+    pigment_chance: Option<Field>,
+    #[serde(default)]
+    pigments: Vec<Vec<Field>>,
+    sigil_chance: Option<Field>,
+    #[serde(default)]
+    sigils: Vec<Vec<Field>>,
 }
 
 /// Table types whose A/B/C pools are stages rather than rotations, besides any bounty.
@@ -240,6 +440,7 @@ fn build_dataset(
 
         nodes.push(Node {
             key,
+            tileset: raw.tileset.filter(|tileset| !tileset.trim().is_empty()),
             name: raw.name,
             planet: raw.planet.unwrap_or_default(),
             mission_type: raw.mission_type.unwrap_or_default(),
@@ -270,6 +471,7 @@ fn build_dataset(
                 max_level: None,
                 is_dark_sector: false,
                 is_special: true,
+                tileset: None,
                 tables: vec![NodeTable {
                     alias: alias.clone(),
                     role: TableRole::Main,
@@ -293,7 +495,124 @@ fn build_dataset(
         nodes,
         tables,
         warnings,
+        ..DropDataset::default()
     }
+}
+
+fn build_enemies(
+    raw: BTreeMap<String, RawEnemyDrops>,
+    infos: &BTreeMap<String, EnemyInfo>,
+    warnings: &mut Vec<String>,
+) -> Vec<Enemy> {
+    let mut enemies = Vec::with_capacity(raw.len());
+    for (key, drops) in raw {
+        let name = drops.name.clone().unwrap_or_else(|| key.clone());
+        let entries = enemy_drops(&key, drops, warnings);
+        if entries.is_empty() {
+            continue;
+        }
+        // Variants are numbered by the drop tables only (`Heavy Gunner (2)`).
+        let info = infos
+            .get(&key)
+            .or_else(|| infos.get(&name))
+            .or_else(|| infos.get(base_name(&key)));
+        let (faction, planets, tilesets) = match info {
+            Some(info) => (
+                info.faction
+                    .as_deref()
+                    .and_then(faction_code)
+                    .map(str::to_owned),
+                info.planets.clone(),
+                info.tilesets.clone(),
+            ),
+            None => {
+                if !infos.is_empty() {
+                    warnings.push(format!(
+                        "Ennemi « {key} » absent de Module:Enemies/data, aucun spot"
+                    ));
+                }
+                (None, Vec::new(), Vec::new())
+            }
+        };
+        enemies.push(Enemy {
+            key,
+            name,
+            faction,
+            planets,
+            tilesets,
+            drops: entries,
+        });
+    }
+    enemies
+}
+
+/// `Heavy Gunner (2)` → `Heavy Gunner`.
+fn base_name(key: &str) -> &str {
+    match key
+        .strip_suffix(')')
+        .and_then(|rest| rest.rsplit_once(" ("))
+    {
+        Some((base, number))
+            if !number.is_empty() && number.chars().all(|c| c.is_ascii_digit()) =>
+        {
+            base
+        }
+        _ => key,
+    }
+}
+
+fn enemy_drops(key: &str, raw: RawEnemyDrops, warnings: &mut Vec<String>) -> Vec<EnemyDrop> {
+    let pools = [
+        (raw.mod_chance, raw.mods),
+        (raw.resource_chance, raw.resources),
+        (raw.blueprint_chance, raw.blueprints),
+        (raw.item_chance, raw.items),
+        (raw.relic_chance, raw.relics),
+        (raw.pigment_chance, raw.pigments),
+        (raw.sigil_chance, raw.sigils),
+    ];
+    let mut drops = Vec::new();
+    for (pool_chance, entries) in pools {
+        if entries.is_empty() {
+            continue;
+        }
+        let Some(pool_percent) = pool_chance.as_ref().and_then(number) else {
+            warnings.push(format!(
+                "Ennemi « {key} » : chance de catégorie absente, pool ignoré"
+            ));
+            continue;
+        };
+        for fields in entries {
+            let entry = match convert_entry(Rotation::None, &fields) {
+                Ok(entry) => entry,
+                Err(reason) => {
+                    warnings.push(format!("Ennemi « {key} » : entrée ignorée ({reason})"));
+                    continue;
+                }
+            };
+            let chance = round_chance(pool_percent / 100.0 * entry.chance);
+            if !(0.0..=1.0).contains(&chance) {
+                warnings.push(format!(
+                    "Ennemi « {key} » : chance invalide pour « {} »",
+                    entry.item
+                ));
+                continue;
+            }
+            drops.push(EnemyDrop {
+                item: entry.item,
+                category: entry.category,
+                chance,
+                rarity: Rarity::from_chance(chance),
+            });
+        }
+    }
+    drops
+}
+
+/// Six decimals absorb the wiki's floating noise (7.6900000000000013 %) without losing any
+/// value it displays.
+fn round_chance(fraction: f64) -> f64 {
+    (fraction * 1_000_000.0).round() / 1_000_000.0
 }
 
 fn faction(enemy: OneOrMany) -> Option<String> {
@@ -370,9 +689,7 @@ fn convert_entry(rotation: Rotation, fields: &[Field]) -> Result<DropEntry, Stri
         None => 1,
         Some(field) => quantity(field).ok_or_else(|| format!("« {item} » : quantité invalide"))?,
     };
-    // Six decimals absorb the wiki's floating noise (7.6900000000000013 %) without losing
-    // any value it displays.
-    let chance = (percent / 100.0 * 1_000_000.0).round() / 1_000_000.0;
+    let chance = round_chance(percent / 100.0);
     Ok(DropEntry {
         rotation,
         item: item.trim().to_owned(),

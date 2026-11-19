@@ -8,7 +8,7 @@ mod wiki;
 pub use cache::{CacheError, CachedModule, ModuleCache};
 pub use http::{FetchError, FetchedPage, ModuleFetcher, WIKI_BASE_URL};
 pub use lua::{LuaError, SandboxedLua};
-pub use wiki::WikiSource;
+pub use wiki::{ENEMY_FACTIONS, WikiSource};
 
 use crate::model::DropDataset;
 

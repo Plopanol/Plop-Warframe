@@ -410,6 +410,206 @@ component SearchTab inherits VerticalBox {
     }
 }
 
+// Spot Search tab: enemies dropping the chosen items, then the nodes where they appear.
+// State and queries live in Rust (src/ui_bridge/spot.rs, src/spot_view.rs).
+component SpotTab inherits VerticalBox {
+    in property <bool> has-data;
+    in property <bool> enabled;
+    in property <[string]> mission-types;
+    in-out property <int> mission-type-index;
+    in property <[string]> planets;
+    in-out property <int> planet-index;
+    in-out property <string> query;
+    in property <[string]> suggestions;
+    in property <[string]> selected-items;
+    in property <string> summary;
+    in property <[TableColumn]> enemy-columns;
+    in property <[[StandardListViewItem]]> enemy-rows;
+    in-out property <int> enemy-current-row;
+    in property <bool> enemy-picked;
+    in property <string> nodes-title;
+    in property <[TableColumn]> node-columns;
+    in property <[[StandardListViewItem]]> node-rows;
+    callback query-edited(string);
+    callback add-suggestion(int);
+    callback remove-item(int);
+    callback filters-changed();
+    callback enemy-selected(int);
+    callback clear-enemy();
+    callback enemy-sort-ascending(int);
+    callback enemy-sort-descending(int);
+    callback node-sort-ascending(int);
+    callback node-sort-descending(int);
+
+    if !root.has-data: Text {
+        text: "Lancez un import depuis l'onglet Données.";
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        vertical-stretch: 1;
+    }
+    if root.has-data: VerticalLayout {
+        spacing: 8px;
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "Type de mission";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "spot-mission-type";
+                model: root.mission-types;
+                current-index <=> root.mission-type-index;
+                enabled: root.enabled;
+                horizontal-stretch: 2;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+
+            Text {
+                text: "Planète";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "spot-planet";
+                model: root.planets;
+                current-index <=> root.planet-index;
+                enabled: root.enabled;
+                horizontal-stretch: 1;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "Objets";
+                vertical-alignment: center;
+            }
+
+            LineEdit {
+                accessible-id: "spot-item-query";
+                placeholder-text: "Ajouter un objet (nom ou partie du nom)…";
+                text <=> root.query;
+                enabled: root.enabled;
+                edited(text) => {
+                    root.query-edited(text);
+                }
+                accepted => {
+                    root.add-suggestion(0);
+                }
+            }
+        }
+
+        if root.suggestions.length > 0: Rectangle {
+            border-width: 1px;
+            border-color: #808080;
+            height: min(root.suggestions.length, 8) * 28px + 4px;
+            ListView {
+                accessible-id: "spot-item-suggestions";
+                for suggestion[index] in root.suggestions: Rectangle {
+                    height: 28px;
+                    background: spot-suggestion-touch.has-hover ? #8080a030 : transparent;
+                    spot-suggestion-touch := TouchArea {
+                        accessible-role: button;
+                        accessible-label: suggestion;
+                        enabled: root.enabled;
+                        clicked => {
+                            root.add-suggestion(index);
+                        }
+                    }
+
+                    Text {
+                        x: 8px;
+                        text: suggestion;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+
+        if root.selected-items.length > 0: ScrollView {
+            height: 44px;
+            HorizontalLayout {
+                spacing: 6px;
+                padding: 4px;
+                alignment: start;
+                for item[index] in root.selected-items: Chip {
+                    text: item;
+                    enabled: root.enabled;
+                    remove => {
+                        root.remove-item(index);
+                    }
+                }
+            }
+        }
+
+        Text {
+            text: root.summary;
+            color: #808080;
+        }
+
+        Text {
+            text: "Ennemis au meilleur taux (cliquer une ligne pour voir ses nœuds)";
+        }
+
+        StandardTableView {
+            accessible-id: "spot-enemies";
+            vertical-stretch: 1;
+            columns: root.enemy-columns;
+            rows: root.enemy-rows;
+            current-row <=> root.enemy-current-row;
+            current-row-changed(row) => {
+                root.enemy-selected(row);
+            }
+            sort-ascending(column) => {
+                root.enemy-sort-ascending(column);
+            }
+            sort-descending(column) => {
+                root.enemy-sort-descending(column);
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: root.nodes-title;
+                vertical-alignment: center;
+            }
+
+            Button {
+                accessible-id: "spot-all-enemies";
+                text: "Tous les ennemis";
+                enabled: root.enabled && root.enemy-picked;
+                clicked => {
+                    root.clear-enemy();
+                }
+            }
+
+            Rectangle {
+                horizontal-stretch: 1;
+            }
+        }
+
+        StandardTableView {
+            accessible-id: "spot-nodes";
+            vertical-stretch: 1;
+            columns: root.node-columns;
+            rows: root.node-rows;
+            sort-ascending(column) => {
+                root.node-sort-ascending(column);
+            }
+            sort-descending(column) => {
+                root.node-sort-descending(column);
+            }
+        }
+    }
+}
+
 export component AppWindow inherits Window {
     title: "Plop-Warframe";
     preferred-width: 1100px;
@@ -421,7 +621,7 @@ export component AppWindow inherits Window {
     in property <[string]> log-lines;
     callback update-from-wiki();
     callback reimport-from-cache();
-    // Raised by Rust once an import has ended, to reload the Search tab.
+    // Raised by Rust once an import has ended, to reload the search tabs.
     callback import-finished();
 
     in property <bool> search-has-data;
@@ -445,6 +645,33 @@ export component AppWindow inherits Window {
     callback search-sort-ascending(int);
     callback search-sort-descending(int);
 
+    in property <bool> spot-has-data;
+    in property <[string]> spot-mission-types;
+    in-out property <int> spot-mission-type-index;
+    in property <[string]> spot-planets;
+    in-out property <int> spot-planet-index;
+    in-out property <string> spot-query;
+    in property <[string]> spot-suggestions;
+    in property <[string]> spot-selected-items;
+    in property <string> spot-summary;
+    in property <[TableColumn]> spot-enemy-columns;
+    in property <[[StandardListViewItem]]> spot-enemy-rows;
+    in-out property <int> spot-enemy-current-row: -1;
+    in property <bool> spot-enemy-picked;
+    in property <string> spot-nodes-title;
+    in property <[TableColumn]> spot-node-columns;
+    in property <[[StandardListViewItem]]> spot-node-rows;
+    callback spot-query-edited(string);
+    callback spot-add-suggestion(int);
+    callback spot-remove-item(int);
+    callback spot-filters-changed();
+    callback spot-enemy-selected(int);
+    callback spot-clear-enemy();
+    callback spot-enemy-sort-ascending(int);
+    callback spot-enemy-sort-descending(int);
+    callback spot-node-sort-ascending(int);
+    callback spot-node-sort-descending(int);
+
     TabWidget {
         Tab {
             title: "Données";
@@ -463,7 +690,7 @@ export component AppWindow inherits Window {
         }
 
         Tab {
-            title: "Recherche";
+            title: "Recherche Mission";
             SearchTab {
                 has-data: root.search-has-data;
                 enabled: !root.busy;
@@ -497,6 +724,59 @@ export component AppWindow inherits Window {
                 }
                 sort-descending(column) => {
                     root.search-sort-descending(column);
+                }
+            }
+        }
+
+        Tab {
+            title: "Recherche Spot";
+            SpotTab {
+                has-data: root.spot-has-data;
+                enabled: !root.busy;
+                mission-types: root.spot-mission-types;
+                mission-type-index <=> root.spot-mission-type-index;
+                planets: root.spot-planets;
+                planet-index <=> root.spot-planet-index;
+                query <=> root.spot-query;
+                suggestions: root.spot-suggestions;
+                selected-items: root.spot-selected-items;
+                summary: root.spot-summary;
+                enemy-columns: root.spot-enemy-columns;
+                enemy-rows: root.spot-enemy-rows;
+                enemy-current-row <=> root.spot-enemy-current-row;
+                enemy-picked: root.spot-enemy-picked;
+                nodes-title: root.spot-nodes-title;
+                node-columns: root.spot-node-columns;
+                node-rows: root.spot-node-rows;
+                query-edited(text) => {
+                    root.spot-query-edited(text);
+                }
+                add-suggestion(index) => {
+                    root.spot-add-suggestion(index);
+                }
+                remove-item(index) => {
+                    root.spot-remove-item(index);
+                }
+                filters-changed => {
+                    root.spot-filters-changed();
+                }
+                enemy-selected(row) => {
+                    root.spot-enemy-selected(row);
+                }
+                clear-enemy => {
+                    root.spot-clear-enemy();
+                }
+                enemy-sort-ascending(column) => {
+                    root.spot-enemy-sort-ascending(column);
+                }
+                enemy-sort-descending(column) => {
+                    root.spot-enemy-sort-descending(column);
+                }
+                node-sort-ascending(column) => {
+                    root.spot-node-sort-ascending(column);
+                }
+                node-sort-descending(column) => {
+                    root.spot-node-sort-descending(column);
                 }
             }
         }

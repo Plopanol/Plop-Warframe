@@ -76,10 +76,10 @@ pub fn install(window: &AppWindow, paths: DataPaths) -> (SharedSearch, Vec<Strin
 }
 
 /// Adapts a state method to a Slint callback; the window and state are held weakly.
-fn with_state<A: 'static>(
+pub(super) fn with_state<S: 'static, A: 'static>(
     window: &AppWindow,
-    state: &SharedSearch,
-    action: impl Fn(&AppWindow, &mut SearchState, A) + 'static,
+    state: &Rc<RefCell<S>>,
+    action: impl Fn(&AppWindow, &mut S, A) + 'static,
 ) -> impl Fn(A) + 'static {
     let weak = slint::ComponentHandle::as_weak(window);
     let state = Rc::downgrade(state);
@@ -257,25 +257,15 @@ impl SearchState {
     }
 
     fn show_rows(&self, window: &AppWindow) {
-        let rows: Vec<ModelRc<StandardListViewItem>> = self
-            .table
-            .rows
-            .iter()
-            .map(|row| {
-                let cells: Vec<StandardListViewItem> = row
-                    .cells
-                    .iter()
-                    .map(|cell| StandardListViewItem::from(cell.as_str()))
-                    .collect();
-                ModelRc::new(VecModel::from(cells))
-            })
-            .collect();
-        window.set_search_rows(ModelRc::new(VecModel::from(rows)));
+        window.set_search_rows(rows(&self.table));
     }
 }
 
 /// Chosen items found again by exact name after an import.
-fn resolve_by_name(conn: &Connection, selected: &[ItemHit]) -> Result<Vec<ItemHit>, DbError> {
+pub(super) fn resolve_by_name(
+    conn: &Connection,
+    selected: &[ItemHit],
+) -> Result<Vec<ItemHit>, DbError> {
     let mut found = Vec::with_capacity(selected.len());
     for item in selected {
         // Prefix matches come first by name, so the exact name is among the first hits.
@@ -289,7 +279,7 @@ fn resolve_by_name(conn: &Connection, selected: &[ItemHit]) -> Result<Vec<ItemHi
     Ok(found)
 }
 
-fn columns(table: &ResultTable) -> ModelRc<TableColumn> {
+pub(super) fn columns(table: &ResultTable) -> ModelRc<TableColumn> {
     let columns: Vec<TableColumn> = table
         .columns
         .iter()
@@ -303,7 +293,24 @@ fn columns(table: &ResultTable) -> ModelRc<TableColumn> {
     ModelRc::new(VecModel::from(columns))
 }
 
-fn strings<'a>(texts: impl Iterator<Item = &'a str>) -> ModelRc<SharedString> {
+/// Cells of a result table for a `StandardTableView`.
+pub(super) fn rows(table: &ResultTable) -> ModelRc<ModelRc<StandardListViewItem>> {
+    let rows: Vec<ModelRc<StandardListViewItem>> = table
+        .rows
+        .iter()
+        .map(|row| {
+            let cells: Vec<StandardListViewItem> = row
+                .cells
+                .iter()
+                .map(|cell| StandardListViewItem::from(cell.as_str()))
+                .collect();
+            ModelRc::new(VecModel::from(cells))
+        })
+        .collect();
+    ModelRc::new(VecModel::from(rows))
+}
+
+pub(super) fn strings<'a>(texts: impl Iterator<Item = &'a str>) -> ModelRc<SharedString> {
     ModelRc::new(VecModel::from(
         texts.map(SharedString::from).collect::<Vec<_>>(),
     ))

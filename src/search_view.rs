@@ -1,5 +1,6 @@
 //! Texts of the Search tab, independent of Slint so they can be tested: mission type
-//! translation (rule 11 of `docs/04-REGLES-DROPS.md`), result cells and column sorting.
+//! translation (rule 11 of `docs/04-REGLES-DROPS.md`), result cells and column sorting, shared
+//! with the Spot Search tab (`crate::spot_view`).
 
 use std::cmp::Ordering;
 
@@ -173,7 +174,7 @@ pub enum SortKey {
 }
 
 impl SortKey {
-    fn text(text: &str) -> Self {
+    pub fn text(text: &str) -> Self {
         SortKey::Text(fold_text(text))
     }
 
@@ -194,12 +195,23 @@ impl SortKey {
 pub struct TableRow {
     pub cells: Vec<String>,
     keys: Vec<SortKey>,
+    /// Database id the row stands for, kept through sorting (the enemy of a Spot row).
+    pub id: Option<i64>,
 }
 
 impl TableRow {
-    fn new(cells: Vec<(String, SortKey)>) -> Self {
+    pub fn new(cells: Vec<(String, SortKey)>) -> Self {
         let (cells, keys) = cells.into_iter().unzip();
-        Self { cells, keys }
+        Self {
+            cells,
+            keys,
+            id: None,
+        }
+    }
+
+    pub fn with_id(mut self, id: i64) -> Self {
+        self.id = Some(id);
+        self
     }
 }
 
@@ -302,11 +314,11 @@ impl ResultTable {
     }
 }
 
-fn text_cell(text: &str) -> (String, SortKey) {
+pub fn text_cell(text: &str) -> (String, SortKey) {
     (text.to_owned(), SortKey::text(text))
 }
 
-fn chance_cell(chance: Option<f64>) -> (String, SortKey) {
+pub fn chance_cell(chance: Option<f64>) -> (String, SortKey) {
     (
         chance.map_or_else(|| MISSING.to_owned(), percent),
         SortKey::Number(chance),

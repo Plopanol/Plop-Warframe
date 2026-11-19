@@ -4,5 +4,6 @@ pub mod db;
 pub mod model;
 pub mod search_view;
 pub mod source;
+pub mod spot_view;
 pub mod ui_bridge;
 pub mod update;

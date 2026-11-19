@@ -62,6 +62,46 @@ impl SandboxedLua {
         Ok(self.lua.from_value_with(value, options)?)
     }
 
+    /// String-keyed entries of a table, in no particular order; empty for any other value.
+    pub fn entries(&self, value: &Value) -> Result<Vec<(String, Value)>, LuaError> {
+        let Some(table) = value.as_table() else {
+            return Ok(Vec::new());
+        };
+        let mut entries = Vec::new();
+        for pair in table.pairs::<Value, Value>() {
+            let (key, value) = pair?;
+            if let Value::String(key) = key {
+                entries.push((key.to_str()?.to_owned(), value));
+            }
+        }
+        Ok(entries)
+    }
+
+    /// Text of a string value, `None` for anything else.
+    pub fn text(&self, value: &Value) -> Option<String> {
+        match value {
+            Value::String(text) => text.to_str().ok().map(|text| text.to_owned()),
+            _ => None,
+        }
+    }
+
+    /// Strings of a list (its sequence part) or of a single string; other values are skipped,
+    /// because an empty Lua table cannot be told apart from an empty map.
+    pub fn texts(&self, value: &Value) -> Result<Vec<String>, LuaError> {
+        match value {
+            Value::Table(table) => {
+                let mut texts = Vec::new();
+                for item in table.sequence_values::<Value>() {
+                    if let Some(text) = self.text(&item?) {
+                        texts.push(text);
+                    }
+                }
+                Ok(texts)
+            }
+            other => Ok(self.text(other).into_iter().collect()),
+        }
+    }
+
     /// Evaluates an expression; used by tests to inspect the sandbox.
     pub fn eval<T: mlua::FromLua>(&self, expression: &str) -> Result<T, LuaError> {
         Ok(self.lua.load(expression).eval::<T>()?)

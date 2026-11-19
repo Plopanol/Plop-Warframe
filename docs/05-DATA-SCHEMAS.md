@@ -19,21 +19,27 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | Version | Fichier | Contenu |
 |---|---|---|
 | 1 | `001_initial.sql` | Schéma initial |
+| 2 | `002_enemies.sql` | Ennemis, emplacements, ressources de région, tileset et factions des nœuds |
 
-## Tables (version 1)
+## Tables (version 2)
 
 | Table | Clé naturelle | Rôle |
 |---|---|---|
 | `planet` | `name` | Planète, ou `Type` de la table pour une mission spéciale ; `(inconnu)` si vide |
 | `mission_type` | `name` | Type de mission (nom anglais du wiki) et `is_endless` |
-| `node` | `key` | Nœud ou pseudo-nœud spécial (`is_special`), faction, niveaux, Secteur sombre |
+| `node` | `key` | Nœud ou pseudo-nœud spécial (`is_special`), faction (texte du wiki), niveaux, Secteur sombre, `tileset` |
+| `node_faction` | `(node_id, faction)` | Codes de faction normalisés d'un nœud non spécial ([règle 13](04-REGLES-DROPS.md)) |
+| `enemy` | `key` | Ennemi de drop (clé de la table, `Heavy Gunner (2)` pour une variante), nom, code de faction ou `NULL` sans emplacement connu |
+| `enemy_location` | `(enemy_id, kind, value)` | Restriction du wiki, `kind` ∈ {`planet`, `tileset`} ; aucune ligne : partout où sa faction apparaît |
+| `enemy_drop` | — | Taux par kill de 0 à 1 et `rarity` ; plusieurs lignes possibles pour un même objet ; objet `Region Resource` pour une ressource de région |
+| `region_resource` | `(planet_id, item_id)` | Ressources d'une planète (`RegionResources`) |
 | `drop_table` | `alias` | Table de drop, `table_type` et `tier` du wiki, `rotation_kind` ∈ {`rotation`, `cache`, `stage`, `none`} |
 | `node_drop_table` | `(node_id, drop_table_id, role)` | Lien, `role` ∈ {`main`, `cache`, `extra`} |
 | `item` | `name` | Objet et catégorie de sa première occurrence (Relic, Mod, Blueprint, Resource…) |
 | `drop` | — | Entrée : table, `rotation` ∈ {`A`, `B`, `C`, `NONE`}, objet, `chance` de 0 à 1, `rarity` (code), `quantity` ≥ 1 ; plusieurs lignes possibles pour un même objet (quantités différentes) |
 | `import_run` | — | Historique : début et fin (secondes Unix), source, révision, `status` ∈ {`running`, `success`, `failed`}, message |
 
-Index : `item.name` (unique), `drop(item_id)`, `drop(drop_table_id, rotation)`, `node(mission_type_id)`, `node_drop_table(drop_table_id)`.
+Index : `item.name` (unique), `drop(item_id)`, `drop(drop_table_id, rotation)`, `node(mission_type_id)`, `node_drop_table(drop_table_id)`, `node_faction(faction)`, `enemy_drop(item_id)`, `enemy_drop(enemy_id)`.
 
 Fonction SQL `fold(texte)`, enregistrée à chaque ouverture : minuscules sans accents latins (« Höllars » → « hollars »), pour la recherche d'objets insensible à la casse et aux accents ; elle n'est pas stockée.
 

@@ -59,7 +59,7 @@ fn dump(conn: &Connection) -> Vec<String> {
 #[test]
 fn migrations_set_the_schema_version() {
     let conn = db::open_in_memory().expect("open");
-    assert_eq!(db::schema_version(&conn).expect("version"), 1);
+    assert_eq!(db::schema_version(&conn).expect("version"), 2);
     let foreign_keys: i64 = conn
         .pragma_query_value(None, "foreign_keys", |row| row.get(0))
         .expect("pragma");
@@ -75,7 +75,7 @@ fn reopening_a_file_keeps_data_and_version() {
         db::import_dataset(&mut conn, dataset(), RUN, &clock).expect("import");
     }
     let conn = db::open(&path).expect("reopen");
-    assert_eq!(db::schema_version(&conn).expect("version"), 1);
+    assert_eq!(db::schema_version(&conn).expect("version"), 2);
     assert_eq!(db::stats(&conn).expect("stats").nodes, 524);
 }
 

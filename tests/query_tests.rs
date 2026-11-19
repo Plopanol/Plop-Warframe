@@ -48,6 +48,7 @@ fn node(key: &str, mission_type: &str, is_special: bool, tables: &[(&str, TableR
         max_level: None,
         is_dark_sector: false,
         is_special,
+        tileset: None,
         tables: tables
             .iter()
             .map(|(alias, role)| NodeTable {
@@ -129,6 +130,7 @@ fn database() -> Connection {
             ),
         ],
         warnings: Vec::new(),
+        ..DropDataset::default()
     };
     let mut conn = db::open_in_memory().expect("open");
     db::import_dataset(

@@ -3,11 +3,15 @@
 
 mod import;
 mod search;
+mod spot;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
 pub use search::{
     CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, RotationFilter, SearchFilter,
     SpecialFilter, fold_text, mission_types, search_by_item, search_combined, search_items,
+};
+pub use spot::{
+    EnemyDropRow, PlanetRow, SpotFilter, SpotRow, enemies_for_items, planets, spots_for_items,
 };
 
 use std::path::Path;
@@ -27,7 +31,10 @@ pub enum DbError {
 }
 
 /// Migrations in order; migration `n` (1-based) brings `user_version` from `n - 1` to `n`.
-const MIGRATIONS: &[&str] = &[include_str!("migrations/001_initial.sql")];
+const MIGRATIONS: &[&str] = &[
+    include_str!("migrations/001_initial.sql"),
+    include_str!("migrations/002_enemies.sql"),
+];
 
 fn latest_version() -> i64 {
     i64::try_from(MIGRATIONS.len()).unwrap_or(i64::MAX)

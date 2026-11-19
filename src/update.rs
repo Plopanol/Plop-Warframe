@@ -5,15 +5,29 @@ use std::path::{Path, PathBuf};
 
 use crate::db::{self, DbError, ImportRun, ImportSummary};
 use crate::source::{
-    CacheError, CachedModule, DropSource, FetchError, ModuleCache, ModuleFetcher, SourceError,
-    WikiSource,
+    CacheError, CachedModule, DropSource, ENEMY_FACTIONS, FetchError, ModuleCache, ModuleFetcher,
+    SourceError, WikiSource,
 };
 
-/// Wiki page and cache file of each module, in download order.
+/// Wiki page and cache file of each required module, in download order.
 pub const MODULES: [(&str, &str); 2] = [
     ("Module:DropTables/data", "droptables_data.lua"),
     ("Module:Missions/data", "missions_data.lua"),
 ];
+
+/// Wiki page and cache file of each enemy location module. They are optional in the cache, so
+/// a cache made before them still imports, with enemies left without a spot.
+pub fn enemy_modules() -> Vec<(String, String)> {
+    ENEMY_FACTIONS
+        .iter()
+        .map(|faction| {
+            (
+                format!("Module:Enemies/data/{faction}"),
+                format!("enemies_{faction}.lua"),
+            )
+        })
+        .collect()
+}
 
 pub const CACHE_DIR: &str = "cache";
 
@@ -66,7 +80,7 @@ impl Progress<'_> {
 /// Number of progress steps of an import: one per download, reading, writing.
 pub fn step_count(origin: Origin) -> usize {
     match origin {
-        Origin::Wiki => MODULES.len() + 2,
+        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 2,
         Origin::Cache => 2,
     }
 }
@@ -142,9 +156,15 @@ pub fn run_import(
     })?;
     let cache = ModuleCache::new(&paths.cache);
 
+    let enemy_modules = enemy_modules();
     if origin == Origin::Wiki {
         let mut fetcher = ModuleFetcher::new()?;
-        for (page, file) in MODULES {
+        let pages = MODULES.iter().map(|(page, file)| (*page, *file)).chain(
+            enemy_modules
+                .iter()
+                .map(|(page, file)| (page.as_str(), file.as_str())),
+        );
+        for (page, file) in pages {
             step(&format!("Téléchargement de {page}…"));
             let page_data = fetcher.fetch_raw(page)?;
             cache.store(
@@ -162,7 +182,21 @@ pub fn run_import(
     let [drop_tables, missions] = MODULES.map(|(_, file)| cache.load(file));
     let (drop_tables, missions) = (drop_tables?, missions?);
     let revision = revision(&[&drop_tables, &missions]);
-    let dataset = WikiSource::new(drop_tables.text, missions.text).load()?;
+    let mut cache_warnings = Vec::new();
+    let mut enemy_texts = Vec::new();
+    for (page, file) in enemy_modules {
+        match cache.load(&file) {
+            Ok(module) => enemy_texts.push((page, module.text)),
+            Err(CacheError::Missing(_)) => cache_warnings.push(format!(
+                "Module « {page} » absent du cache : relancer une mise à jour depuis le wiki"
+            )),
+            Err(error) => return Err(error.into()),
+        }
+    }
+    let mut dataset = WikiSource::new(drop_tables.text, missions.text)
+        .with_enemy_modules(enemy_texts)
+        .load()?;
+    dataset.warnings.splice(0..0, cache_warnings);
 
     step("Écriture dans la base…");
     let mut conn = db::open(&paths.database)?;

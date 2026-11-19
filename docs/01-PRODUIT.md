@@ -12,20 +12,23 @@ Joueur de Warframe, sur son poste Windows ou Linux, qui prépare ses sessions de
 
 ## Périmètre
 
-- Import des tables de drop des missions depuis le wiki (`Module:DropTables/data`, `Module:Missions/data`) vers une base SQLite locale ; réimport depuis le cache sans réseau ; historique des imports.
+- Import des tables de drop des missions depuis le wiki (`Module:DropTables/data`, `Module:Missions/data`, `Module:Enemies/data/<faction>`) vers une base SQLite locale ; réimport depuis le cache sans réseau ; historique des imports.
 - Recherche par type de mission et objets sélectionnés, avec filtres de rotation et de missions spéciales (primes, Sortie, Arbitrages, Cauchemar…), en deux modes : par objet et combiné (somme des chances par nœud et rotation), avec la chance par cycle AABC des missions sans fin.
-- Interface Slint en français, deux onglets : Données et Recherche.
+- Recherche par spot : pour des objets choisis, ennemis au meilleur taux par kill, puis nœuds où ils apparaissent, filtrés par type de mission et planète.
+- Interface Slint en français, trois onglets : Données, Recherche Mission et Recherche Spot.
 
 ## Exclusions
 
-- Drops des ennemis et des conteneurs (sections `Enemies` et `Containers` du module) : hors périmètre de la première version, voir [BACKLOG](BACKLOG.md).
+- Drops des conteneurs (section `Containers` du module) : voir [BACKLOG](BACKLOG.md).
+- Densité d'ennemis par nœud : aucune source ne la publie ; les spots sont classés par compatibilité ([04-REGLES-DROPS](04-REGLES-DROPS.md), règle 13).
 - Aucune interaction avec le jeu ni avec un compte joueur.
 - Les noms d'objets et de nœuds restent en anglais, comme dans le jeu ; seuls l'interface et les types de mission courants sont traduits.
 
 ## Parcours principaux
 
 1. Onglet Données : « Mettre à jour depuis le wiki » ; progression et journal, puis date, statut et volumes du dernier import.
-2. Onglet Recherche : choisir un type de mission, ajouter des objets par autocomplétion, régler rotation, missions spéciales et mode ; lire le tableau trié.
+2. Onglet Recherche Mission : choisir un type de mission, ajouter des objets par autocomplétion, régler rotation, missions spéciales et mode ; lire le tableau trié.
+3. Onglet Recherche Spot : ajouter des objets, filtrer par type de mission et planète ; lire les ennemis au meilleur taux, puis les nœuds où les trouver.
 
 ## Critères de succès observables
 
