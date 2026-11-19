@@ -3,11 +3,15 @@
 
 mod import;
 mod search;
+mod spot;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
 pub use search::{
     CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, RotationFilter, SearchFilter,
     SpecialFilter, fold_text, mission_types, search_by_item, search_combined, search_items,
+};
+pub use spot::{
+    EnemyDropRow, PlanetRow, SpotFilter, SpotRow, enemies_for_items, planets, spots_for_items,
 };
 
 use std::path::Path;

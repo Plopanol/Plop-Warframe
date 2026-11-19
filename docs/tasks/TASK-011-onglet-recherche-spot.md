@@ -29,12 +29,13 @@ L'onglet « Recherche » devient « Recherche Mission ». Un onglet « Recherche
 | Lot | Contenu | Préconditions | Contrôles | État |
 |---|---|---|---|---|
 | 1 | Données : modèle, lecture des ennemis, `RegionResources` et tilesets, 12 modules d'ennemis au téléchargement et au cache, migration 2, import, fixtures, règles 12 à 14 | Arbitrages | Vérification rapide, tests de parsing et d'import | Terminé |
-| 2 | Requêtes : planètes, ennemis par objet, spots par objet avec filtres, Region Resource étendue | Lot 1 | Vérification rapide, tests sur fixtures | À faire |
+| 2 | Requêtes : planètes, ennemis par objet, spots par objet avec filtres, Region Resource étendue | Lot 1 | Vérification rapide, tests sur fixtures | Terminé |
 | 3 | Interface : renommage, onglet Recherche Spot (`src/spot_view.rs`, `src/ui_bridge/spot.rs`, `ui/app-window.slint`) | Lot 2 ; modules d'ennemis dans `data/cache/` (import à demander) | Vérification rapide, contrôle complet, validation manuelle | À faire |
 
 ## Journal des lots
 
 - Lot 1, 2026-11-19 : `src/model.rs` (`Enemy`, `EnemyDrop`, `RegionResources`, `Node.tileset`, codes de faction) ; `src/source/wiki.rs` (section `Enemies`, `RegionResources`, `Tileset`, modules `Module:Enemies/data/<faction>` via `with_enemy_modules`, champs absents signalés sans échec) ; `src/update.rs` (12 modules d'ennemis téléchargés et mis en cache, facultatifs à l'import depuis le cache, avec avertissement) ; migration `002_enemies.sql` et import ; règles 12 à 14 de 04-REGLES-DROPS, dont l'exclusion des nœuds Archwing pour un ennemi sans `TileSets` ; fixtures `tests/fixtures/enemies/` ; `tests/enemy_tests.rs` (8 tests). Sur les fixtures, environ 75 ennemis de drop n'ont pas d'emplacement dans `Module:Enemies/data` (boss, Eidolons, Necramechs, Raptor…) : ils restent sans spot. Vérification rapide réussie.
+- Lot 2, 2026-11-19 : `src/db/spot.rs` (`planets`, `enemies_for_items`, `spots_for_items`, `SpotFilter` objets, type de mission, planète, ennemi) : taux par kill sommés par ennemi et objet, ressource de région rattachée à sa planète et divisée par son nombre de ressources, compatibilité de la règle 13 en SQL, classement par fenêtre `row_number`. Sans filtre, les ennemis sans spot connu restent listés ; avec un filtre, seuls ceux qui ont un nœud compatible. `tests/spot_tests.rs` (8 tests, dont Aerial Commander sur les fixtures). Mesure en release sur les fixtures : 0,5 à 66 ms par recherche (Neurodes, Orokin Cell les plus lourdes). Vérification rapide réussie.
 
 ## Validation et preuves
 
