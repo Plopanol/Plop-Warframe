@@ -3,7 +3,7 @@
 - **Statut :** À faire
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
-- **Dépendances :** TASK-014
+- **Dépendances :** TASK-008
 - **Dernière mise à jour :** 2026-11-19
 
 ## Résultat attendu

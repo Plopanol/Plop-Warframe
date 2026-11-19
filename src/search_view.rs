@@ -116,9 +116,58 @@ pub fn specials_from_index(index: i32) -> SpecialFilter {
     }
 }
 
+/// French names of the item categories of the wiki, in the plural used by the game's menus.
+const CATEGORY_LABELS: &[(&str, &str)] = &[
+    ("Arcane", "Arcanes"),
+    ("Ayatan Sculpture", "Sculptures Ayatan"),
+    ("Blueprint", "Schémas"),
+    ("Cosmetic", "Cosmétiques"),
+    ("Credits", "Crédits"),
+    ("Decoration", "Décorations"),
+    ("Fragments", "Fragments"),
+    ("Item", "Objets divers"),
+    ("Mod", "Mods"),
+    ("Other", "Autres"),
+    ("Relic", "Reliques"),
+    ("Resource", "Ressources"),
+    ("Scene", "Scènes"),
+    ("Sigil", "Sceaux"),
+];
+
+/// French name of an item category, or its wiki name when it has no translation.
+pub fn category_label(category: &str) -> &str {
+    CATEGORY_LABELS
+        .iter()
+        .find(|(english, _)| *english == category)
+        .map_or(category, |(_, french)| french)
+}
+
+/// Entry of the item type selector; `category` is `None` for "every type".
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CategoryChoice {
+    pub category: Option<String>,
+    pub label: String,
+}
+
+pub const ALL_CATEGORIES: &str = "Tous les types";
+
+/// Selector entries: "every type" first, then the categories in the given order (the most
+/// populated first).
+pub fn category_choices(categories: &[String]) -> Vec<CategoryChoice> {
+    std::iter::once(CategoryChoice {
+        category: None,
+        label: ALL_CATEGORIES.to_owned(),
+    })
+    .chain(categories.iter().map(|category| CategoryChoice {
+        category: Some(category.clone()),
+        label: category_label(category).to_owned(),
+    }))
+    .collect()
+}
+
 /// Line of the autocompletion list.
 pub fn suggestion_label(hit: &ItemHit) -> String {
-    format!("{} · {}", hit.name, hit.category)
+    format!("{} · {}", hit.name, category_label(&hit.category))
 }
 
 /// Line above the result table.
@@ -373,6 +422,26 @@ mod tests {
         assert_eq!(mission_type_label("Survival"), "Survie");
         assert_eq!(mission_type_label("Mobile Defense"), "Défense mobile");
         assert_eq!(mission_type_label("Cetus Bounty"), "Cetus Bounty");
+    }
+
+    #[test]
+    fn category_choices_start_with_all_and_translate() {
+        let choices =
+            category_choices(&["Mod".to_owned(), "Blueprint".to_owned(), "New".to_owned()]);
+        let labels: Vec<&str> = choices.iter().map(|c| c.label.as_str()).collect();
+        assert_eq!(labels, [ALL_CATEGORIES, "Mods", "Schémas", "New"]);
+        assert_eq!(choices[0].category, None);
+        assert_eq!(choices[2].category.as_deref(), Some("Blueprint"));
+    }
+
+    #[test]
+    fn suggestion_shows_the_french_category() {
+        let hit = ItemHit {
+            id: 1,
+            name: "Vitality".to_owned(),
+            category: "Mod".to_owned(),
+        };
+        assert_eq!(suggestion_label(&hit), "Vitality · Mods");
     }
 
     #[test]

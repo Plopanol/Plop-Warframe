@@ -6,7 +6,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-013](TASK-013-filtre-type-objet.md) | Filtre par type d'objet | En cours | Phase 2 — Interface | Normale |
+| [TASK-013](TASK-013-filtre-type-objet.md) | Filtre par type d'objet | À valider | Phase 2 — Interface | Normale |
 
 ## À faire
 

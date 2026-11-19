@@ -32,12 +32,12 @@ Jalon : `--import` remplit la base depuis le wiki et une requête de test retrou
 | [TASK-011](tasks/TASK-011-onglet-recherche-spot.md) | Onglet Recherche Spot (drops des ennemis) | TASK-007 |
 | [TASK-008](tasks/TASK-008-finitions.md) | Gestion d'erreurs, README, notices, livrable | TASK-011 |
 | [TASK-013](tasks/TASK-013-filtre-type-objet.md) | Filtre des suggestions par type d'objet | TASK-011 |
-| [TASK-014](tasks/TASK-014-theme-wiki.md) | Couleurs et polices du wiki | TASK-013 |
-| [TASK-015](tasks/TASK-015-icone-coffre.md) | Icône coffre de loot (fenêtre et exe) | TASK-014 |
+| [TASK-014](tasks/TASK-014-theme-wiki.md) | Couleurs et polices du wiki | TASK-008 |
+| [TASK-015](tasks/TASK-015-icone-coffre.md) | Icône coffre de loot (fenêtre et exe) | TASK-008 |
 | [TASK-012](tasks/TASK-012-controle-linux.md) | Contrôle Linux (reporté) | TASK-008 |
 
 Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Windows et Linux.
 
 ## Prochaine tâche
 
-[TASK-013](tasks/TASK-013-filtre-type-objet.md)
+[TASK-014](tasks/TASK-014-theme-wiki.md)

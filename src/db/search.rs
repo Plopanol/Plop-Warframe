@@ -50,27 +50,43 @@ pub struct ItemHit {
     pub category: String,
 }
 
-/// Items whose name contains `text`, ignoring case and accents; prefix matches first, then by
-/// name. An empty text yields nothing.
-pub fn search_items(conn: &Connection, text: &str, limit: u32) -> Result<Vec<ItemHit>, DbError> {
+/// Items whose name contains `text`, ignoring case and accents, restricted to `category` when
+/// given; prefix matches first, then by name. An empty text yields every item of `category`,
+/// or nothing without a category.
+pub fn search_items(
+    conn: &Connection,
+    text: &str,
+    category: Option<&str>,
+    limit: u32,
+) -> Result<Vec<ItemHit>, DbError> {
     let needle = fold_text(text.trim());
-    if needle.is_empty() {
+    if needle.is_empty() && category.is_none() {
         return Ok(Vec::new());
     }
-    // `instr` rather than LIKE: no wildcard to escape in the user's text.
+    // `instr` rather than LIKE: no wildcard to escape in the user's text. An empty needle
+    // matches at position 1 for every name.
     let mut statement = conn.prepare_cached(
         "SELECT id, name, category FROM item
-         WHERE instr(fold(name), ?1) > 0
+         WHERE instr(fold(name), ?1) > 0 AND (?3 IS NULL OR category = ?3)
          ORDER BY instr(fold(name), ?1) <> 1, name COLLATE NOCASE, name
          LIMIT ?2",
     )?;
-    let rows = statement.query_map(params![needle, i64::from(limit)], |row| {
+    let rows = statement.query_map(params![needle, i64::from(limit), category], |row| {
         Ok(ItemHit {
             id: row.get(0)?,
             name: row.get(1)?,
             category: row.get(2)?,
         })
     })?;
+    Ok(rows.collect::<Result<_, _>>()?)
+}
+
+/// Distinct item categories, the most populated first, for the item type filter.
+pub fn item_categories(conn: &Connection) -> Result<Vec<String>, DbError> {
+    let mut statement = conn.prepare_cached(
+        "SELECT category FROM item GROUP BY category ORDER BY count(*) DESC, category",
+    )?;
+    let rows = statement.query_map([], |row| row.get(0))?;
     Ok(rows.collect::<Result<_, _>>()?)
 }
 

@@ -214,7 +214,7 @@ fn fold_text_ignores_case_and_accents() {
 fn item_search_contains_ignoring_case_and_accents() {
     let conn = database();
     let names = |text: &str| -> Vec<String> {
-        db::search_items(&conn, text, 10)
+        db::search_items(&conn, text, None, 10)
             .expect("search")
             .into_iter()
             .map(|hit| hit.name)
@@ -229,7 +229,37 @@ fn item_search_contains_ignoring_case_and_accents() {
     assert_eq!(names("%"), ["Credits 50%"]);
     assert_eq!(names("_"), Vec::<String>::new());
     assert!(names("  ").is_empty());
-    assert_eq!(db::search_items(&conn, "r", 1).expect("search").len(), 1);
+    assert_eq!(
+        db::search_items(&conn, "r", None, 1).expect("search").len(),
+        1
+    );
+}
+
+#[test]
+fn item_search_filters_by_category() {
+    let conn = database();
+    conn.execute_batch(
+        "UPDATE item SET category = 'Resource' WHERE name = 'Höllars Cache';
+         UPDATE item SET category = 'Credits' WHERE name = 'Credits 50%';",
+    )
+    .expect("categories");
+    let names = |text: &str, category: Option<&str>| -> Vec<String> {
+        db::search_items(&conn, text, category, 10)
+            .expect("search")
+            .into_iter()
+            .map(|hit| hit.name)
+            .collect()
+    };
+    assert_eq!(names("re", Some("Relic")), ["Relic X", "Relic Y"]);
+    assert_eq!(names("re", Some("Credits")), ["Credits 50%"]);
+    assert!(names("re", Some("Mod")).is_empty());
+    // An empty query lists the whole category, by name; without a category, nothing.
+    assert_eq!(names("  ", Some("Resource")), ["Höllars Cache"]);
+    assert_eq!(names("", Some("Relic")), ["Relic X", "Relic Y"]);
+    assert!(names("", None).is_empty());
+
+    let categories = db::item_categories(&conn).expect("categories");
+    assert_eq!(categories, ["Relic", "Credits", "Resource"]);
 }
 
 #[test]
@@ -459,7 +489,9 @@ fn full_database_search_under_100_ms() {
         ..SearchFilter::default()
     };
     time("autocomplétion « a »", &|| {
-        db::search_items(&conn, "a", 50).expect("search").len()
+        db::search_items(&conn, "a", None, 50)
+            .expect("search")
+            .len()
     });
     time("types de mission", &|| {
         db::mission_types(&conn).expect("types").len()
