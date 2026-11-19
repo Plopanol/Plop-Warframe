@@ -2,6 +2,7 @@
 
 pub mod db;
 pub mod model;
+pub mod search_view;
 pub mod source;
 pub mod ui_bridge;
 pub mod update;
