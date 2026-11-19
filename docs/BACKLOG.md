@@ -14,3 +14,5 @@ Idées hors périmètre : non planifiées, jamais implémentées d'office. Une i
 ### 2026-11-19 — Ajouter une liste d'objet favoris
 
 ### 2026-11-19 — Ajouter un recap des objets suivi
+
+### 2026-11-19 — Ajouter un resumé des objets complets à farmer avec les spot pour un Blueprints selectionner
