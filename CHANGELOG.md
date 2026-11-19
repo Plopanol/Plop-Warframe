@@ -2,6 +2,10 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.6
+
+- Onglet Recherche : type de mission traduit, autocomplétion des objets et sélection en puces supprimables, filtres de rotation (A, B, C) et de missions spéciales, modes « Par objet » et « Combiné », tableau triable par colonne avec pool, chance, rareté et chance AABC ; message invitant à importer si la base est vide ; sélection conservée après un import.
+
 ## v0.1.5
 
 - Sous Windows, l'exécutable release s'ouvre sans console ; la ligne de commande (`--import`, `--import-cache`, `--stats`) s'utilise avec une construction debug.

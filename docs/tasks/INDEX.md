@@ -4,9 +4,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | En cours | Phase 2 — Interface | Normale |
+Aucune.
 
 ## À faire
 
@@ -22,6 +20,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | Terminée | Phase 2 — Interface | Normale |
 | [TASK-010](TASK-010-console-release.md) | Pas de console Windows en release | Terminée | Phase 2 — Interface | Normale |
 | [TASK-006](TASK-006-onglet-donnees.md) | Onglet Données | Terminée | Phase 2 — Interface | Normale |
 | [TASK-005](TASK-005-requetes-recherche.md) | Requêtes de recherche | Terminée | Phase 1 — Données | Haute |

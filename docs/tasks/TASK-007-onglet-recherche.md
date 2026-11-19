@@ -1,6 +1,6 @@
 # TASK-007 — Onglet Recherche
 
-- **Statut :** En cours
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-005, TASK-006
@@ -13,14 +13,14 @@ Type de mission (traduit), autocomplétion d'objets, sélection en puces supprim
 ## Critères d'acceptation
 
 - [x] Exemple Survie et une relique conforme au wiki.
-- [ ] Validation manuelle demandée à l'utilisateur.
+- [x] Validation manuelle demandée à l'utilisateur.
 
 ## Exécution
 
 | Lot | Contenu | Préconditions | Contrôles | État |
 |---|---|---|---|---|
 | 1 | Vue de la recherche sans Slint (`src/search_view.rs`) : traduction des types de mission (règle 11), libellés de rotation, cellules et clés de tri des deux modes, tri par colonne | Aucune | Vérification rapide, tests unitaires | Terminé |
-| 2 | Onglet Slint et branchement (`ui/app-window.slint`, `src/ui_bridge.rs`) : sélecteurs, autocomplétion, puces, filtres, tableau triable, base vide, rafraîchissement après import | Lot 1 | Vérification rapide, contrôle complet, validation manuelle | Implémenté, validation manuelle en attente |
+| 2 | Onglet Slint et branchement (`ui/app-window.slint`, `src/ui_bridge.rs`) : sélecteurs, autocomplétion, puces, filtres, tableau triable, base vide, rafraîchissement après import | Lot 1 | Vérification rapide, contrôle complet, validation manuelle | Terminé |
 
 ## Journal des lots
 
@@ -35,7 +35,8 @@ Type de mission (traduit), autocomplétion d'objets, sélection en puces supprim
 - Exemple Survie et relique, base de `data/` importée depuis le cache du wiki : « Neo K10 » en Survie donne en tête Mot (Void), Rotation A, 18,18 %, puis Zabala (Eris) Rotation B 14,29 % ; la table `VoidSurvival4` de `Module:DropTables/data` (cache `data/cache/droptables_data.lua`) porte bien 18,18 % en A et 12,5 % en B.
 - `slint-lsp format` 1.18.1 appliqué à `ui/app-window.slint`.
 - Lancement de fumée de l'exe debug : fenêtre ouverte, aucune erreur au journal ; aucune action d'interface exécutée par l'agent.
-- Validation manuelle : demandée à l'utilisateur, non encore faite.
+- Validation manuelle : parcours de l'onglet Recherche (exemple Survie, tri, filtres, mode Combiné, retrait de puce, réimport, base vide) validé par l'utilisateur.
+- Clôture (version 0.1.6) : contrôle complet relancé sur l'état final.
 
 ## Obstacles et reprise
 
