@@ -27,6 +27,7 @@ Jalon : `--import` remplit la base depuis le wiki et une requête de test retrou
 | Ordre | Livrable | Dépendances |
 |---|---|---|
 | [TASK-006](tasks/TASK-006-onglet-donnees.md) | Onglet Données, import en arrière-plan | TASK-004 |
+| [TASK-010](tasks/TASK-010-console-release.md) | Pas de console Windows en release (Q-003) | TASK-006 |
 | [TASK-007](tasks/TASK-007-onglet-recherche.md) | Onglet Recherche | TASK-005, TASK-006 |
 | [TASK-008](tasks/TASK-008-finitions.md) | Gestion d'erreurs, README, contrôle Linux | TASK-007 |
 

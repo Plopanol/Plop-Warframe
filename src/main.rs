@@ -1,5 +1,9 @@
 //! Entry point: the window without a command, otherwise the import command line.
 
+// Release builds open no console beside the window (Q-003); the command line then shows no
+// output, so it is meant for debug builds.
+#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
+
 use std::path::PathBuf;
 use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};

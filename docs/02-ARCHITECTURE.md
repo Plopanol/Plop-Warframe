@@ -13,7 +13,7 @@ Crate binaire unique `plop-warframe`.
 | `src/db/` | Ouverture, migrations `PRAGMA user_version`, import transactionnel, statistiques ; requêtes de recherche (TASK-005) |
 | `src/update.rs` | Cas d'usage d'import partagé par la ligne de commande et l'interface : téléchargement ou cache, lecture, écriture ; bloquant, sur un thread de travail |
 | `src/ui_bridge.rs`, `ui/*.slint` | Textes et modèles Slint, fenêtre à onglets Données et Recherche, thread d'import |
-| `src/main.rs` | Démarrage, journalisation ; ligne de commande `--import`, `--import-cache`, `--stats`, `--data-dir` ; sans commande, ouvre la fenêtre |
+| `src/main.rs` | Démarrage, journalisation ; ligne de commande `--import`, `--import-cache`, `--stats`, `--data-dir` ; sans commande, ouvre la fenêtre ; en release Windows, aucune console (arbitrage Q-003 du 2026-11-19), si bien que la ligne de commande ne s'utilise qu'en debug |
 
 Le cœur (`model`, `source`, `db`) ignore l'interface ; le travail long (téléchargement, import) tourne hors du thread UI et revient par `slint::invoke_from_event_loop`.
 

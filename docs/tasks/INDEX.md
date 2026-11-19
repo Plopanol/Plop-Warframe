@@ -1,6 +1,6 @@
 # Index des tâches
 
-Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-010.
+Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-011.
 
 ## Actives
 
@@ -21,6 +21,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-010](TASK-010-console-release.md) | Pas de console Windows en release | Terminée | Phase 2 — Interface | Normale |
 | [TASK-006](TASK-006-onglet-donnees.md) | Onglet Données | Terminée | Phase 2 — Interface | Normale |
 | [TASK-005](TASK-005-requetes-recherche.md) | Requêtes de recherche | Terminée | Phase 1 — Données | Haute |
 | [TASK-009](TASK-009-donnees-de-developpement.md) | Conserver les données de développement | Terminée | Phase 1 — Données | Haute |
