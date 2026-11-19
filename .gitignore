@@ -22,3 +22,6 @@ Thumbs.db
 # Rust
 /target/
 # commun:fin
+
+# Development data (database and wiki module cache), kept out of Git but not deleted by cargo clean.
+/data/

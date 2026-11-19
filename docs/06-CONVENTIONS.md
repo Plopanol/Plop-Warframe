@@ -32,7 +32,8 @@ Lancement, construction, outils. La vérification rapide et le contrôle complet
 | Usage | Commande |
 |---|---|
 | Lancer l'application | `cargo run` |
-| Importer depuis le wiki, depuis le cache, état de la base | `cargo run -- [--data-dir <dossier>] --import`, `--import-cache`, `--stats` |
+| Importer depuis le cache, état de la base (développement : `data/` du dépôt) | `cargo run -- --import-cache`, `cargo run -- --stats` |
+| Télécharger depuis le wiki puis importer (sur demande seulement) | `cargo run -- [--data-dir <dossier>] --import` |
 | Construire | `cargo build --release --locked` |
 | Licences des dépendances | `cargo deny check licenses` |
 
