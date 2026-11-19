@@ -2,6 +2,12 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.8
+
+- Messages d'erreur expliqués en français : base occupée, droits, disque plein, fichier endommagé, base plus récente que l'application ; wiki injoignable, délai dépassé, réponses HTTP 404, 429 et 5xx.
+- Onglet « À propos » : version, attribution CC BY-NC-SA 3.0 des données du wiki, attribution Slint.
+- `NOTICES.md` (licences des bibliothèques embarquées, SQLite, Lua) généré par `tools/New-Notices.ps1` et livré dans l'archive ; `README.md` ; `tools/livrable.ps1` opérationnel.
+
 ## v0.1.7
 
 - Onglet « Recherche » renommé « Recherche Mission ».

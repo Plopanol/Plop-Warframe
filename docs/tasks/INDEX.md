@@ -4,9 +4,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-008](TASK-008-finitions.md) | Finitions | En cours | Phase 2 — Interface | Normale |
+Aucune.
 
 ## À faire
 
@@ -22,6 +20,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-008](TASK-008-finitions.md) | Finitions | Terminée | Phase 2 — Interface | Normale |
 | [TASK-011](TASK-011-onglet-recherche-spot.md) | Onglet Recherche Spot | Terminée | Phase 2 — Interface | Normale |
 | [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | Terminée | Phase 2 — Interface | Normale |
 | [TASK-010](TASK-010-console-release.md) | Pas de console Windows en release | Terminée | Phase 2 — Interface | Normale |

@@ -1,6 +1,6 @@
 # TASK-008 — Finitions
 
-- **Statut :** En cours
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-007
@@ -12,8 +12,8 @@ Erreurs lisibles dans l'interface, README (compilation, lancement, emplacement d
 
 ## Critères d'acceptation
 
-- [ ] Contrôle complet vert.
-- [ ] Onglet « À propos » et messages d'erreur validés manuellement.
+- [x] Contrôle complet vert.
+- [x] Onglet « À propos » et messages d'erreur validés manuellement.
 
 ## Réalisation
 
@@ -24,7 +24,12 @@ Erreurs lisibles dans l'interface, README (compilation, lancement, emplacement d
 
 ## Validation et preuves
 
-Non exécutée.
+2026-11-19 :
+
+- Contrôle complet (`tools/Test-Projet.ps1 -Complet`) réussi sur l'état final : fmt, Clippy, tests (1 test ignoré, il exige la base de développement), construction release, `cargo deny` licences, `New-Notices.ps1 -Check`, Test-Docs.
+- Validation manuelle par l'utilisateur, réussie : onglet « À propos » (version, attribution du wiki, AboutSlint), base endommagée dans un `--data-dir` jetable, mise à jour sans réseau.
+- `tools/livrable.ps1` : syntaxe contrôlée seulement ; non exécuté, le livrable ne se produit que sur demande.
+- Contrôle Linux : non exécuté, déplacé dans TASK-012.
 
 ## Obstacles et reprise
 

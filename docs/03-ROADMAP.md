@@ -37,4 +37,4 @@ Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Wind
 
 ## Prochaine tâche
 
-[TASK-008](tasks/TASK-008-finitions.md)
+Aucune tâche planifiée.
