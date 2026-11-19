@@ -138,6 +138,7 @@ impl From<DataView> for DataStatus {
 /// Opens the window and runs the Slint event loop until it closes.
 pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformError> {
     let window = AppWindow::new()?;
+    window.set_version(env!("CARGO_PKG_VERSION").into());
     window.set_log_lines(ModelRc::from(Rc::new(VecModel::<SharedString>::default())));
     let lines = load_status(&window, &paths);
     append_lines(&window, lines);

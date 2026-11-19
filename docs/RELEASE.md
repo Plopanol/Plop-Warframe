@@ -8,7 +8,7 @@ La version est dans le fichier du champ `Version :` d'AGENTS.md (`Cargo.toml`) ;
 
 ## Préalables
 
-Contrôle complet vert, arbre de travail propre, `NOTICES.md` à jour (dépendances Rust et attribution des données du wiki). `tools/livrable.ps1` est complété par TASK-008.
+Contrôle complet vert (il vérifie aussi `NOTICES.md`), arbre de travail propre. `NOTICES.md` (crates Rust embarquées, SQLite, Lua, Slint, attribution CC BY-NC-SA 3.0 du wiki) se régénère par `pwsh -NoProfile -File tools/New-Notices.ps1` après tout changement de `Cargo.lock` ; `tools/livrable.ps1` refuse un fichier périmé.
 
 ## Produire le livrable
 

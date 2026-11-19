@@ -1,6 +1,6 @@
 # Index des tâches
 
-Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-012.
+Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-013.
 
 ## Actives
 
@@ -8,18 +8,19 @@ Aucune.
 
 ## À faire
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-008](TASK-008-finitions.md) | Finitions et contrôle Linux | À faire | Phase 2 — Interface | Normale |
+Aucune.
 
 ## Reportées
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-012](TASK-012-controle-linux.md) | Contrôle Linux | Reportée | Phase 2 — Interface | Normale |
 
 ## Terminées
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-008](TASK-008-finitions.md) | Finitions | Terminée | Phase 2 — Interface | Normale |
 | [TASK-011](TASK-011-onglet-recherche-spot.md) | Onglet Recherche Spot | Terminée | Phase 2 — Interface | Normale |
 | [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | Terminée | Phase 2 — Interface | Normale |
 | [TASK-010](TASK-010-console-release.md) | Pas de console Windows en release | Terminée | Phase 2 — Interface | Normale |

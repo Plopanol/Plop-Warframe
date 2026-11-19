@@ -26,6 +26,7 @@ try {
     if ($Complet) {
         Invoke-Check -Command cargo -Arguments @('build', '--release', '--locked')
         Invoke-Check -Command cargo -Arguments @('deny', '--locked', 'check', 'licenses')
+        Invoke-Check -Command pwsh -Arguments @('-NoProfile', '-File', 'tools/New-Notices.ps1', '-Check')
         Invoke-Check -Command pwsh -Arguments @('-NoProfile', '-File', 'tools/commun/Test-Docs.ps1', '-Path', '.')
     }
 }
