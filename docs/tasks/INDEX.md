@@ -4,13 +4,14 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | En cours | Phase 2 — Interface | Normale |
 
 ## À faire
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | À faire | Phase 2 — Interface | Normale |
 | [TASK-008](TASK-008-finitions.md) | Finitions et contrôle Linux | À faire | Phase 2 — Interface | Normale |
 
 ## Reportées
