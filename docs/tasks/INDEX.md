@@ -4,13 +4,14 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-004](TASK-004-base-sqlite-import.md) | Base SQLite et import transactionnel | En cours | Phase 1 — Données | Haute |
 
 ## À faire
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-004](TASK-004-base-sqlite-import.md) | Base SQLite et import transactionnel | À faire | Phase 1 — Données | Haute |
 | [TASK-005](TASK-005-requetes-recherche.md) | Requêtes de recherche | À faire | Phase 1 — Données | Haute |
 | [TASK-006](TASK-006-onglet-donnees.md) | Onglet Données | À faire | Phase 2 — Interface | Normale |
 | [TASK-007](TASK-007-onglet-recherche.md) | Onglet Recherche | À faire | Phase 2 — Interface | Normale |

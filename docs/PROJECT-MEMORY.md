@@ -4,7 +4,7 @@ Carte d'orientation non normative. En cas de contradiction, l'autorité citée p
 
 ## État courant
 
-- Stade : développement, phase 1 (données) ; question bloquante [Q-001](QUESTIONS.md#q-001) pour l'emplacement de la base.
+- Stade : développement, phase 1 (données).
 - Version : voir `Cargo.toml` (ne pas recopier le numéro ici).
 - Livrables : aucun.
 - Tâches et anomalies ouvertes : [tasks/INDEX.md](tasks/INDEX.md), [bugs/INDEX.md](bugs/INDEX.md).

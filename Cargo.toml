@@ -12,11 +12,15 @@ description = "Recherche des meilleurs lieux de drop Warframe à partir des tabl
 
 [dependencies]
 mlua = { version = "0.12.2", features = ["lua54", "vendored", "serialize"] }
+rusqlite = { version = "0.43.0", features = ["bundled"] }
 serde = { version = "1.0.229", features = ["derive"] }
 thiserror = "2.0.21"
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+tempfile = "3.27.0"
 
 [workspace.lints.rust]
 unsafe_code = "deny"

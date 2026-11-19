@@ -33,7 +33,8 @@ Le binaire offre provisoirement `--parse <DropTables_data.lua> <Missions_data.lu
 ## Données
 
 - Source : modules Lua du wiki, règles de lecture dans [04-REGLES-DROPS](04-REGLES-DROPS.md) ; fixtures dans `tests/fixtures/`.
-- Base SQLite : schéma en TASK-004 ; emplacement à arbitrer, voir [Q-001](QUESTIONS.md#q-001).
+- Emplacement (arbitrage Q-001 du 2026-11-19, conforme au socle) : dossier `data/` à côté de l'exécutable, remplaçable par l'argument `--data-dir <dossier>` ; il contient la base `plop-warframe.sqlite3` et le cache des modules `cache/`. Aucun chemin sous `%APPDATA%` ni dans le profil utilisateur.
+- Base SQLite : schéma dans [05-DATA-SCHEMAS](05-DATA-SCHEMAS.md).
 
 ## Contraintes techniques
 

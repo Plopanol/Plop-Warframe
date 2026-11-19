@@ -1,9 +1,9 @@
 # TASK-004 — Base SQLite et import transactionnel
 
-- **Statut :** À faire
+- **Statut :** En cours
 - **Phase :** Phase 1 — Données
 - **Priorité :** Haute
-- **Dépendances :** TASK-003, [Q-001](../QUESTIONS.md#q-001)
+- **Dépendances :** TASK-003
 - **Dernière mise à jour :** 2026-11-19
 
 ## Résultat attendu
@@ -14,12 +14,19 @@ Schéma normalisé (`planet`, `mission_type`, `node`, `drop_table`, `node_drop_t
 
 - [ ] Deux imports successifs donnent le même contenu ; `import_run` conservé.
 - [ ] Import depuis le cache sans réseau.
-- [ ] Emplacement de la base et du cache conforme à l'arbitrage de Q-001.
+- [ ] Base et cache dans `data/` à côté de l'exécutable, ou dans `--data-dir` (arbitrage Q-001, [02-ARCHITECTURE](../02-ARCHITECTURE.md#données)).
+
+## Lots
+
+| Lot | Contenu | Préconditions | Contrôles | État |
+|---|---|---|---|---|
+| 1 | Schéma v1, migrations, import transactionnel, statistiques | TASK-003 | `tests/import_tests.rs`, vérification rapide | Fait |
+| 2 | Téléchargement, cache disque, CLI `--import`, `--import-cache`, `--data-dir` | Lot 1, Q-001 tranchée | Tests du cache, import réel | À faire |
 
 ## Validation et preuves
 
-Non exécutée.
+- 2026-11-19, lot 1, Windows : `pwsh -NoProfile -File tools/Test-Projet.ps1` réussi ; 6 tests d'import (versions de schéma, réouverture, 524 nœuds, 341 tables et 6 753 drops, second import identique ligne à ligne, échec annulé sans perte et tracé `failed`).
 
 ## Obstacles et reprise
 
-Q-001 (emplacement de la base) doit être tranchée avant le code d'ouverture de la base et du cache ; le schéma et l'import peuvent avancer sur une base en mémoire.
+Aucun obstacle identifié.
