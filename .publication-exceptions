@@ -1,0 +1,3 @@
+# Exceptions de tools/commun/Test-Publication.ps1 : « <motif de chemin> | <règle> ».
+# Page du wiki figée : des noms d'images (suffixe « 2x.png » après une arobase) ressemblent à des courriels.
+tests/fixtures/drop_tables.html | courriel non générique
