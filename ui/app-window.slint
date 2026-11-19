@@ -14,6 +14,7 @@ import {
     HorizontalBox,
     GridBox,
 } from "std-widgets.slint";
+import { Theme, Heading } from "theme.slint";
 
 // Texts of the Data tab, computed in Rust from the database (src/ui_bridge.rs).
 export struct DataStatus {
@@ -38,7 +39,7 @@ component Field inherits HorizontalLayout {
         text: root.label;
         min-width: 140px;
         horizontal-stretch: 0;
-        color: #808080;
+        color: Theme.accent;
     }
 
     Text {
@@ -179,8 +180,8 @@ component Chip inherits Rectangle {
     callback remove();
     border-radius: 12px;
     border-width: 1px;
-    border-color: #8080a0;
-    background: #8080a020;
+    border-color: Theme.accent;
+    background: Theme.hover;
     HorizontalLayout {
         padding-left: 10px;
         padding-right: 2px;
@@ -365,13 +366,14 @@ component SearchTab inherits VerticalBox {
 
         if root.suggestions.length > 0: Rectangle {
             border-width: 1px;
-            border-color: #808080;
+            border-color: Theme.border;
+            background: Theme.panel;
             height: min(root.suggestions.length, 8) * 28px + 4px;
             ListView {
                 accessible-id: "item-suggestions";
                 for suggestion[index] in root.suggestions: Rectangle {
                     height: 28px;
-                    background: suggestion-touch.has-hover ? #8080a030 : transparent;
+                    background: suggestion-touch.has-hover ? Theme.hover : transparent;
                     suggestion-touch := TouchArea {
                         accessible-role: button;
                         accessible-label: suggestion;
@@ -408,7 +410,7 @@ component SearchTab inherits VerticalBox {
 
         Text {
             text: root.summary;
-            color: #808080;
+            color: Theme.muted;
         }
 
         StandardTableView {
@@ -538,13 +540,14 @@ component SpotTab inherits VerticalBox {
 
         if root.suggestions.length > 0: Rectangle {
             border-width: 1px;
-            border-color: #808080;
+            border-color: Theme.border;
+            background: Theme.panel;
             height: min(root.suggestions.length, 8) * 28px + 4px;
             ListView {
                 accessible-id: "spot-item-suggestions";
                 for suggestion[index] in root.suggestions: Rectangle {
                     height: 28px;
-                    background: spot-suggestion-touch.has-hover ? #8080a030 : transparent;
+                    background: spot-suggestion-touch.has-hover ? Theme.hover : transparent;
                     spot-suggestion-touch := TouchArea {
                         accessible-role: button;
                         accessible-label: suggestion;
@@ -581,10 +584,10 @@ component SpotTab inherits VerticalBox {
 
         Text {
             text: root.summary;
-            color: #808080;
+            color: Theme.muted;
         }
 
-        Text {
+        Heading {
             text: "Ennemis au meilleur taux (cliquer une ligne pour voir ses nœuds)";
         }
 
@@ -607,7 +610,7 @@ component SpotTab inherits VerticalBox {
 
         HorizontalLayout {
             spacing: 8px;
-            Text {
+            Heading {
                 text: root.nodes-title;
                 vertical-alignment: center;
             }
@@ -645,10 +648,9 @@ component AboutTab inherits VerticalBox {
     in property <string> version;
     alignment: start;
 
-    Text {
+    Heading {
         text: "Plop-Warframe " + root.version;
-        font-size: 18px;
-        font-weight: 700;
+        font-size: 22px;
     }
 
     GroupBox {
@@ -679,6 +681,8 @@ component AboutTab inherits VerticalBox {
 
 export component AppWindow inherits Window {
     title: "Plop-Warframe";
+    default-font-family: Theme.body-font;
+    background: Theme.content;
     in property <string> version;
     preferred-width: 1100px;
     preferred-height: 750px;
@@ -746,129 +750,160 @@ export component AppWindow inherits Window {
     callback spot-node-sort-ascending(int);
     callback spot-node-sort-descending(int);
 
-    TabWidget {
-        Tab {
-            title: "Données";
-            DataTab {
-                status: root.data-status;
-                busy: root.busy;
-                progress: root.progress;
-                log-lines: root.log-lines;
-                update-from-wiki => {
-                    root.update-from-wiki();
+    VerticalLayout {
+    // Header bar, as the wiki's dark top band.
+    Rectangle {
+            height: 44px;
+            background: Theme.page;
+            HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                Heading {
+                    text: "PLOP-WARFRAME";
+                    font-size: 20px;
+                    letter-spacing: 2px;
+                    vertical-alignment: center;
                 }
-                reimport-from-cache => {
-                    root.reimport-from-cache();
+
+                Text {
+                    text: "Meilleurs lieux de drop";
+                    color: Theme.muted;
+                    horizontal-alignment: right;
+                    vertical-alignment: center;
                 }
+            }
+
+            Rectangle {
+                y: parent.height - 2px;
+                height: 2px;
+                background: Theme.accent;
             }
         }
 
-        Tab {
-            title: "Recherche Mission";
-            SearchTab {
-                has-data: root.search-has-data;
-                enabled: !root.busy;
-                mission-types: root.search-mission-types;
-                mission-type-index <=> root.search-mission-type-index;
-                mode-index <=> root.search-mode-index;
-                specials-index <=> root.search-specials-index;
-                rotation-a <=> root.search-rotation-a;
-                rotation-b <=> root.search-rotation-b;
-                rotation-c <=> root.search-rotation-c;
-                categories: root.search-categories;
-                category-index <=> root.search-category-index;
-                query <=> root.search-query;
-                suggestions: root.search-suggestions;
-                selected-items: root.search-selected-items;
-                summary: root.search-summary;
-                columns: root.search-columns;
-                rows: root.search-rows;
-                query-edited(text) => {
-                    root.search-query-edited(text);
-                }
-                category-changed => {
-                    root.search-category-changed();
-                }
-                add-suggestion(index) => {
-                    root.search-add-suggestion(index);
-                }
-                remove-item(index) => {
-                    root.search-remove-item(index);
-                }
-                filters-changed => {
-                    root.search-filters-changed();
-                }
-                sort-ascending(column) => {
-                    root.search-sort-ascending(column);
-                }
-                sort-descending(column) => {
-                    root.search-sort-descending(column);
+        TabWidget {
+            Tab {
+                title: "Données";
+                DataTab {
+                    status: root.data-status;
+                    busy: root.busy;
+                    progress: root.progress;
+                    log-lines: root.log-lines;
+                    update-from-wiki => {
+                        root.update-from-wiki();
+                    }
+                    reimport-from-cache => {
+                        root.reimport-from-cache();
+                    }
                 }
             }
-        }
 
-        Tab {
-            title: "Recherche Spot";
-            SpotTab {
-                has-data: root.spot-has-data;
-                enabled: !root.busy;
-                mission-types: root.spot-mission-types;
-                mission-type-index <=> root.spot-mission-type-index;
-                planets: root.spot-planets;
-                planet-index <=> root.spot-planet-index;
-                categories: root.spot-categories;
-                category-index <=> root.spot-category-index;
-                query <=> root.spot-query;
-                suggestions: root.spot-suggestions;
-                selected-items: root.spot-selected-items;
-                summary: root.spot-summary;
-                enemy-columns: root.spot-enemy-columns;
-                enemy-rows: root.spot-enemy-rows;
-                enemy-current-row <=> root.spot-enemy-current-row;
-                enemy-picked: root.spot-enemy-picked;
-                nodes-title: root.spot-nodes-title;
-                node-columns: root.spot-node-columns;
-                node-rows: root.spot-node-rows;
-                query-edited(text) => {
-                    root.spot-query-edited(text);
-                }
-                category-changed => {
-                    root.spot-category-changed();
-                }
-                add-suggestion(index) => {
-                    root.spot-add-suggestion(index);
-                }
-                remove-item(index) => {
-                    root.spot-remove-item(index);
-                }
-                filters-changed => {
-                    root.spot-filters-changed();
-                }
-                enemy-selected(row) => {
-                    root.spot-enemy-selected(row);
-                }
-                clear-enemy => {
-                    root.spot-clear-enemy();
-                }
-                enemy-sort-ascending(column) => {
-                    root.spot-enemy-sort-ascending(column);
-                }
-                enemy-sort-descending(column) => {
-                    root.spot-enemy-sort-descending(column);
-                }
-                node-sort-ascending(column) => {
-                    root.spot-node-sort-ascending(column);
-                }
-                node-sort-descending(column) => {
-                    root.spot-node-sort-descending(column);
+            Tab {
+                title: "Recherche Mission";
+                SearchTab {
+                    has-data: root.search-has-data;
+                    enabled: !root.busy;
+                    mission-types: root.search-mission-types;
+                    mission-type-index <=> root.search-mission-type-index;
+                    mode-index <=> root.search-mode-index;
+                    specials-index <=> root.search-specials-index;
+                    rotation-a <=> root.search-rotation-a;
+                    rotation-b <=> root.search-rotation-b;
+                    rotation-c <=> root.search-rotation-c;
+                    categories: root.search-categories;
+                    category-index <=> root.search-category-index;
+                    query <=> root.search-query;
+                    suggestions: root.search-suggestions;
+                    selected-items: root.search-selected-items;
+                    summary: root.search-summary;
+                    columns: root.search-columns;
+                    rows: root.search-rows;
+                    query-edited(text) => {
+                        root.search-query-edited(text);
+                    }
+                    category-changed => {
+                        root.search-category-changed();
+                    }
+                    add-suggestion(index) => {
+                        root.search-add-suggestion(index);
+                    }
+                    remove-item(index) => {
+                        root.search-remove-item(index);
+                    }
+                    filters-changed => {
+                        root.search-filters-changed();
+                    }
+                    sort-ascending(column) => {
+                        root.search-sort-ascending(column);
+                    }
+                    sort-descending(column) => {
+                        root.search-sort-descending(column);
+                    }
                 }
             }
-        }
 
-        Tab {
-            title: "À propos";
-            AboutTab {
-                version: root.version;
+            Tab {
+                title: "Recherche Spot";
+                SpotTab {
+                    has-data: root.spot-has-data;
+                    enabled: !root.busy;
+                    mission-types: root.spot-mission-types;
+                    mission-type-index <=> root.spot-mission-type-index;
+                    planets: root.spot-planets;
+                    planet-index <=> root.spot-planet-index;
+                    categories: root.spot-categories;
+                    category-index <=> root.spot-category-index;
+                    query <=> root.spot-query;
+                    suggestions: root.spot-suggestions;
+                    selected-items: root.spot-selected-items;
+                    summary: root.spot-summary;
+                    enemy-columns: root.spot-enemy-columns;
+                    enemy-rows: root.spot-enemy-rows;
+                    enemy-current-row <=> root.spot-enemy-current-row;
+                    enemy-picked: root.spot-enemy-picked;
+                    nodes-title: root.spot-nodes-title;
+                    node-columns: root.spot-node-columns;
+                    node-rows: root.spot-node-rows;
+                    query-edited(text) => {
+                        root.spot-query-edited(text);
+                    }
+                    category-changed => {
+                        root.spot-category-changed();
+                    }
+                    add-suggestion(index) => {
+                        root.spot-add-suggestion(index);
+                    }
+                    remove-item(index) => {
+                        root.spot-remove-item(index);
+                    }
+                    filters-changed => {
+                        root.spot-filters-changed();
+                    }
+                    enemy-selected(row) => {
+                        root.spot-enemy-selected(row);
+                    }
+                    clear-enemy => {
+                        root.spot-clear-enemy();
+                    }
+                    enemy-sort-ascending(column) => {
+                        root.spot-enemy-sort-ascending(column);
+                    }
+                    enemy-sort-descending(column) => {
+                        root.spot-enemy-sort-descending(column);
+                    }
+                    node-sort-ascending(column) => {
+                        root.spot-node-sort-ascending(column);
+                    }
+                    node-sort-descending(column) => {
+                        root.spot-node-sort-descending(column);
+                    }
+                }
+            }
+
+            Tab {
+                title: "À propos";
+                AboutTab {
+                    version: root.version;
+                }
             }
         }
     }

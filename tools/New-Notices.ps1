@@ -98,6 +98,20 @@ function Build-Notices {
     [void]$out.AppendLine()
     [void]$out.AppendLine('L''interface utilise Slint sous la licence Slint Royalty-free 2.0 ; l''onglet « À propos » affiche l''attribution requise (`AboutSlint`). Les crates Slint ne contiennent pas le texte de la licence : il est publié sur <https://slint.dev/terms-and-conditions#royalty-free>.')
     [void]$out.AppendLine()
+    # Fonts are compiled into the binary (ui/theme.slint); their OFL texts sit next to them.
+    [void]$out.AppendLine('## Polices')
+    [void]$out.AppendLine()
+    [void]$out.AppendLine('Les polices Roboto et Quantico, reprises du wiki Warframe, sont intégrées à l''exécutable ; elles sont publiées sous SIL Open Font License 1.1 (<https://openfontlicense.org>), textes ci-dessous.')
+    foreach ($font in 'Roboto', 'Quantico') {
+        $text = (Get-Content -Raw -Encoding utf8 (Join-Path $root "ui/fonts/OFL-$font.txt")).Trim() -replace "`r`n", "`n"
+        [void]$out.AppendLine()
+        [void]$out.AppendLine("### $font")
+        [void]$out.AppendLine()
+        [void]$out.AppendLine('````text')
+        [void]$out.AppendLine($text)
+        [void]$out.AppendLine('````')
+    }
+    [void]$out.AppendLine()
     [void]$out.AppendLine("## Crates Rust ($($packages.Count))")
     [void]$out.AppendLine()
     [void]$out.AppendLine('| Crate | Version | Licence |')

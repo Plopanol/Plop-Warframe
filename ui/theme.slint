@@ -1,0 +1,26 @@
+// Look of wiki.warframe.com (colours and fonts read from its stylesheet on 2026-11-19).
+// Standard widgets keep the dark Fluent palette, which Slint 1.18 does not let us override.
+import "fonts/Roboto-Variable.ttf";
+import "fonts/Quantico-Regular.ttf";
+import "fonts/Quantico-Bold.ttf";
+
+export global Theme {
+    out property <color> page: #0f0f0f;
+    out property <color> content: #19262f;
+    out property <color> panel: #232323;
+    out property <color> text: #d5d5d5;
+    out property <color> muted: #9aa5ad;
+    out property <color> accent: #89c6e5;
+    out property <color> border: #80808080;
+    out property <color> hover: #89c6e530;
+    out property <string> body-font: "Roboto";
+    out property <string> title-font: "Quantico";
+}
+
+// Section title in the wiki's heading font.
+export component Heading inherits Text {
+    font-family: Theme.title-font;
+    font-weight: 700;
+    font-size: 15px;
+    color: Theme.accent;
+}
