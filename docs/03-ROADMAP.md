@@ -40,4 +40,4 @@ Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Wind
 
 ## Prochaine tâche
 
-[TASK-015](tasks/TASK-015-icone-coffre.md)
+Aucune tâche planifiée.

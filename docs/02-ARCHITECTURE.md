@@ -33,6 +33,7 @@ Chaque dépendance est justifiée dans le commit qui l'introduit ; aucune n'est 
 | `anyhow` | Erreurs du binaire | TASK-004 |
 | `tempfile` (développement) | Dossiers de test | TASK-004 |
 | `slint`, `slint-build` (`=1.18.1`, winit, rendu logiciel) | Interface ; licence Slint Royalty-free 2.0 | TASK-006 |
+| `resvg`, `winresource` (construction) | Icône `.ico` de l'exécutable Windows, dérivée de `ui/icons/coffre.svg` par `build.rs` | TASK-015 |
 
 Les avertissements de lecture des sources sont portés par `DropDataset::warnings` et journalisés à l'import.
 

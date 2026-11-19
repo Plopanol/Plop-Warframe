@@ -1,6 +1,6 @@
 # TASK-015 — Icône en forme de coffre de loot
 
-- **Statut :** À faire
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-008
@@ -12,14 +12,25 @@ Icône originale en forme de conteneur de loot, affichée dans la barre de titre
 
 ## Critères d'acceptation
 
-- [ ] Icône de fenêtre.
-- [ ] Icône de l'exécutable Windows ; construction non Windows inchangée.
-- [ ] `cargo deny check licenses` et `NOTICES.md` à jour.
-- [ ] Contrôle complet vert ; validation manuelle par l'utilisateur.
+- [x] Icône de fenêtre.
+- [x] Icône de l'exécutable Windows ; construction non Windows inchangée.
+- [x] `cargo deny check licenses` et `NOTICES.md` à jour.
+- [x] Contrôle complet vert ; validation manuelle par l'utilisateur.
+
+## Réalisation
+
+- `ui/icons/coffre.svg` : dessin original (caisse d'acier chanfreinée, liserés dorés, serrure lumineuse `#89c6e5`), source unique de l'icône ; propriété `icon` de la fenêtre.
+- `build.rs` : pour une cible Windows, rend le SVG en PNG 16, 24, 32, 48 et 256 px (`resvg`, déjà dans le graphe par Slint), les assemble en `.ico` dans `OUT_DIR` et l'attache à l'exécutable (`winresource`, MIT) ; dépendances de construction seulement, absentes de `NOTICES.md`.
 
 ## Validation et preuves
 
-Non exécutée.
+2026-11-19 :
+
+- Contrôle complet (`tools/Test-Projet.ps1 -Complet`) réussi : fmt, Clippy, tests, construction release, licences, `NOTICES.md` à jour, Test-Docs.
+- `.ico` généré : en-tête valide, 5 images 32 bits.
+- Validation manuelle par l'utilisateur, réussie : icône dans la barre de titre, la barre des tâches et sur l'exécutable dans l'Explorateur.
+- Contrôle complet de clôture réussi sur l'état final (version 0.1.11).
+- Construction non Windows : non exécutée (pas de poste Linux, voir TASK-012) ; le code de l'icône Windows n'y est pas appelé.
 
 ## Obstacles et reprise
 

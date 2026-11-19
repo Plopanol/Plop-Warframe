@@ -2,6 +2,10 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.11
+
+- Icône en forme de coffre de loot pour la fenêtre, la barre des tâches et l'exécutable Windows.
+
 ## v0.1.10
 
 - Apparence du wiki Warframe : thème sombre (fond bleu-gris, accent bleu clair), bandeau de titre, polices Roboto et Quantico intégrées ; licences OFL des polices dans `NOTICES.md`.

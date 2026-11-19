@@ -8,9 +8,7 @@ Aucune.
 
 ## À faire
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-015](TASK-015-icone-coffre.md) | Icône en forme de coffre de loot | À faire | Phase 2 — Interface | Normale |
+Aucune.
 
 ## Reportées
 
@@ -22,6 +20,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-015](TASK-015-icone-coffre.md) | Icône en forme de coffre de loot | Terminée | Phase 2 — Interface | Normale |
 | [TASK-014](TASK-014-theme-wiki.md) | Apparence du wiki | Terminée | Phase 2 — Interface | Normale |
 | [TASK-013](TASK-013-filtre-type-objet.md) | Filtre par type d'objet | Terminée | Phase 2 — Interface | Normale |
 | [TASK-008](TASK-008-finitions.md) | Finitions | Terminée | Phase 2 — Interface | Normale |
