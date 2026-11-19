@@ -28,7 +28,7 @@ Fenêtre Slint à deux onglets ; onglet Données : date, statut et volumes du de
 
 - Contrôle complet (`tools/Test-Projet.ps1 -Complet`) : fmt, Clippy, tests (38 réussis, 1 ignoré hors données), construction release, licences et Test-Docs réussis.
 - Lancement de fumée de l'exe debug : fenêtre ouverte, aucune erreur au journal ; aucun bouton actionné par l'agent.
-- `slint-lsp format` exécuté avec la version 1.17.1 installée, pas 1.18.1 : écart signalé dans la question Q-002.
+- `slint-lsp format` exécuté avec la version 1.17.1 installée, pas 1.18.1 : écart signalé dans la question Q-002. Le 2026-11-19, après installation de `slint-lsp` 1.18.1 (Q-002), le reformatage de `ui/app-window.slint` ne change rien.
 - Validation manuelle : écrans, réimport depuis le cache et réactivité pendant l'import validés par l'utilisateur.
 
 ## Obstacles et reprise

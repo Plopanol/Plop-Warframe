@@ -15,7 +15,7 @@ Le découpage en lots est défini par le profil complet d'[AGENTS.md](../AGENTS.
 
 ## Style de code
 
-`rustfmt.toml`, `clippy.toml` et `[workspace.lints]` de `Cargo.toml` font foi. Erreurs du cœur par `thiserror` ; `anyhow` réservé au binaire.
+`rustfmt.toml`, `clippy.toml` et `[workspace.lints]` de `Cargo.toml` font foi. Les `.slint` se formatent avec `slint-lsp format` de la version épinglée de `slint`, installé pour tout le poste (arbitrage Q-002 du 2026-11-19) ; vérifier `slint-lsp --version` avant de formater. Erreurs du cœur par `thiserror` ; `anyhow` réservé au binaire.
 
 ## Stratégie de tests
 
