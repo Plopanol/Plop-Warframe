@@ -1,3 +1,8 @@
 # Exceptions de tools/commun/Test-Publication.ps1 : « <motif de chemin> | <règle> ».
 # Page du wiki figée : des noms d'images (suffixe « 2x.png » après une arobase) ressemblent à des courriels.
 tests/fixtures/drop_tables.html | courriel non générique
+# Notices de licences générées : courriels et noms des auteurs des bibliothèques tierces.
+NOTICES.md | courriel non générique
+NOTICES.md | valeur interdite
+# Licence OFL de la police Quantico : courriel de son auteur.
+ui/fonts/OFL-Quantico.txt | courriel non générique
