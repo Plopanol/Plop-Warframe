@@ -4,9 +4,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-016](TASK-016-secteurs-sombres.md) | Repérer et filtrer les Secteurs sombres | En cours | Phase 2 — Interface | Normale |
+Aucune.
 
 ## À faire
 
@@ -22,6 +20,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-016](TASK-016-secteurs-sombres.md) | Repérer et filtrer les Secteurs sombres | Terminée | Phase 2 — Interface | Normale |
 | [TASK-015](TASK-015-icone-coffre.md) | Icône en forme de coffre de loot | Terminée | Phase 2 — Interface | Normale |
 | [TASK-014](TASK-014-theme-wiki.md) | Apparence du wiki | Terminée | Phase 2 — Interface | Normale |
 | [TASK-013](TASK-013-filtre-type-objet.md) | Filtre par type d'objet | Terminée | Phase 2 — Interface | Normale |

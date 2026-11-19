@@ -41,4 +41,4 @@ Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Wind
 
 ## Prochaine tâche
 
-[TASK-016](tasks/TASK-016-secteurs-sombres.md)
+Aucune tâche planifiée.
