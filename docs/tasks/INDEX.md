@@ -4,9 +4,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-004](TASK-004-base-sqlite-import.md) | Base SQLite et import transactionnel | En cours | Phase 1 — Données | Haute |
+Aucune.
 
 ## À faire
 
@@ -25,6 +23,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-004](TASK-004-base-sqlite-import.md) | Base SQLite et import transactionnel | Terminée | Phase 1 — Données | Haute |
 | [TASK-003](TASK-003-parseur-modules-lua.md) | Parseur des modules Lua du wiki | Terminée | Phase 1 — Données | Haute |
 | [TASK-001](TASK-001-initialiser-le-projet.md) | Initialiser le projet | Terminée | Phase 0 — Cadrage | Haute |
 | [TASK-002](TASK-002-analyser-sources-wiki.md) | Analyser les sources du wiki | Terminée | Phase 0 — Cadrage | Haute |

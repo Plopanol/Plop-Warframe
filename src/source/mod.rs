@@ -1,8 +1,12 @@
 //! Data sources. Every source goes through [`DropSource`] so the wiki can be replaced later.
 
+mod cache;
+mod http;
 mod lua;
 mod wiki;
 
+pub use cache::{CacheError, CachedModule, ModuleCache};
+pub use http::{FetchError, FetchedPage, ModuleFetcher, WIKI_BASE_URL};
 pub use lua::{LuaError, SandboxedLua};
 pub use wiki::WikiSource;
 

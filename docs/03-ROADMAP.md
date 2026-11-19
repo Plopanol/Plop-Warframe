@@ -33,4 +33,4 @@ Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Wind
 
 ## Prochaine tâche
 
-[TASK-004](tasks/TASK-004-base-sqlite-import.md)
+[TASK-005](tasks/TASK-005-requetes-recherche.md)

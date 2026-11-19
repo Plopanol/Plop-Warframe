@@ -189,6 +189,7 @@ Pour un projet à plusieurs phases, couches ou domaines.
 | Sujet | Autorité |
 |---|---|
 | Sources du wiki, mapping, rotations, rareté | docs/04-REGLES-DROPS.md |
+| Base SQLite, migrations, dossier de données | docs/05-DATA-SCHEMAS.md |
 | Historique des versions | `CHANGELOG.md` (racine) |
 | Cadrage initial (historique) | docs/archive/INDEX.md, sur renvoi uniquement |
 

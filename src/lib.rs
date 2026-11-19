@@ -3,3 +3,4 @@
 pub mod db;
 pub mod model;
 pub mod source;
+pub mod update;
