@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Original loot container: chamfered steel case, gold trim, glowing lock. -->
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4d6170"/>
+      <stop offset="1" stop-color="#26343e"/>
+    </linearGradient>
+    <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5f7686"/>
+      <stop offset="1" stop-color="#34454f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#e8f7ff"/>
+      <stop offset="0.45" stop-color="#89c6e5"/>
+      <stop offset="1" stop-color="#89c6e5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Body -->
+  <path d="M24 112 H232 V196 L208 228 H48 L24 196 Z" fill="url(#steel)" stroke="#d4af5a" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Lid -->
+  <path d="M40 104 L60 44 H196 L216 104 Z" fill="url(#lid)" stroke="#d4af5a" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Seam light between lid and body -->
+  <rect x="28" y="104" width="200" height="10" fill="#89c6e5"/>
+  <!-- Side ribs -->
+  <path d="M56 132 V204 M200 132 V204" stroke="#d4af5a" stroke-width="10" stroke-linecap="round"/>
+  <!-- Lock plate -->
+  <path d="M104 124 H152 V176 L128 196 L104 176 Z" fill="#1a242b" stroke="#d4af5a" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="128" cy="154" r="30" fill="url(#glow)"/>
+  <circle cx="128" cy="154" r="9" fill="#e8f7ff"/>
+  <!-- Lid ridge -->
+  <path d="M84 72 H172" stroke="#d4af5a" stroke-width="8" stroke-linecap="round"/>
+</svg>
