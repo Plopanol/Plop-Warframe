@@ -34,7 +34,9 @@ fn run() -> Result<()> {
     let (data_dir, command) = parse_args(std::env::args().skip(1))?;
     let paths = match data_dir {
         Some(dir) => DataPaths::new(dir),
-        None => DataPaths::beside_executable().context("dossier de l'exécutable introuvable")?,
+        None => {
+            DataPaths::default_location().context("dossier de données par défaut introuvable")?
+        }
     };
     log::info!("Dossier de données : {}", paths.dir.display());
 

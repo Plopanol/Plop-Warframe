@@ -67,6 +67,22 @@ impl DataPaths {
         }
     }
 
+    /// Default location: `data/` next to the executable in release builds; in debug builds,
+    /// `data/` at the repository root, which survives `cargo clean` and spares the wiki
+    /// repeated downloads during development.
+    pub fn default_location() -> std::io::Result<Self> {
+        #[cfg(debug_assertions)]
+        {
+            Ok(Self::new(
+                Path::new(env!("CARGO_MANIFEST_DIR")).join("data"),
+            ))
+        }
+        #[cfg(not(debug_assertions))]
+        {
+            Self::beside_executable()
+        }
+    }
+
     /// `data/` next to the executable, as the common base requires.
     pub fn beside_executable() -> std::io::Result<Self> {
         let exe = std::env::current_exe()?;

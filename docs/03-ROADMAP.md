@@ -17,6 +17,7 @@ Jalon : mapping des sources validé par l'utilisateur.
 |---|---|---|
 | [TASK-003](tasks/TASK-003-parseur-modules-lua.md) | Parseur Lua des modules et tests sur fixtures | TASK-002 |
 | [TASK-004](tasks/TASK-004-base-sqlite-import.md) | Schéma SQLite, migrations, import transactionnel, CLI `--import` | TASK-003 |
+| [TASK-009](tasks/TASK-009-donnees-de-developpement.md) | Données de développement conservées dans `data/` du dépôt | TASK-004 |
 | [TASK-005](tasks/TASK-005-requetes-recherche.md) | Requêtes de recherche par objet et combinée, tests | TASK-004 |
 
 Jalon : `--import` remplit la base depuis le wiki et une requête de test retrouve les valeurs du wiki.

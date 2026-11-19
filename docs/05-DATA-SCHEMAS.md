@@ -4,7 +4,7 @@ Autorité pour la base SQLite, ses migrations et le cache des sources. Le DDL fa
 
 ## Emplacement
 
-Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossier>` ([02-ARCHITECTURE](02-ARCHITECTURE.md#données)).
+Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossier>` ([02-ARCHITECTURE](02-ARCHITECTURE.md#données)). En construction de développement (`debug`), le défaut est `data/` à la racine du dépôt, ignoré par Git : il survit à `cargo clean` et garde le cache des modules entre les sessions.
 
 | Chemin | Contenu |
 |---|---|
