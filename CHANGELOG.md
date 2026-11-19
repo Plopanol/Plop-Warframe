@@ -2,6 +2,14 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.10
+
+- Apparence du wiki Warframe : thème sombre (fond bleu-gris, accent bleu clair), bandeau de titre, polices Roboto et Quantico intégrées ; licences OFL des polices dans `NOTICES.md`.
+
+## v0.1.9
+
+- Recherche Mission et Recherche Spot : liste « Type » (Mods, Schémas, Ressources, Arcanes, Reliques…) qui filtre les suggestions d'objets ; champ vide et type choisi : tous les objets du type. Les suggestions affichent le type en français.
+
 ## v0.1.8
 
 - Messages d'erreur expliqués en français : base occupée, droits, disque plein, fichier endommagé, base plus récente que l'application ; wiki injoignable, délai dépassé, réponses HTTP 404, 429 et 5xx.
