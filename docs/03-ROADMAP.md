@@ -34,4 +34,4 @@ Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Wind
 
 ## Prochaine tâche
 
-[TASK-005](tasks/TASK-005-requetes-recherche.md)
+[TASK-006](tasks/TASK-006-onglet-donnees.md)

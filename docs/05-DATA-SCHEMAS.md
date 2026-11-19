@@ -35,6 +35,8 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 
 Index : `item.name` (unique), `drop(item_id)`, `drop(drop_table_id, rotation)`, `node(mission_type_id)`, `node_drop_table(drop_table_id)`.
 
+Fonction SQL `fold(texte)`, enregistrée à chaque ouverture : minuscules sans accents latins (« Höllars » → « hollars »), pour la recherche d'objets insensible à la casse et aux accents ; elle n'est pas stockée.
+
 Codes de rareté : `very_common`, `common`, `uncommon`, `rare`, `ultra_rare`, `legendary`, `beyond_legendary`.
 
 ## Import

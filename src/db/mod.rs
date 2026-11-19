@@ -2,11 +2,17 @@
 //! Schema reference: `docs/05-DATA-SCHEMAS.md`.
 
 mod import;
+mod search;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
+pub use search::{
+    CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, RotationFilter, SearchFilter,
+    SpecialFilter, fold_text, mission_types, search_by_item, search_combined, search_items,
+};
 
 use std::path::Path;
 
+use rusqlite::functions::FunctionFlags;
 use rusqlite::{Connection, OptionalExtension};
 
 /// File name of the database inside the data directory.
@@ -39,6 +45,17 @@ pub fn open_in_memory() -> Result<Connection, DbError> {
 
 fn prepare(mut conn: Connection) -> Result<Connection, DbError> {
     conn.pragma_update(None, "foreign_keys", true)?;
+    // Case- and accent-insensitive search (`search_items`); SQLite has no such collation.
+    conn.create_scalar_function(
+        "fold",
+        1,
+        FunctionFlags::SQLITE_UTF8 | FunctionFlags::SQLITE_DETERMINISTIC,
+        |ctx| {
+            Ok(ctx
+                .get::<Option<String>>(0)?
+                .map(|text| search::fold_text(&text)))
+        },
+    )?;
     migrate(&mut conn)?;
     Ok(conn)
 }
