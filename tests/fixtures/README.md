@@ -10,6 +10,7 @@ Copies figées des sources lues par le parseur, pour des tests hors ligne et dé
 | `drop_tables.html` | `https://wiki.warframe.com/w/Drop_Tables` | 2026-11-19 |
 | `droptables_de_relics.html` | `https://www.warframe.com/droptables` (`Last-Modified` du 22 octobre 2026), extrait : début et fin de chapitres voisins, 13 en-têtes du chapitre `relicRewards`, et deux reliques fabriquées pour les cas d'erreur (`Neo Z9`, `Meso X1`) | 2026-11-20 |
 | `wfcd_relics.json` | `https://cdn.jsdelivr.net/npm/@wfcd/items/data/json/Relics.json` (version 1.1276.51), extrait : entrées des reliques de `droptables_de_relics.html` réduites à `name`, `uniqueName`, `vaulted`, entrées génériques, et `Meso X1` fabriquée (raffinements en désaccord) | 2026-11-20 |
+| `wfcd/Warframes.json`, `wfcd/Mods.json`, `wfcd/fr.json` | `https://cdn.jsdelivr.net/npm/@wfcd/items/data/json/<Catégorie>.json` et `i18n/fr.json` (version 1.1276.51), extraits réduits à quelques champs : Excalibur et Mag, Vitality et sa traduction « Vitalité », et un mod fabriqué sans `name` (entrée ignorée) ; `wfcd_relics.json` tient lieu de `wfcd/Relics.json` dans les tests | 2026-11-20 |
 
 Les tables officielles appartiennent à Digital Extremes ; extrait conservé pour les tests. `@wfcd/items` est sous licence MIT (WFCD).
 

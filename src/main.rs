@@ -66,6 +66,7 @@ fn run() -> Result<()> {
                 summary.relics,
                 summary.warnings
             );
+            log::info!("{}", ui_bridge::wfcd_items_line(&summary));
         }
         Command::Stats => print_stats(&paths)?,
     }

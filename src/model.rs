@@ -348,7 +348,7 @@ pub struct RelicReward {
     pub rarity: Rarity,
 }
 
-/// Whether a relic is vaulted, i.e. no longer dropped (`docs/04-REGLES-DROPS.md`, rule 17).
+/// Whether a relic is vaulted, i.e. no longer dropped (`docs/04-REGLES-DROPS.md`, rule 18).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RelicStatus {
     /// Relic name as DE writes it, e.g. `Lith Q3 Relic`.
@@ -359,6 +359,22 @@ pub struct RelicStatus {
 /// Era of a relic name: `Lith` for `Lith Q3 Relic`.
 pub fn relic_tier(relic: &str) -> &str {
     relic.split_whitespace().next().unwrap_or_default()
+}
+
+/// Item of `@wfcd/items`, kept with its raw JSON (`docs/04-REGLES-DROPS.md`, rule 19).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WfcdItem {
+    /// WFCD `uniqueName`, e.g. `/Lotus/Powersuits/Excalibur/Excalibur`.
+    pub unique_name: String,
+    /// Source file without its extension, e.g. `Warframes`.
+    pub category: String,
+    pub name: String,
+    /// `name` of the French translation (`i18n/fr.json`), when present.
+    pub name_fr: Option<String>,
+    /// Entry of the category file, compact JSON.
+    pub json: String,
+    /// Entry of the French translation, compact JSON.
+    pub json_fr: Option<String>,
 }
 
 /// Everything a source yields for one import.
@@ -373,6 +389,8 @@ pub struct DropDataset {
     pub relic_rewards: Vec<RelicReward>,
     /// Vaulted status of the relics, when the WFCD list is available.
     pub relic_status: Vec<RelicStatus>,
+    /// Every `@wfcd/items` item, in file order.
+    pub wfcd_items: Vec<WfcdItem>,
     /// Non-fatal anomalies (missing alias, malformed entry), in French for the import log.
     pub warnings: Vec<String>,
 }

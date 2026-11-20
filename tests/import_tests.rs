@@ -59,7 +59,7 @@ fn dump(conn: &Connection) -> Vec<String> {
 #[test]
 fn migrations_set_the_schema_version() {
     let conn = db::open_in_memory().expect("open");
-    assert_eq!(db::schema_version(&conn).expect("version"), 4);
+    assert_eq!(db::schema_version(&conn).expect("version"), 5);
     let foreign_keys: i64 = conn
         .pragma_query_value(None, "foreign_keys", |row| row.get(0))
         .expect("pragma");
@@ -75,7 +75,7 @@ fn reopening_a_file_keeps_data_and_version() {
         db::import_dataset(&mut conn, dataset(), RUN, &clock).expect("import");
     }
     let conn = db::open(&path).expect("reopen");
-    assert_eq!(db::schema_version(&conn).expect("version"), 4);
+    assert_eq!(db::schema_version(&conn).expect("version"), 5);
     assert_eq!(db::stats(&conn).expect("stats").nodes, 524);
 }
 
@@ -179,4 +179,53 @@ fn failed_import_keeps_previous_data() {
     let last = db::stats(&conn).expect("stats").last_run.expect("run");
     assert_eq!(last.status, "failed");
     assert!(last.message.is_some());
+}
+
+#[test]
+fn wfcd_items_are_stored_with_counts_and_french_name() {
+    use plop_warframe::source::WfcdItemsSource;
+    let source = WfcdItemsSource::new(
+        vec![
+            (
+                "Warframes".to_owned(),
+                include_str!("fixtures/wfcd/Warframes.json").to_owned(),
+            ),
+            (
+                "Mods".to_owned(),
+                include_str!("fixtures/wfcd/Mods.json").to_owned(),
+            ),
+        ],
+        Some(include_str!("fixtures/wfcd/fr.json").to_owned()),
+    );
+    let dataset = source.load().expect("load");
+    assert_eq!(dataset.warnings.len(), 1);
+    let mut conn = db::open_in_memory().expect("open");
+    let summary = db::import_dataset(&mut conn, &dataset, RUN, &clock).expect("import");
+    assert_eq!(
+        summary.wfcd_items_by_category,
+        [("Warframes".to_owned(), 2), ("Mods".to_owned(), 1)]
+    );
+    let rows: Vec<(String, Option<String>, bool)> = conn
+        .prepare("SELECT name, name_fr, json_fr IS NOT NULL FROM wfcd_item ORDER BY id")
+        .expect("prepare")
+        .query_map([], |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))
+        .expect("query")
+        .collect::<Result<_, _>>()
+        .expect("rows");
+    assert_eq!(
+        rows,
+        [
+            ("Excalibur".to_owned(), None, false),
+            ("Mag".to_owned(), None, false),
+            ("Vitality".to_owned(), Some("Vitalité".to_owned()), true),
+        ]
+    );
+
+    // A second import replaces the items instead of adding to them.
+    let summary = db::import_dataset(&mut conn, &dataset, RUN, &clock).expect("import");
+    assert_eq!(summary.wfcd_items(), 3);
+    let count: i64 = conn
+        .query_row("SELECT count(*) FROM wfcd_item", [], |row| row.get(0))
+        .expect("count");
+    assert_eq!(count, 3);
 }

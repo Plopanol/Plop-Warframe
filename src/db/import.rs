@@ -29,7 +29,18 @@ pub struct ImportSummary {
     pub drops: usize,
     /// Distinct relics of the DE drop tables.
     pub relics: usize,
+    /// `@wfcd/items` items by category, in reading order (that of `WFCD_CATEGORIES`).
+    pub wfcd_items_by_category: Vec<(String, usize)>,
     pub warnings: usize,
+}
+
+impl ImportSummary {
+    pub fn wfcd_items(&self) -> usize {
+        self.wfcd_items_by_category
+            .iter()
+            .map(|(_, count)| count)
+            .sum()
+    }
 }
 
 /// Replaces the data with `dataset`. `now` returns Unix seconds; it is injected so tests stay
@@ -71,7 +82,8 @@ fn load(
     // Children first, for the foreign keys. Without AUTOINCREMENT, ids restart at 1, so two
     // imports of the same data give identical rows.
     tx.execute_batch(
-        "DELETE FROM relic_reward;
+        "DELETE FROM wfcd_item;
+         DELETE FROM relic_reward;
          DELETE FROM relic;
          DELETE FROM region_resource;
          DELETE FROM enemy_drop;
@@ -138,6 +150,7 @@ fn load(
     let item_count = items.count();
     drop(items);
     let relic_count = insert_relics(&tx, dataset)?;
+    let wfcd_items_by_category = insert_wfcd_items(&tx, dataset)?;
 
     let summary = ImportSummary {
         run_id,
@@ -146,15 +159,17 @@ fn load(
         items: item_count,
         drops: drop_count,
         relics: relic_count,
+        wfcd_items_by_category,
         warnings: dataset.warnings.len(),
     };
     let message = format!(
-        "{} nœuds, {} tables, {} objets, {} drops, {} reliques, {} avertissements",
+        "{} nœuds, {} tables, {} objets, {} drops, {} reliques, {} items WFCD, {} avertissements",
         summary.nodes,
         summary.tables,
         summary.items,
         summary.drops,
         summary.relics,
+        summary.wfcd_items(),
         summary.warnings
     );
     tx.execute(
@@ -399,4 +414,35 @@ fn insert_relics(tx: &Transaction<'_>, dataset: &DropDataset) -> Result<usize, D
         ])?;
     }
     Ok(relic_ids.len())
+}
+
+/// Returns the item count by category, in order of first appearance: the update reads the
+/// files in the order of `WFCD_CATEGORIES`, and storage stays independent of the source.
+fn insert_wfcd_items(
+    tx: &Transaction<'_>,
+    dataset: &DropDataset,
+) -> Result<Vec<(String, usize)>, DbError> {
+    let mut insert = tx.prepare_cached(
+        "INSERT INTO wfcd_item (unique_name, category, name, name_fr, json, json_fr)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+    )?;
+    let mut by_category: Vec<(String, usize)> = Vec::new();
+    for item in &dataset.wfcd_items {
+        insert.execute(params![
+            item.unique_name,
+            item.category,
+            item.name,
+            item.name_fr,
+            item.json,
+            item.json_fr
+        ])?;
+        match by_category
+            .iter_mut()
+            .find(|(category, _)| *category == item.category)
+        {
+            Some((_, count)) => *count += 1,
+            None => by_category.push((item.category.clone(), 1)),
+        }
+    }
+    Ok(by_category)
 }

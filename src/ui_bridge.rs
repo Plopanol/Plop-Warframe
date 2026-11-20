@@ -6,9 +6,10 @@ use std::rc::Rc;
 
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
-use crate::db::{self, DbError, Stats};
+use crate::db::{self, DbError, ImportSummary, Stats};
 use crate::update::{self, DataPaths, Origin, UpdateReport};
 
+mod items;
 mod relics;
 mod search;
 mod spot;
@@ -97,6 +98,20 @@ pub fn read_stats(paths: &DataPaths) -> Result<Option<Stats>, DbError> {
     db::stats(&conn).map(Some)
 }
 
+/// Count of `@wfcd/items` items, in total and by category, for the import log.
+pub fn wfcd_items_line(summary: &ImportSummary) -> String {
+    if summary.wfcd_items_by_category.is_empty() {
+        return "Items WFCD : aucun.".to_owned();
+    }
+    let by_category = summary
+        .wfcd_items_by_category
+        .iter()
+        .map(|(category, count)| format!("{category} {count}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    format!("Items WFCD : {} ({by_category}).", summary.wfcd_items())
+}
+
 /// Log lines summarising a finished import.
 pub fn report_lines(result: &Result<UpdateReport, update::UpdateError>) -> Vec<String> {
     match result {
@@ -111,6 +126,7 @@ pub fn report_lines(result: &Result<UpdateReport, update::UpdateError>) -> Vec<S
                 summary.relics,
                 summary.warnings
             )];
+            lines.push(wfcd_items_line(summary));
             lines.extend(
                 report
                     .warnings
@@ -154,11 +170,14 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
     append_lines(&window, lines);
     let (relics, lines) = relics::install(&window, paths.clone());
     append_lines(&window, lines);
+    let (items, lines) = items::install(&window, paths.clone());
+    append_lines(&window, lines);
     {
         let weak = window.as_weak();
         let search = Rc::downgrade(&search);
         let spot = Rc::downgrade(&spot);
         let relics = Rc::downgrade(&relics);
+        let items = Rc::downgrade(&items);
         window.on_import_finished(move || {
             let Some(window) = weak.upgrade() else {
                 return;
@@ -173,6 +192,10 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
             }
             if let Some(relics) = relics.upgrade() {
                 let lines = relics.borrow_mut().reload(&window);
+                append_lines(&window, lines);
+            }
+            if let Some(items) = items.upgrade() {
+                let lines = items.borrow_mut().reload(&window);
                 append_lines(&window, lines);
             }
         });
@@ -193,6 +216,7 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
         let search = Rc::downgrade(&search);
         let spot = Rc::downgrade(&spot);
         let relics = Rc::downgrade(&relics);
+        let items = Rc::downgrade(&items);
         window_callback(
             &window,
             Box::new(move || {
@@ -206,6 +230,9 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
                     }
                     if let Some(relics) = relics.upgrade() {
                         relics.borrow_mut().close();
+                    }
+                    if let Some(items) = items.upgrade() {
+                        items.borrow_mut().close();
                     }
                     start_import(&window, paths.clone(), origin, now);
                 }

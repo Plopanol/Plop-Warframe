@@ -5,6 +5,7 @@ Idées hors périmètre : non planifiées, jamais implémentées d'office. Une i
 | Idée | Origine | Intérêt |
 |---|---|---|
 | Drops des conteneurs (section `Containers`) | TASK-002 | Couvrir les objets des caisses et coffres |
+| Un onglet par fichier WFCD (Warframes, Mods, Arcanes…) | TASK-019 | Colonnes propres à chaque catégorie plutôt que le détail générique |
 | Source alternative : tables officielles de DE (`warframe.com/droptables`) | Cadrage initial | Recouper ou remplacer le wiki derrière `DropSource` |
 
 ## Idées notées

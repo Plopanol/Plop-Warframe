@@ -1,0 +1,18 @@
+[
+  {
+    "uniqueName": "/Lotus/Powersuits/Excalibur/Excalibur",
+    "name": "Excalibur",
+    "health": 270,
+    "masteryReq": 0,
+    "category": "Warframes",
+    "isPrime": false
+  },
+  {
+    "uniqueName": "/Lotus/Powersuits/Mag/Mag",
+    "name": "Mag",
+    "health": 270,
+    "masteryReq": 0,
+    "category": "Warframes",
+    "isPrime": false
+  }
+]

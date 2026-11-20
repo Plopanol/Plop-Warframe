@@ -16,7 +16,8 @@ Joueur de Warframe, sur son poste Windows ou Linux, qui prépare ses sessions de
 - Recherche par type de mission et objets sélectionnés, avec filtres de rotation, de missions spéciales (primes, Sortie, Arbitrages, Cauchemar…) et de Secteurs sombres, en deux modes : par objet et combiné (somme des chances par nœud et rotation), avec la chance par cycle AABC des missions sans fin.
 - Recherche par spot : pour des objets choisis, ennemis au meilleur taux par kill, puis nœuds où ils apparaissent, filtrés par type de mission et planète.
 - Reliques d'une Warframe : pour chaque pièce Prime, reliques qui la donnent, chance par raffinement, présence dans les missions et statut vaulted (`@wfcd/items`, [ADR-003](adr/ADR-003-statut-vaulted-wfcd.md)), filtrables.
-- Interface Slint en français, quatre onglets : Données, Recherche Mission, Recherche Spot et Reliques.
+- Catalogue des items de `@wfcd/items` ([ADR-004](adr/ADR-004-items-wfcd.md)) : recherche par catégorie et par nom français ou anglais, détail brut de l'item avec sa traduction française.
+- Interface Slint en français, cinq onglets : Données, Recherche Mission, Recherche Spot, Reliques et Items.
 
 ## Exclusions
 
@@ -31,6 +32,7 @@ Joueur de Warframe, sur son poste Windows ou Linux, qui prépare ses sessions de
 2. Onglet Recherche Mission : choisir un type de mission, ajouter des objets par autocomplétion, régler rotation, missions spéciales, Secteurs sombres et mode ; lire le tableau trié.
 3. Onglet Recherche Spot : ajouter des objets, filtrer par type de mission et planète ; lire les ennemis au meilleur taux, puis les nœuds où les trouver.
 4. Onglet Reliques : choisir une Warframe ; lire, par pièce, les reliques qui la donnent et leurs chances Intacte à Éclatante ; filtrer par « En mission » et « Vaulted ».
+5. Onglet Items : choisir une catégorie, taper tout ou partie d'un nom français ou anglais ; cliquer un item pour lire chacun de ses champs, sa valeur et sa traduction française.
 
 ## Critères de succès observables
 
