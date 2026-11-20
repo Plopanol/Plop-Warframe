@@ -6,7 +6,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-019](TASK-019-items-wfcd.md) | Récupérer tous les items du jeu (WFCD) | En cours | Phase 2 — Interface | Normale |
+| [TASK-019](TASK-019-items-wfcd.md) | Récupérer tous les items du jeu (WFCD) | À valider | Phase 2 — Interface | Normale |
 
 ## À faire
 

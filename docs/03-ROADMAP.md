@@ -44,4 +44,4 @@ Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Wind
 
 ## Prochaine tâche
 
-[TASK-019](tasks/TASK-019-items-wfcd.md)
+Aucune tâche planifiée.

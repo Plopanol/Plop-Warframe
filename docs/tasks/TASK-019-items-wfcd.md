@@ -1,6 +1,6 @@
 # TASK-019 — Récupérer tous les items du jeu (WFCD)
 
-- **Statut :** En cours
+- **Statut :** À valider
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-018
@@ -39,7 +39,8 @@ Deux lots, chacun confié à un sous-agent, l'orchestrateur relisant et commitan
 
 ## Validation et preuves
 
-Non exécutée.
+- 2026-11-20, Windows 11 : vérification rapide et contrôle complet réussis (fmt, Clippy, tests dont `items_keep_their_raw_json_and_french_name`, `wfcd_items_are_imported_from_their_cache_directory` et `tests/wfcd_item_tests.rs`, release, licences, NOTICES, Test-Docs) ; `slint-lsp format` 1.18.1 sans écart ; `--import-cache` : 20 166 items WFCD.
+- Validation manuelle de l'onglet Items : en attente.
 
 ## Obstacles et reprise
 
