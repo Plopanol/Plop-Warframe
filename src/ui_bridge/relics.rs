@@ -10,7 +10,10 @@ use slint::SharedString;
 use super::AppWindow;
 use super::search::{columns, rows, strings, with_state};
 use crate::db::{self, DbError};
-use crate::relic_view::{empty_relics, relic_table, summary, warframe_suggestions};
+use crate::relic_view::{
+    FLAG_FILTER_CHOICES, FlagFilter, empty_relics, filter_rows, relic_table, summary,
+    warframe_suggestions,
+};
 use crate::search_view::ResultTable;
 use crate::update::DataPaths;
 
@@ -55,6 +58,11 @@ pub fn install(window: &AppWindow, paths: DataPaths) -> (SharedRelics, Vec<Strin
         state.show_relics(window);
     });
     window.on_relic_clear_warframe(move || clear(()));
+    let filters_changed = with_state(window, &state, |window, state: &mut RelicState, ()| {
+        state.show_relics(window);
+    });
+    window.on_relic_filters_changed(move || filters_changed(()));
+    window.set_relic_flag_choices(strings(FLAG_FILTER_CHOICES.into_iter()));
     window.on_relic_sort_ascending(with_state(
         window,
         &state,
@@ -155,8 +163,13 @@ impl RelicState {
         };
         let text = match found {
             Ok(found) => {
-                self.table = relic_table(&found);
-                summary(!self.warframes.is_empty(), warframe.as_deref(), &found)
+                let shown = filter_rows(
+                    &found,
+                    FlagFilter::from_index(window.get_relic_mission_index()),
+                    FlagFilter::from_index(window.get_relic_vaulted_index()),
+                );
+                self.table = relic_table(&shown);
+                summary(!self.warframes.is_empty(), warframe.as_deref(), &shown)
             }
             Err(error) => {
                 log::error!("Reliques : {error}");

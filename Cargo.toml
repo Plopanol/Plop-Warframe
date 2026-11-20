@@ -4,7 +4,7 @@ resolver = "3"
 
 [package]
 name = "plop-warframe"
-version = "0.1.13"
+version = "0.1.14"
 edition = "2024"
 publish = false
 license = "MIT"
@@ -18,6 +18,7 @@ mlua = { version = "0.12.2", features = ["lua54", "vendored", "serialize"] }
 reqwest = { version = "0.13.5", default-features = false, features = ["blocking", "native-tls", "gzip"] }
 rusqlite = { version = "0.43.0", features = ["bundled", "functions"] }
 serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
 slint = { version = "=1.18.1", default-features = false, features = ["std", "backend-winit", "renderer-software", "compat-1-18"] }
 thiserror = "2.0.21"
 

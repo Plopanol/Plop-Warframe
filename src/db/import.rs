@@ -362,7 +362,15 @@ fn insert_tables<'d>(
 /// Relic rewards are kept apart from `item`, so the reward names of the DE tables do not
 /// crowd the item search of the other tabs. Returns the number of relics.
 fn insert_relics(tx: &Transaction<'_>, dataset: &DropDataset) -> Result<usize, DbError> {
-    let mut insert_relic = tx.prepare_cached("INSERT INTO relic (name, tier) VALUES (?1, ?2)")?;
+    let mut insert_relic =
+        tx.prepare_cached("INSERT INTO relic (name, tier, vaulted) VALUES (?1, ?2, ?3)")?;
+    // Relics only WFCD knows are skipped: DE gives the contents the tab shows. Names are
+    // matched without case, as DE writes « Requiem Ii » where WFCD writes « Requiem II ».
+    let vaulted: HashMap<String, bool> = dataset
+        .relic_status
+        .iter()
+        .map(|status| (status.relic.to_lowercase(), status.vaulted))
+        .collect();
     let mut insert_reward = tx.prepare_cached(
         "INSERT INTO relic_reward (relic_id, refinement, item_name, chance, rarity)
          VALUES (?1, ?2, ?3, ?4, ?5)",
@@ -372,7 +380,11 @@ fn insert_relics(tx: &Transaction<'_>, dataset: &DropDataset) -> Result<usize, D
         let relic_id = match relic_ids.get(reward.relic.as_str()) {
             Some(id) => *id,
             None => {
-                insert_relic.execute(params![reward.relic, relic_tier(&reward.relic)])?;
+                insert_relic.execute(params![
+                    reward.relic,
+                    relic_tier(&reward.relic),
+                    vaulted.get(&reward.relic.to_lowercase())
+                ])?;
                 let id = tx.last_insert_rowid();
                 relic_ids.insert(&reward.relic, id);
                 id

@@ -9,7 +9,7 @@ Interface en français ; Windows (Linux prévu). Détail du produit : [docs/01-P
 - **Données** : import des modules Lua du wiki (`Module:DropTables/data`, `Module:Missions/data`, `Module:Enemies/data/<faction>`), réimport depuis le cache sans réseau, historique des imports.
 - **Recherche Mission** : pour un type de mission (Survie, Défense, Excavation…) et des objets, nœuds triés par chance, avec filtres de rotation et de missions spéciales (primes, Sortie, Arbitrages, Cauchemar…) ; mode par objet ou combiné, chance par cycle AABC des missions sans fin.
 - **Recherche Spot** : ennemis au meilleur taux par kill pour les objets choisis, puis nœuds où ils apparaissent, filtrés par type de mission et planète.
-- **Reliques** : pour une Warframe, reliques qui donnent chacune de ses pièces Prime, chances Intacte à Éclatante et présence dans les missions, d'après les [tables de drop officielles](https://www.warframe.com/droptables) de DE.
+- **Reliques** : pour une Warframe, reliques qui donnent chacune de ses pièces Prime, chances Intacte à Éclatante, présence dans les missions et statut vaulted (filtrables), d'après les [tables de drop officielles](https://www.warframe.com/droptables) de DE et la liste des reliques de [`@wfcd/items`](https://github.com/WFCD/warframe-items).
 
 Les noms d'objets et de nœuds restent en anglais, comme dans le jeu.
 
@@ -17,7 +17,7 @@ Les noms d'objets et de nœuds restent en anglais, comme dans le jeu.
 
 1. Décompresser `plop-warframe-<version>-x86_64-pc-windows-msvc.zip` dans un dossier où l'on peut écrire.
 2. Lancer `plop-warframe.exe`.
-3. Au premier lancement, onglet **Données** : **Mettre à jour depuis le wiki** télécharge les modules du wiki et les tables officielles de DE, puis remplit la base (une requête par seconde, pour ménager le wiki).
+3. Au premier lancement, onglet **Données** : **Mettre à jour depuis le wiki** télécharge les modules du wiki, les tables officielles de DE et la liste des reliques WFCD, puis remplit la base (une requête par seconde, pour ménager le wiki).
 4. Onglets **Recherche Mission** et **Recherche Spot** : choisir les objets et les filtres ; onglet **Reliques** : choisir une Warframe.
 
 L'application n'accède au réseau que sur ce bouton. Les erreurs (réseau, base occupée ou endommagée, cache absent) s'affichent dans le journal de l'onglet Données ou dans le résumé de l'onglet de recherche.

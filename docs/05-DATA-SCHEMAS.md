@@ -12,6 +12,7 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | `cache/<module>.lua` | Texte brut du module téléchargé (`?action=raw`) |
 | `cache/<module>.lua.meta` | Date de téléchargement (secondes Unix) et en-tête `Last-Modified` |
 | `cache/droptables_de.html` (et `.meta`) | Page des tables officielles de DE, lue pour les reliques ; absente : import sans reliques, avec avertissement |
+| `cache/wfcd_relics.json` (et `.meta`) | `Relics.json` de `@wfcd/items`, lu pour le statut vaulted ; absent : statut inconnu, avec avertissement |
 
 ## Migrations
 
@@ -22,8 +23,9 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | 1 | `001_initial.sql` | Schéma initial |
 | 2 | `002_enemies.sql` | Ennemis, emplacements, ressources de région, tileset et factions des nœuds |
 | 3 | `003_relics.sql` | Reliques et leurs récompenses (tables officielles de DE) |
+| 4 | `004_relic_vaulted.sql` | Statut vaulted des reliques (WFCD) |
 
-## Tables (version 3)
+## Tables (version 4)
 
 | Table | Clé naturelle | Rôle |
 |---|---|---|
@@ -39,7 +41,7 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | `node_drop_table` | `(node_id, drop_table_id, role)` | Lien, `role` ∈ {`main`, `cache`, `extra`} |
 | `item` | `name` | Objet et catégorie de sa première occurrence (Relic, Mod, Blueprint, Resource…) |
 | `drop` | — | Entrée : table, `rotation` ∈ {`A`, `B`, `C`, `NONE`}, objet, `chance` de 0 à 1, `rarity` (code), `quantity` ≥ 1 ; plusieurs lignes possibles pour un même objet (quantités différentes) |
-| `relic` | `name` | Relique (« Lith Q3 Relic ») et ère (`tier`) |
+| `relic` | `name` | Relique (« Lith Q3 Relic »), ère (`tier`) et `vaulted` (1 non disponible, 0 disponible, `NULL` inconnu) |
 | `relic_reward` | — | Récompense : relique, `refinement` ∈ {`Intact`, `Exceptional`, `Flawless`, `Radiant`}, `item_name` (texte, hors de `item` pour ne pas encombrer la recherche d'objets), `chance` de 0 à 1, `rarity` |
 | `import_run` | — | Historique : début et fin (secondes Unix), source, révision, `status` ∈ {`running`, `success`, `failed`}, message |
 

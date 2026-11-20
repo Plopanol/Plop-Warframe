@@ -6,7 +6,8 @@ use std::path::{Path, PathBuf};
 use crate::db::{self, DbError, ImportRun, ImportSummary};
 use crate::source::{
     CacheError, CachedModule, DE_DROP_TABLES, DE_DROP_TABLES_URL, DeRelicSource, DropSource,
-    ENEMY_FACTIONS, FetchError, ModuleCache, ModuleFetcher, SourceError, WikiSource,
+    ENEMY_FACTIONS, FetchError, ModuleCache, ModuleFetcher, SourceError, WFCD_RELICS,
+    WFCD_RELICS_URL, WfcdSource, WikiSource,
 };
 
 /// Wiki page and cache file of each required module, in download order.
@@ -32,6 +33,10 @@ pub fn enemy_modules() -> Vec<(String, String)> {
 /// Cache file of the DE drop tables page, read for the relic contents (ADR-002). Optional in
 /// the cache, so a cache made before it still imports, without relics.
 pub const DE_CACHE_FILE: &str = "droptables_de.html";
+
+/// Cache file of the WFCD relic list, read for the vaulted status (ADR-003). Optional, like
+/// the DE page: without it the status stays unknown.
+pub const WFCD_CACHE_FILE: &str = "wfcd_relics.json";
 
 pub const CACHE_DIR: &str = "cache";
 
@@ -84,7 +89,7 @@ impl Progress<'_> {
 /// Number of progress steps of an import: one per download, reading, writing.
 pub fn step_count(origin: Origin) -> usize {
     match origin {
-        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 3,
+        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 4,
         Origin::Cache => 2,
     }
 }
@@ -190,6 +195,16 @@ pub fn run_import(
                 last_modified: page_data.last_modified,
             },
         )?;
+        step(&format!("Téléchargement de la {WFCD_RELICS}…"));
+        let page_data = fetcher.fetch_url(WFCD_RELICS, WFCD_RELICS_URL)?;
+        cache.store(
+            WFCD_CACHE_FILE,
+            &CachedModule {
+                text: page_data.text,
+                downloaded_at: now(),
+                last_modified: page_data.last_modified,
+            },
+        )?;
     }
 
     step("Lecture des modules…");
@@ -219,6 +234,18 @@ pub fn run_import(
         }
         Err(CacheError::Missing(_)) => cache_warnings.push(format!(
             "{DE_DROP_TABLES} absentes du cache, aucune relique : relancer une mise à jour"
+        )),
+        Err(error) => return Err(error.into()),
+    }
+    match cache.load(WFCD_CACHE_FILE) {
+        Ok(list) => {
+            let status = WfcdSource::new(list.text.as_str()).load()?;
+            dataset.relic_status = status.relic_status;
+            dataset.warnings.extend(status.warnings);
+            revision.push_str(&format!(" ; {WFCD_RELICS} : {}", when(&list)));
+        }
+        Err(CacheError::Missing(_)) => cache_warnings.push(format!(
+            "{WFCD_RELICS} absente du cache, statut vaulted inconnu : relancer une mise à jour"
         )),
         Err(error) => return Err(error.into()),
     }

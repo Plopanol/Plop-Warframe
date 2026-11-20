@@ -2,7 +2,7 @@
 //! Expected values were read on the DE page on the fixture download date.
 
 use plop_warframe::model::{Rarity, Refinement, RelicReward};
-use plop_warframe::source::{DeRelicSource, DropSource, parse_relic_rewards};
+use plop_warframe::source::{DeRelicSource, DropSource, parse_relic_rewards, parse_relic_vaulted};
 
 const DE_PAGE: &str = include_str!("fixtures/droptables_de_relics.html");
 
@@ -62,4 +62,25 @@ fn source_yields_only_relics() {
     assert_eq!(dataset.relic_rewards.len(), 79);
     assert!(dataset.nodes.is_empty() && dataset.tables.is_empty());
     assert_eq!(dataset.warnings.len(), 2);
+}
+
+#[test]
+fn wfcd_status_by_relic() {
+    let (status, warnings) =
+        parse_relic_vaulted(include_str!("fixtures/wfcd_relics.json")).expect("parse");
+    let vaulted = |relic: &str| {
+        status
+            .iter()
+            .find(|s| s.relic == relic)
+            .map(|s| s.vaulted)
+            .unwrap_or_else(|| panic!("{relic} missing"))
+    };
+    // 7 real relics plus the made-up Meso X1; « Axi Relic » and « Void Relic » are skipped.
+    assert_eq!(status.len(), 8);
+    assert!(vaulted("Lith Q3 Relic"));
+    assert!(!vaulted("Lith G14 Relic"));
+    // Meso X1 is Intact false, Radiant true: counted vaulted, with a warning.
+    assert!(vaulted("Meso X1 Relic"));
+    assert_eq!(warnings.len(), 1, "{warnings:?}");
+    assert!(warnings[0].contains("Meso X1 Relic"));
 }

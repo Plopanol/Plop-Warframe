@@ -40,6 +40,8 @@ pub struct RelicRow {
     pub chances: [Option<f64>; 4],
     /// The relic (name without « Relic ») is an item of an imported mission drop table.
     pub in_mission: bool,
+    /// Vaulted (no longer available) according to WFCD; `None` when unknown.
+    pub vaulted: Option<bool>,
 }
 
 /// Relics giving the parts of `warframe`, by part order then relic name.
@@ -56,7 +58,8 @@ pub fn relics_for_warframe(conn: &Connection, warframe: &str) -> Result<Vec<Reli
                     WHERE i.name = CASE WHEN r.name LIKE '% Relic'
                                         THEN substr(r.name, 1, length(r.name) - 6)
                                         ELSE r.name END
-                )
+                ),
+                r.vaulted
          FROM relic_reward rr JOIN relic r ON r.id = rr.relic_id
          WHERE rr.item_name IN (?1 || ?2, ?1 || ?3, ?1 || ?4, ?1 || ?5)
          GROUP BY rr.item_name, r.id
@@ -82,6 +85,7 @@ pub fn relics_for_warframe(conn: &Connection, warframe: &str) -> Result<Vec<Reli
                 relic: row.get(1)?,
                 chances: [row.get(2)?, row.get(3)?, row.get(4)?, row.get(5)?],
                 in_mission: row.get(6)?,
+                vaulted: row.get(7)?,
             })
         },
     )?;
