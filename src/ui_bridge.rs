@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
-use crate::db::{self, DbError, Stats};
+use crate::db::{self, DbError, ImportSummary, Stats};
 use crate::update::{self, DataPaths, Origin, UpdateReport};
 
 mod relics;
@@ -97,6 +97,20 @@ pub fn read_stats(paths: &DataPaths) -> Result<Option<Stats>, DbError> {
     db::stats(&conn).map(Some)
 }
 
+/// Count of `@wfcd/items` items, in total and by category, for the import log.
+pub fn wfcd_items_line(summary: &ImportSummary) -> String {
+    if summary.wfcd_items_by_category.is_empty() {
+        return "Items WFCD : aucun.".to_owned();
+    }
+    let by_category = summary
+        .wfcd_items_by_category
+        .iter()
+        .map(|(category, count)| format!("{category} {count}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    format!("Items WFCD : {} ({by_category}).", summary.wfcd_items())
+}
+
 /// Log lines summarising a finished import.
 pub fn report_lines(result: &Result<UpdateReport, update::UpdateError>) -> Vec<String> {
     match result {
@@ -111,6 +125,7 @@ pub fn report_lines(result: &Result<UpdateReport, update::UpdateError>) -> Vec<S
                 summary.relics,
                 summary.warnings
             )];
+            lines.push(wfcd_items_line(summary));
             lines.extend(
                 report
                     .warnings

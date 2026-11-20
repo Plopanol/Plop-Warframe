@@ -6,8 +6,9 @@ use std::path::{Path, PathBuf};
 use crate::db::{self, DbError, ImportRun, ImportSummary};
 use crate::source::{
     CacheError, CachedModule, DE_DROP_TABLES, DE_DROP_TABLES_URL, DeRelicSource, DropSource,
-    ENEMY_FACTIONS, FetchError, ModuleCache, ModuleFetcher, SourceError, WFCD_RELICS,
-    WFCD_RELICS_URL, WfcdSource, WikiSource,
+    ENEMY_FACTIONS, FetchError, ModuleCache, ModuleFetcher, SourceError, WFCD_CATEGORIES,
+    WFCD_FR_FILE, WFCD_RELICS, WFCD_RELICS_CATEGORY, WfcdItemsSource, WfcdSource, WikiSource,
+    wfcd_category_file, wfcd_item_files,
 };
 
 /// Wiki page and cache file of each required module, in download order.
@@ -34,9 +35,12 @@ pub fn enemy_modules() -> Vec<(String, String)> {
 /// the cache, so a cache made before it still imports, without relics.
 pub const DE_CACHE_FILE: &str = "droptables_de.html";
 
-/// Cache file of the WFCD relic list, read for the vaulted status (ADR-003). Optional, like
-/// the DE page: without it the status stays unknown.
+/// Former cache file of the WFCD relic list, still read for the vaulted status (ADR-003) when
+/// `wfcd/Relics.json` is missing, so a cache made before ADR-004 keeps its status.
 pub const WFCD_CACHE_FILE: &str = "wfcd_relics.json";
+
+/// Cache subdirectory of the `@wfcd/items` files (ADR-004). Every file is optional.
+pub const WFCD_CACHE_DIR: &str = "wfcd";
 
 pub const CACHE_DIR: &str = "cache";
 
@@ -89,7 +93,7 @@ impl Progress<'_> {
 /// Number of progress steps of an import: one per download, reading, writing.
 pub fn step_count(origin: Origin) -> usize {
     match origin {
-        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 4,
+        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 3 + WFCD_CATEGORIES.len() + 1,
         Origin::Cache => 2,
     }
 }
@@ -164,6 +168,8 @@ pub fn run_import(
         source,
     })?;
     let cache = ModuleCache::new(&paths.cache);
+    let wfcd_cache = ModuleCache::new(paths.cache.join(WFCD_CACHE_DIR));
+    let mut cache_warnings = Vec::new();
 
     let enemy_modules = enemy_modules();
     if origin == Origin::Wiki {
@@ -182,6 +188,7 @@ pub fn run_import(
                     text: page_data.text,
                     downloaded_at: now(),
                     last_modified: page_data.last_modified,
+                    version: page_data.version,
                 },
             )?;
         }
@@ -193,25 +200,34 @@ pub fn run_import(
                 text: page_data.text,
                 downloaded_at: now(),
                 last_modified: page_data.last_modified,
+                version: page_data.version,
             },
         )?;
-        step(&format!("Téléchargement de la {WFCD_RELICS}…"));
-        let page_data = fetcher.fetch_url(WFCD_RELICS, WFCD_RELICS_URL)?;
-        cache.store(
-            WFCD_CACHE_FILE,
-            &CachedModule {
-                text: page_data.text,
-                downloaded_at: now(),
-                last_modified: page_data.last_modified,
-            },
-        )?;
+        for (file, url) in wfcd_item_files() {
+            let label = format!("@wfcd/items {file}");
+            step(&format!("Téléchargement de {label}…"));
+            // A WFCD file is optional: the previous copy of the cache stays in use.
+            match fetcher.fetch_url(&label, &url) {
+                Ok(page_data) => wfcd_cache.store(
+                    &file,
+                    &CachedModule {
+                        text: page_data.text,
+                        downloaded_at: now(),
+                        last_modified: page_data.last_modified,
+                        version: page_data.version,
+                    },
+                )?,
+                Err(error) => cache_warnings.push(format!(
+                    "{error} ; copie précédente du cache conservée si elle existe"
+                )),
+            }
+        }
     }
 
     step("Lecture des modules…");
     let [drop_tables, missions] = MODULES.map(|(_, file)| cache.load(file));
     let (drop_tables, missions) = (drop_tables?, missions?);
     let mut revision = revision(&[&drop_tables, &missions]);
-    let mut cache_warnings = Vec::new();
     let mut enemy_texts = Vec::new();
     for (page, file) in enemy_modules {
         match cache.load(&file) {
@@ -237,18 +253,38 @@ pub fn run_import(
         )),
         Err(error) => return Err(error.into()),
     }
-    match cache.load(WFCD_CACHE_FILE) {
-        Ok(list) => {
-            let status = WfcdSource::new(list.text.as_str()).load()?;
+    let wfcd = load_wfcd(&wfcd_cache, &mut cache_warnings)?;
+    let relics_text = wfcd
+        .files
+        .iter()
+        .find(|(category, _)| category == WFCD_RELICS_CATEGORY)
+        .map(|(_, text)| text.as_str());
+    let legacy_relics = match relics_text {
+        Some(_) => None,
+        None => match cache.load(WFCD_CACHE_FILE) {
+            Ok(list) => Some(list),
+            Err(CacheError::Missing(_)) => None,
+            Err(error) => return Err(error.into()),
+        },
+    };
+    match relics_text.or(legacy_relics.as_ref().map(|list| list.text.as_str())) {
+        Some(text) => {
+            let status = WfcdSource::new(text).load()?;
             dataset.relic_status = status.relic_status;
             dataset.warnings.extend(status.warnings);
-            revision.push_str(&format!(" ; {WFCD_RELICS} : {}", when(&list)));
         }
-        Err(CacheError::Missing(_)) => cache_warnings.push(format!(
+        None => cache_warnings.push(format!(
             "{WFCD_RELICS} absente du cache, statut vaulted inconnu : relancer une mise à jour"
         )),
-        Err(error) => return Err(error.into()),
     }
+    match (&wfcd.revision, &legacy_relics) {
+        (Some(wfcd_revision), _) => revision.push_str(&format!(" ; {wfcd_revision}")),
+        (None, Some(list)) => revision.push_str(&format!(" ; {WFCD_RELICS} : {}", when(list))),
+        (None, None) => {}
+    }
+    let items = WfcdItemsSource::new(wfcd.files, wfcd.fr).load()?;
+    dataset.wfcd_items = items.wfcd_items;
+    dataset.warnings.extend(items.warnings);
     dataset.warnings.splice(0..0, cache_warnings);
 
     step("Écriture dans la base…");
@@ -270,6 +306,68 @@ pub fn run_import(
         summary,
         warnings: dataset.warnings,
     })
+}
+
+/// `@wfcd/items` files found in the cache.
+struct WfcdFiles {
+    /// (category, JSON text), in the order of `WFCD_CATEGORIES`.
+    files: Vec<(String, String)>,
+    fr: Option<String>,
+    /// `WFCD <version> : <date>` of `Relics.json`, else of the first file read.
+    revision: Option<String>,
+}
+
+/// Reads the cached `@wfcd/items` files; a missing one gives a warning, not an error.
+fn load_wfcd(cache: &ModuleCache, warnings: &mut Vec<String>) -> Result<WfcdFiles, CacheError> {
+    let mut wfcd = WfcdFiles {
+        files: Vec::new(),
+        fr: None,
+        revision: None,
+    };
+    let mut first_read = None;
+    let mut missing = Vec::new();
+    let files = WFCD_CATEGORIES
+        .iter()
+        .map(|category| (Some(*category), wfcd_category_file(category)))
+        .chain(std::iter::once((None, WFCD_FR_FILE.to_owned())));
+    for (category, file) in files {
+        let module = match cache.load(&file) {
+            Ok(module) => module,
+            Err(CacheError::Missing(_)) => {
+                missing.push(file);
+                continue;
+            }
+            Err(error) => return Err(error),
+        };
+        let module_revision = wfcd_revision(&module);
+        if category == Some(WFCD_RELICS_CATEGORY) {
+            wfcd.revision = Some(module_revision);
+        } else if first_read.is_none() {
+            first_read = Some(module_revision);
+        }
+        match category {
+            Some(category) => wfcd.files.push((category.to_owned(), module.text)),
+            None => wfcd.fr = Some(module.text),
+        }
+    }
+    if wfcd.revision.is_none() {
+        wfcd.revision = first_read;
+    }
+    // One line for the whole set: a cache made before ADR-004 would otherwise log 27 lines.
+    if !missing.is_empty() {
+        warnings.push(format!(
+            "Fichiers WFCD absents du cache ({}) : relancer une mise à jour",
+            missing.join(", ")
+        ));
+    }
+    Ok(wfcd)
+}
+
+fn wfcd_revision(module: &CachedModule) -> String {
+    match &module.version {
+        Some(version) => format!("WFCD {version} : {}", when(module)),
+        None => format!("WFCD : {}", when(module)),
+    }
 }
 
 /// Identifies the imported module versions: `Last-Modified` when known, else download date.

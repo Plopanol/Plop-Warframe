@@ -23,6 +23,8 @@ pub struct CachedModule {
     /// Unix seconds.
     pub downloaded_at: i64,
     pub last_modified: Option<String>,
+    /// Package version of the file when the server names it (`@wfcd/items`).
+    pub version: Option<String>,
 }
 
 pub struct ModuleCache {
@@ -57,6 +59,9 @@ impl ModuleCache {
         if let Some(last_modified) = &module.last_modified {
             meta.push_str(&format!("last_modified={last_modified}\n"));
         }
+        if let Some(version) = &module.version {
+            meta.push_str(&format!("version={version}\n"));
+        }
         fs::write(&meta_path, meta).map_err(io_error(&meta_path))
     }
 
@@ -73,17 +78,21 @@ impl ModuleCache {
         let meta = fs::read_to_string(meta_path(&path)).unwrap_or_default();
         let mut downloaded_at = 0;
         let mut last_modified = None;
+        let mut version = None;
         for line in meta.lines() {
             if let Some(value) = line.strip_prefix("downloaded_at=") {
                 downloaded_at = value.trim().parse().unwrap_or(0);
             } else if let Some(value) = line.strip_prefix("last_modified=") {
                 last_modified = Some(value.trim().to_owned());
+            } else if let Some(value) = line.strip_prefix("version=") {
+                version = Some(value.trim().to_owned());
             }
         }
         Ok(CachedModule {
             text,
             downloaded_at,
             last_modified,
+            version,
         })
     }
 }

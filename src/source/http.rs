@@ -8,6 +8,9 @@ use reqwest::header::LAST_MODIFIED;
 
 pub const WIKI_BASE_URL: &str = "https://wiki.warframe.com/w/";
 
+/// jsDelivr header that names the package version actually served.
+const JSD_VERSION: &str = "x-jsd-version";
+
 const USER_AGENT: &str = concat!(
     "Plop-Warframe/",
     env!("CARGO_PKG_VERSION"),
@@ -59,6 +62,8 @@ pub struct FetchedPage {
     pub text: String,
     /// `Last-Modified` header, when the server sends one.
     pub last_modified: Option<String>,
+    /// Package version sent by jsDelivr (`X-JSD-Version`), for the `@wfcd/items` files.
+    pub version: Option<String>,
 }
 
 /// Blocking client: call it from a worker thread, never from the UI thread.
@@ -116,15 +121,20 @@ impl ModuleFetcher {
                 status: status.as_u16(),
             });
         }
-        let last_modified = response
-            .headers()
-            .get(LAST_MODIFIED)
-            .and_then(|value| value.to_str().ok())
-            .map(str::to_owned);
+        let header = |name: &str| {
+            response
+                .headers()
+                .get(name)
+                .and_then(|value| value.to_str().ok())
+                .map(str::to_owned)
+        };
+        let last_modified = header(LAST_MODIFIED.as_str());
+        let version = header(JSD_VERSION);
         let text = response.text().map_err(request_error)?;
         Ok(FetchedPage {
             text,
             last_modified,
+            version,
         })
     }
 }

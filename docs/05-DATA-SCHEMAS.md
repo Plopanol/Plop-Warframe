@@ -10,9 +10,10 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 |---|---|
 | `plop-warframe.sqlite3` | Base |
 | `cache/<module>.lua` | Texte brut du module téléchargé (`?action=raw`) |
-| `cache/<module>.lua.meta` | Date de téléchargement (secondes Unix) et en-tête `Last-Modified` |
+| `cache/<module>.lua.meta` | Date de téléchargement (secondes Unix), en-tête `Last-Modified` et, si connue, version du paquet (`version=`) |
 | `cache/droptables_de.html` (et `.meta`) | Page des tables officielles de DE, lue pour les reliques ; absente : import sans reliques, avec avertissement |
-| `cache/wfcd_relics.json` (et `.meta`) | `Relics.json` de `@wfcd/items`, lu pour le statut vaulted ; absent : statut inconnu, avec avertissement |
+| `cache/wfcd/<Catégorie>.json`, `cache/wfcd/fr.json` (et `.meta`) | 26 fichiers de catégorie et traduction française de `@wfcd/items` ; le `.meta` ajoute `version=` (en-tête `X-JSD-Version`) ; les fichiers absents donnent un avertissement commun ; `Relics.json` sert aussi au statut vaulted |
+| `cache/wfcd_relics.json` (et `.meta`) | Ancien emplacement de `Relics.json`, plus téléchargé ; lu pour le statut vaulted seulement si `cache/wfcd/Relics.json` manque |
 
 ## Migrations
 
@@ -24,8 +25,9 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | 2 | `002_enemies.sql` | Ennemis, emplacements, ressources de région, tileset et factions des nœuds |
 | 3 | `003_relics.sql` | Reliques et leurs récompenses (tables officielles de DE) |
 | 4 | `004_relic_vaulted.sql` | Statut vaulted des reliques (WFCD) |
+| 5 | `005_wfcd_items.sql` | Items de `@wfcd/items` |
 
-## Tables (version 4)
+## Tables (version 5)
 
 | Table | Clé naturelle | Rôle |
 |---|---|---|
@@ -43,9 +45,10 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | `drop` | — | Entrée : table, `rotation` ∈ {`A`, `B`, `C`, `NONE`}, objet, `chance` de 0 à 1, `rarity` (code), `quantity` ≥ 1 ; plusieurs lignes possibles pour un même objet (quantités différentes) |
 | `relic` | `name` | Relique (« Lith Q3 Relic »), ère (`tier`) et `vaulted` (1 non disponible, 0 disponible, `NULL` inconnu) |
 | `relic_reward` | — | Récompense : relique, `refinement` ∈ {`Intact`, `Exceptional`, `Flawless`, `Radiant`}, `item_name` (texte, hors de `item` pour ne pas encombrer la recherche d'objets), `chance` de 0 à 1, `rarity` |
+| `wfcd_item` | `unique_name` | Item de `@wfcd/items` ([règle 19](04-REGLES-DROPS.md)) : `category` (fichier source sans `.json`), `name`, `name_fr` (`NULL` sans traduction), `json` (entrée compacte), `json_fr` (traduction compacte ou `NULL`) ; indépendant de `item` |
 | `import_run` | — | Historique : début et fin (secondes Unix), source, révision, `status` ∈ {`running`, `success`, `failed`}, message |
 
-Index : `item.name` (unique), `drop(item_id)`, `drop(drop_table_id, rotation)`, `node(mission_type_id)`, `node_drop_table(drop_table_id)`, `node_faction(faction)`, `enemy_drop(item_id)`, `enemy_drop(enemy_id)`, `relic_reward(item_name)`, `relic_reward(relic_id)`.
+Index : `item.name` (unique), `drop(item_id)`, `drop(drop_table_id, rotation)`, `node(mission_type_id)`, `node_drop_table(drop_table_id)`, `node_faction(faction)`, `enemy_drop(item_id)`, `enemy_drop(enemy_id)`, `relic_reward(item_name)`, `relic_reward(relic_id)`, `wfcd_item.unique_name` (unique), `wfcd_item(category)`.
 
 Fonction SQL `fold(texte)`, enregistrée à chaque ouverture : minuscules sans accents latins (« Höllars » → « hollars »), pour la recherche d'objets insensible à la casse et aux accents ; elle n'est pas stockée.
 

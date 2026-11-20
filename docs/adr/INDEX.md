@@ -1,9 +1,10 @@
 # Index des décisions
 
-Statuts : Proposée, Acceptée, Remplacée par ADR-XXX, Rejetée, Obsolète. Seule une ADR `Acceptée` fait autorité ; une ADR remplacée pointe vers celle qui la remplace. Les hésitations non tranchées vont dans `QUESTIONS.md`. Prochain identifiant libre : ADR-004.
+Statuts : Proposée, Acceptée, Remplacée par ADR-XXX, Rejetée, Obsolète. Seule une ADR `Acceptée` fait autorité ; une ADR remplacée pointe vers celle qui la remplace. Les hésitations non tranchées vont dans `QUESTIONS.md`. Prochain identifiant libre : ADR-005.
 
 | ID | Titre | Statut | Décision courte |
 |---|---|---|---|
 | [ADR-001](ADR-001-modules-lua-wiki-source-donnees.md) | Modules Lua du wiki comme source | Acceptée | Exécuter les modules dans un Lua 5.4 embarqué restreint, jamais analyser le HTML |
 | [ADR-002](ADR-002-tables-de-pour-reliques.md) | Tables officielles DE pour les reliques | Acceptée | Lire le chapitre relicRewards de la page DE derrière DropSource |
 | [ADR-003](ADR-003-statut-vaulted-wfcd.md) | Statut vaulted des reliques depuis WFCD | Acceptée | Lire le seul champ vaulted de Relics.json (@wfcd/items) derrière DropSource |
+| [ADR-004](ADR-004-items-wfcd.md) | Tous les items depuis WFCD | Acceptée | Importer les 26 fichiers de @wfcd/items et fr.json dans une table générique avec JSON brut |

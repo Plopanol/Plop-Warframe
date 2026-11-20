@@ -1,5 +1,5 @@
 //! Data sources: the wiki for missions and enemies, the DE drop tables for relic contents,
-//! `@wfcd/items` for the vaulted status of relics.
+//! `@wfcd/items` for every item and the vaulted status of relics.
 //! Every source goes through [`DropSource`] so a source can be replaced later.
 
 mod cache;
@@ -13,7 +13,11 @@ pub use cache::{CacheError, CachedModule, ModuleCache};
 pub use de::{DE_DROP_TABLES, DE_DROP_TABLES_URL, DeRelicSource, parse_relic_rewards};
 pub use http::{FetchError, FetchedPage, ModuleFetcher, WIKI_BASE_URL};
 pub use lua::{LuaError, SandboxedLua};
-pub use wfcd::{WFCD_RELICS, WFCD_RELICS_URL, WfcdSource, parse_relic_vaulted};
+pub use wfcd::{
+    WFCD_CATEGORIES, WFCD_FR_FILE, WFCD_FR_PATH, WFCD_ITEMS, WFCD_ITEMS_BASE_URL, WFCD_RELICS,
+    WFCD_RELICS_CATEGORY, WfcdItemsSource, WfcdSource, parse_relic_vaulted, wfcd_category_file,
+    wfcd_item_files,
+};
 pub use wiki::{ENEMY_FACTIONS, WikiSource};
 
 use crate::model::DropDataset;
