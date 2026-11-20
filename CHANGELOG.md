@@ -2,6 +2,11 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.15
+
+- Onglet « Items » : recherche des items du jeu par catégorie et par nom (anglais ou français, sans casse ni accent), puis, à la sélection, toutes leurs informations en tableau Champ / Valeur / Français.
+- La mise à jour télécharge les 26 fichiers d'items de `@wfcd/items` et leur traduction française, conservés dans `cache/wfcd/` ; un fichier en échec donne un avertissement ; `Relics.json` n'est plus téléchargé deux fois ; base au schéma 5.
+
 ## v0.1.14
 
 - Onglet « Reliques » : colonne « Vaulted » (relique non disponible) d'après la liste des reliques de `@wfcd/items`, à côté de « En mission » ; filtres Toutes, Oui, Non sur les deux colonnes.

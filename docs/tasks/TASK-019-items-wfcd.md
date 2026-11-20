@@ -1,6 +1,6 @@
 # TASK-019 — Récupérer tous les items du jeu (WFCD)
 
-- **Statut :** À valider
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-018
@@ -13,12 +13,12 @@
   - version : dernière version du paquet (URL sans numéro) ; la version reçue est notée dans l'historique d'import.
   Arbitrages du démarrage, 2026-11-20 : `Relics.json` téléchargé une seule fois, dans `data/cache/wfcd/`, et relu pour le statut vaulted (repli sur l'ancien `cache/wfcd_relics.json`) ; échec de téléchargement d'un fichier WFCD : avertissement, l'ancien fichier du cache reste et la mise à jour continue ; onglet Items : filtres catégorie et nom, détail en tableau Champ / Valeur aplati (chemins `abilities[0].name`), traduction française en regard ; un onglet par fichier viendra plus tard ([BACKLOG](../BACKLOG.md)).
 - **Critères d'acceptation :**
-  - [ ] `--import` télécharge les 27 fichiers ; `--import-cache` les importe sans réseau, fichier absent : avertissement.
-  - [ ] Table des items remplie (nombre d'items par catégorie consigné) ; nom français pour les items traduits.
-  - [ ] Tests sur fixtures réduites ; vérification rapide et contrôle complet réussis.
-  - [ ] Onglet Items : filtre catégorie (Toutes + 26) et nom (anglais ou français, sans casse ni accent), résultats triables ; sélection : tableau Champ / Valeur / Français de toutes les informations.
-  - [ ] Validation manuelle de l'onglet Items par l'utilisateur.
-  - [ ] ADR, fiche, index, roadmap et autorités touchées synchronisés.
+  - [x] `--import` télécharge les 27 fichiers ; `--import-cache` les importe sans réseau, fichier absent : avertissement.
+  - [x] Table des items remplie (nombre d'items par catégorie consigné) ; nom français pour les items traduits.
+  - [x] Tests sur fixtures réduites ; vérification rapide et contrôle complet réussis.
+  - [x] Onglet Items : filtre catégorie (Toutes + 26) et nom (anglais ou français, sans casse ni accent), résultats triables ; sélection : tableau Champ / Valeur / Français de toutes les informations.
+  - [x] Validation manuelle de l'onglet Items par l'utilisateur.
+  - [x] ADR, fiche, index, roadmap et autorités touchées synchronisés.
 - **Risques :** volume (environ 49 Mo, temps de mise à jour allongé) ; format WFCD qui change ; parade : fichiers optionnels, colonnes minimales et JSON brut conservé.
 - **Tests prévus :** lecture des fixtures, import, update depuis le cache.
 
@@ -29,7 +29,7 @@ Deux lots, chacun confié à un sous-agent, l'orchestrateur relisant et commitan
 | Lot | Contenu | Préconditions | Contrôles | État |
 |---|---|---|---|---|
 | 1 | Import : version `X-JSD-Version`, source `WfcdItemsSource`, cache `wfcd/`, migration 5 (`wfcd_item`), comptes par catégorie, ADR-004, docs 02, 04, 05 | Arbitrages du 2026-11-20 | Vérification rapide, `--import-cache` | Fait |
-| 2 | Onglet Items : requêtes, `src/item_view.rs`, pont Slint, `ItemTab`, doc 01 | Lot 1 | Vérification rapide, contrôle complet, validation manuelle | Fait, validation manuelle en attente |
+| 2 | Onglet Items : requêtes, `src/item_view.rs`, pont Slint, `ItemTab`, doc 01 | Lot 1 | Vérification rapide, contrôle complet, validation manuelle | Fait |
 
 ## Journal des lots
 
@@ -40,7 +40,8 @@ Deux lots, chacun confié à un sous-agent, l'orchestrateur relisant et commitan
 ## Validation et preuves
 
 - 2026-11-20, Windows 11 : vérification rapide et contrôle complet réussis (fmt, Clippy, tests dont `items_keep_their_raw_json_and_french_name`, `wfcd_items_are_imported_from_their_cache_directory` et `tests/wfcd_item_tests.rs`, release, licences, NOTICES, Test-Docs) ; `slint-lsp format` 1.18.1 sans écart ; `--import-cache` : 20 166 items WFCD.
-- Validation manuelle de l'onglet Items : en attente.
+- 2026-11-20 : validation manuelle de l'onglet Items par l'utilisateur (filtres, recherche, détail, tri, réimport) : conforme.
+- 2026-11-20 : clôture en 0.1.15 ; vérification rapide sur l'état final.
 
 ## Obstacles et reprise
 
