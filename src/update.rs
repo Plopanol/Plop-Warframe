@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 
 use crate::db::{self, DbError, ImportRun, ImportSummary};
 use crate::source::{
-    CacheError, CachedModule, DropSource, ENEMY_FACTIONS, FetchError, ModuleCache, ModuleFetcher,
-    SourceError, WikiSource,
+    CacheError, CachedModule, DE_DROP_TABLES, DE_DROP_TABLES_URL, DeRelicSource, DropSource,
+    ENEMY_FACTIONS, FetchError, ModuleCache, ModuleFetcher, SourceError, WikiSource,
 };
 
 /// Wiki page and cache file of each required module, in download order.
@@ -28,6 +28,10 @@ pub fn enemy_modules() -> Vec<(String, String)> {
         })
         .collect()
 }
+
+/// Cache file of the DE drop tables page, read for the relic contents (ADR-002). Optional in
+/// the cache, so a cache made before it still imports, without relics.
+pub const DE_CACHE_FILE: &str = "droptables_de.html";
 
 pub const CACHE_DIR: &str = "cache";
 
@@ -80,7 +84,7 @@ impl Progress<'_> {
 /// Number of progress steps of an import: one per download, reading, writing.
 pub fn step_count(origin: Origin) -> usize {
     match origin {
-        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 2,
+        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 3,
         Origin::Cache => 2,
     }
 }
@@ -176,12 +180,22 @@ pub fn run_import(
                 },
             )?;
         }
+        step(&format!("Téléchargement des {DE_DROP_TABLES}…"));
+        let page_data = fetcher.fetch_url(DE_DROP_TABLES, DE_DROP_TABLES_URL)?;
+        cache.store(
+            DE_CACHE_FILE,
+            &CachedModule {
+                text: page_data.text,
+                downloaded_at: now(),
+                last_modified: page_data.last_modified,
+            },
+        )?;
     }
 
     step("Lecture des modules…");
     let [drop_tables, missions] = MODULES.map(|(_, file)| cache.load(file));
     let (drop_tables, missions) = (drop_tables?, missions?);
-    let revision = revision(&[&drop_tables, &missions]);
+    let mut revision = revision(&[&drop_tables, &missions]);
     let mut cache_warnings = Vec::new();
     let mut enemy_texts = Vec::new();
     for (page, file) in enemy_modules {
@@ -196,6 +210,18 @@ pub fn run_import(
     let mut dataset = WikiSource::new(drop_tables.text, missions.text)
         .with_enemy_modules(enemy_texts)
         .load()?;
+    match cache.load(DE_CACHE_FILE) {
+        Ok(page) => {
+            let relics = DeRelicSource::new(page.text.as_str()).load()?;
+            dataset.relic_rewards = relics.relic_rewards;
+            dataset.warnings.extend(relics.warnings);
+            revision.push_str(&format!(" ; {DE_DROP_TABLES} : {}", when(&page)));
+        }
+        Err(CacheError::Missing(_)) => cache_warnings.push(format!(
+            "{DE_DROP_TABLES} absentes du cache, aucune relique : relancer une mise à jour"
+        )),
+        Err(error) => return Err(error.into()),
+    }
     dataset.warnings.splice(0..0, cache_warnings);
 
     step("Écriture dans la base…");
@@ -224,15 +250,17 @@ fn revision(modules: &[&CachedModule]) -> String {
     MODULES
         .iter()
         .zip(modules)
-        .map(|((page, _), module)| {
-            let when = module
-                .last_modified
-                .clone()
-                .unwrap_or_else(|| format_utc(module.downloaded_at));
-            format!("{page} : {when}")
-        })
+        .map(|((page, _), module)| format!("{page} : {}", when(module)))
         .collect::<Vec<_>>()
         .join(" ; ")
+}
+
+/// `Last-Modified` of a cached page when known, else its download date.
+fn when(module: &CachedModule) -> String {
+    module
+        .last_modified
+        .clone()
+        .unwrap_or_else(|| format_utc(module.downloaded_at))
 }
 
 /// Unix seconds to `YYYY-MM-DD HH:MM:SS UTC` (civil-from-days, H. Hinnant), without a date

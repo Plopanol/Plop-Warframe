@@ -6,7 +6,7 @@ use std::collections::{BTreeSet, HashMap};
 use rusqlite::{Connection, Transaction, params};
 
 use super::DbError;
-use crate::model::{DropDataset, node_faction_codes};
+use crate::model::{DropDataset, node_faction_codes, relic_tier};
 
 /// Placeholder stored when the wiki leaves a planet or mission type empty.
 const UNKNOWN: &str = "(inconnu)";
@@ -27,6 +27,8 @@ pub struct ImportSummary {
     pub tables: usize,
     pub items: usize,
     pub drops: usize,
+    /// Distinct relics of the DE drop tables.
+    pub relics: usize,
     pub warnings: usize,
 }
 
@@ -69,7 +71,9 @@ fn load(
     // Children first, for the foreign keys. Without AUTOINCREMENT, ids restart at 1, so two
     // imports of the same data give identical rows.
     tx.execute_batch(
-        "DELETE FROM region_resource;
+        "DELETE FROM relic_reward;
+         DELETE FROM relic;
+         DELETE FROM region_resource;
          DELETE FROM enemy_drop;
          DELETE FROM enemy_location;
          DELETE FROM enemy;
@@ -133,6 +137,7 @@ fn load(
     insert_region_resources(&tx, dataset, &planet_ids, &mut items)?;
     let item_count = items.count();
     drop(items);
+    let relic_count = insert_relics(&tx, dataset)?;
 
     let summary = ImportSummary {
         run_id,
@@ -140,11 +145,17 @@ fn load(
         tables: dataset.tables.len(),
         items: item_count,
         drops: drop_count,
+        relics: relic_count,
         warnings: dataset.warnings.len(),
     };
     let message = format!(
-        "{} nœuds, {} tables, {} objets, {} drops, {} avertissements",
-        summary.nodes, summary.tables, summary.items, summary.drops, summary.warnings
+        "{} nœuds, {} tables, {} objets, {} drops, {} reliques, {} avertissements",
+        summary.nodes,
+        summary.tables,
+        summary.items,
+        summary.drops,
+        summary.relics,
+        summary.warnings
     );
     tx.execute(
         "UPDATE import_run SET status = 'success', finished_at = ?1, message = ?2 WHERE id = ?3",
@@ -346,4 +357,34 @@ fn insert_tables<'d>(
         }
     }
     Ok((table_ids, drop_count))
+}
+
+/// Relic rewards are kept apart from `item`, so the reward names of the DE tables do not
+/// crowd the item search of the other tabs. Returns the number of relics.
+fn insert_relics(tx: &Transaction<'_>, dataset: &DropDataset) -> Result<usize, DbError> {
+    let mut insert_relic = tx.prepare_cached("INSERT INTO relic (name, tier) VALUES (?1, ?2)")?;
+    let mut insert_reward = tx.prepare_cached(
+        "INSERT INTO relic_reward (relic_id, refinement, item_name, chance, rarity)
+         VALUES (?1, ?2, ?3, ?4, ?5)",
+    )?;
+    let mut relic_ids: HashMap<&str, i64> = HashMap::new();
+    for reward in &dataset.relic_rewards {
+        let relic_id = match relic_ids.get(reward.relic.as_str()) {
+            Some(id) => *id,
+            None => {
+                insert_relic.execute(params![reward.relic, relic_tier(&reward.relic)])?;
+                let id = tx.last_insert_rowid();
+                relic_ids.insert(&reward.relic, id);
+                id
+            }
+        };
+        insert_reward.execute(params![
+            relic_id,
+            reward.refinement.code(),
+            reward.item,
+            reward.chance,
+            reward.rarity.code()
+        ])?;
+    }
+    Ok(relic_ids.len())
 }

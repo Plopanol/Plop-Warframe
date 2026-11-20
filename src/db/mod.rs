@@ -62,6 +62,7 @@ fn sqlite_reason(error: &rusqlite::Error) -> String {
 const MIGRATIONS: &[&str] = &[
     include_str!("migrations/001_initial.sql"),
     include_str!("migrations/002_enemies.sql"),
+    include_str!("migrations/003_relics.sql"),
 ];
 
 fn latest_version() -> i64 {

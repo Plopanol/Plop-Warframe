@@ -102,8 +102,13 @@ pub fn report_lines(result: &Result<UpdateReport, update::UpdateError>) -> Vec<S
         Ok(report) => {
             let summary = &report.summary;
             let mut lines = vec![format!(
-                "Import terminé : {} nœuds, {} tables, {} objets, {} drops, {} avertissements.",
-                summary.nodes, summary.tables, summary.items, summary.drops, summary.warnings
+                "Import terminé : {} nœuds, {} tables, {} objets, {} drops, {} reliques, {} avertissements.",
+                summary.nodes,
+                summary.tables,
+                summary.items,
+                summary.drops,
+                summary.relics,
+                summary.warnings
             )];
             lines.extend(
                 report
