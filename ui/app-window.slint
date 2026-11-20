@@ -660,6 +660,72 @@ component SpotTab inherits VerticalBox {
     }
 }
 
+// Relics tab: relics giving the parts of the chosen Warframe, from the DE drop tables.
+// State and queries live in Rust (src/ui_bridge/relics.rs, src/relic_view.rs).
+component RelicTab inherits VerticalBox {
+    in property <bool> has-data;
+    in property <bool> enabled;
+    in property <[string]> warframes;
+    in-out property <int> warframe-index;
+    in property <string> summary;
+    in property <[TableColumn]> columns;
+    in property <[[StandardListViewItem]]> rows;
+    callback warframe-changed();
+    callback sort-ascending(int);
+    callback sort-descending(int);
+
+    if !root.has-data: Text {
+        text: "Aucune relique en base : lancez une mise à jour depuis l'onglet Données.";
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        vertical-stretch: 1;
+    }
+    if root.has-data: VerticalLayout {
+        spacing: 8px;
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "Warframe";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "relic-warframe";
+                model: root.warframes;
+                current-index <=> root.warframe-index;
+                enabled: root.enabled;
+                min-width: 220px;
+                horizontal-stretch: 0;
+                selected => {
+                    root.warframe-changed();
+                }
+            }
+
+            Rectangle {
+                horizontal-stretch: 1;
+            }
+        }
+
+        Text {
+            text: root.summary;
+            color: Theme.muted;
+        }
+
+        StandardTableView {
+            accessible-id: "relic-rewards";
+            vertical-stretch: 1;
+            columns: root.columns;
+            rows: root.rows;
+            sort-ascending(column) => {
+                root.sort-ascending(column);
+            }
+            sort-descending(column) => {
+                root.sort-descending(column);
+            }
+        }
+    }
+}
+
 component AboutTab inherits VerticalBox {
     in property <string> version;
     alignment: start;
@@ -675,7 +741,7 @@ component AboutTab inherits VerticalBox {
             Text {
                 accessible-id: "about-data-attribution";
                 wrap: word-wrap;
-                text: "Les tables de drop proviennent du wiki Warframe (wiki.warframe.com), écrit par ses contributeurs et publié sous licence CC BY-NC-SA 3.0 (creativecommons.org/licenses/by-nc-sa/3.0). L'application les lit et les réorganise sans les modifier ; elle n'est ni affiliée ni approuvée par Digital Extremes ou par le wiki.";
+                text: "Les tables de drop proviennent du wiki Warframe (wiki.warframe.com), écrit par ses contributeurs et publié sous licence CC BY-NC-SA 3.0 (creativecommons.org/licenses/by-nc-sa/3.0). Le contenu des reliques provient des tables de drop officielles publiées par Digital Extremes (warframe.com/droptables). L'application lit ces données et les réorganise sans les modifier ; elle n'est ni affiliée ni approuvée par Digital Extremes ou par le wiki.";
             }
         }
     }
@@ -767,6 +833,16 @@ export component AppWindow inherits Window {
     callback spot-enemy-sort-descending(int);
     callback spot-node-sort-ascending(int);
     callback spot-node-sort-descending(int);
+
+    in property <bool> relic-has-data;
+    in property <[string]> relic-warframes;
+    in-out property <int> relic-warframe-index;
+    in property <string> relic-summary;
+    in property <[TableColumn]> relic-columns;
+    in property <[[StandardListViewItem]]> relic-rows;
+    callback relic-warframe-changed();
+    callback relic-sort-ascending(int);
+    callback relic-sort-descending(int);
 
     VerticalLayout {
     // Header bar, as the wiki's dark top band.
@@ -914,6 +990,28 @@ export component AppWindow inherits Window {
                     }
                     node-sort-descending(column) => {
                         root.spot-node-sort-descending(column);
+                    }
+                }
+            }
+
+            Tab {
+                title: "Reliques";
+                RelicTab {
+                    has-data: root.relic-has-data;
+                    enabled: !root.busy;
+                    warframes: root.relic-warframes;
+                    warframe-index <=> root.relic-warframe-index;
+                    summary: root.relic-summary;
+                    columns: root.relic-columns;
+                    rows: root.relic-rows;
+                    warframe-changed => {
+                        root.relic-warframe-changed();
+                    }
+                    sort-ascending(column) => {
+                        root.relic-sort-ascending(column);
+                    }
+                    sort-descending(column) => {
+                        root.relic-sort-descending(column);
                     }
                 }
             }

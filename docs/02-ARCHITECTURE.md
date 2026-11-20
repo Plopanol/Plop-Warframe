@@ -10,10 +10,10 @@ Crate binaire unique `plop-warframe`.
 |---|---|
 | `src/model.rs` | Types métier (`Mission`, `DropTable`, `DropEntry`, `Rotation`, `Rarity`…), sans I/O |
 | `src/source/` | Trait `DropSource` ; source wiki : exécution des modules Lua (`lua.rs`), conversion vers le modèle (`wiki.rs`), modules d'ennemis lus champ par champ ; source DE : chapitre `relicRewards` des tables officielles (`de.rs`, [ADR-002](adr/ADR-002-tables-de-pour-reliques.md)) ; téléchargement (`http.rs`), cache disque (`cache.rs`) |
-| `src/db/` | Ouverture, migrations `PRAGMA user_version`, import transactionnel, statistiques ; requêtes de recherche par mission (`search.rs`, TASK-005) et par spot (`spot.rs`, TASK-011) |
+| `src/db/` | Ouverture, migrations `PRAGMA user_version`, import transactionnel, statistiques ; requêtes de recherche par mission (`search.rs`, TASK-005), par spot (`spot.rs`, TASK-011) et des reliques (`relics.rs`, TASK-017) |
 | `src/update.rs` | Cas d'usage d'import partagé par la ligne de commande et l'interface : téléchargement ou cache, lecture, écriture ; bloquant, sur un thread de travail |
-| `src/ui_bridge.rs`, `src/ui_bridge/`, `ui/*.slint` | Modèles Slint, fenêtre à onglets Données, Recherche Mission et Recherche Spot, thread d'import, requêtes de recherche sur le thread UI |
-| `src/search_view.rs`, `src/spot_view.rs` | Textes des onglets Recherche Mission et Recherche Spot sans Slint : traduction des types de mission, cellules, tri |
+| `src/ui_bridge.rs`, `src/ui_bridge/`, `ui/*.slint` | Modèles Slint, fenêtre à onglets Données, Recherche Mission, Recherche Spot et Reliques, thread d'import, requêtes de recherche sur le thread UI |
+| `src/search_view.rs`, `src/spot_view.rs`, `src/relic_view.rs` | Textes des onglets Recherche Mission, Recherche Spot et Reliques sans Slint : traduction des types de mission, cellules, tri |
 | `src/main.rs` | Démarrage, journalisation ; ligne de commande `--import`, `--import-cache`, `--stats`, `--data-dir` ; sans commande, ouvre la fenêtre ; en release Windows, aucune console (arbitrage Q-003 du 2026-11-19), si bien que la ligne de commande ne s'utilise qu'en debug |
 
 Le cœur (`model`, `source`, `db`) ignore l'interface ; le travail long (téléchargement, import) tourne hors du thread UI et revient par `slint::invoke_from_event_loop`.
