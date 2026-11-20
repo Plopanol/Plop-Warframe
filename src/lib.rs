@@ -2,6 +2,7 @@
 
 pub mod db;
 pub mod model;
+pub mod relic_view;
 pub mod search_view;
 pub mod source;
 pub mod spot_view;

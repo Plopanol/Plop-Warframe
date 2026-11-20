@@ -11,6 +11,7 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | `plop-warframe.sqlite3` | Base |
 | `cache/<module>.lua` | Texte brut du module téléchargé (`?action=raw`) |
 | `cache/<module>.lua.meta` | Date de téléchargement (secondes Unix) et en-tête `Last-Modified` |
+| `cache/droptables_de.html` (et `.meta`) | Page des tables officielles de DE, lue pour les reliques ; absente : import sans reliques, avec avertissement |
 
 ## Migrations
 
@@ -20,8 +21,9 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 |---|---|---|
 | 1 | `001_initial.sql` | Schéma initial |
 | 2 | `002_enemies.sql` | Ennemis, emplacements, ressources de région, tileset et factions des nœuds |
+| 3 | `003_relics.sql` | Reliques et leurs récompenses (tables officielles de DE) |
 
-## Tables (version 2)
+## Tables (version 3)
 
 | Table | Clé naturelle | Rôle |
 |---|---|---|
@@ -37,9 +39,11 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | `node_drop_table` | `(node_id, drop_table_id, role)` | Lien, `role` ∈ {`main`, `cache`, `extra`} |
 | `item` | `name` | Objet et catégorie de sa première occurrence (Relic, Mod, Blueprint, Resource…) |
 | `drop` | — | Entrée : table, `rotation` ∈ {`A`, `B`, `C`, `NONE`}, objet, `chance` de 0 à 1, `rarity` (code), `quantity` ≥ 1 ; plusieurs lignes possibles pour un même objet (quantités différentes) |
+| `relic` | `name` | Relique (« Lith Q3 Relic ») et ère (`tier`) |
+| `relic_reward` | — | Récompense : relique, `refinement` ∈ {`Intact`, `Exceptional`, `Flawless`, `Radiant`}, `item_name` (texte, hors de `item` pour ne pas encombrer la recherche d'objets), `chance` de 0 à 1, `rarity` |
 | `import_run` | — | Historique : début et fin (secondes Unix), source, révision, `status` ∈ {`running`, `success`, `failed`}, message |
 
-Index : `item.name` (unique), `drop(item_id)`, `drop(drop_table_id, rotation)`, `node(mission_type_id)`, `node_drop_table(drop_table_id)`, `node_faction(faction)`, `enemy_drop(item_id)`, `enemy_drop(enemy_id)`.
+Index : `item.name` (unique), `drop(item_id)`, `drop(drop_table_id, rotation)`, `node(mission_type_id)`, `node_drop_table(drop_table_id)`, `node_faction(faction)`, `enemy_drop(item_id)`, `enemy_drop(enemy_id)`, `relic_reward(item_name)`, `relic_reward(relic_id)`.
 
 Fonction SQL `fold(texte)`, enregistrée à chaque ouverture : minuscules sans accents latins (« Höllars » → « hollars »), pour la recherche d'objets insensible à la casse et aux accents ; elle n'est pas stockée.
 

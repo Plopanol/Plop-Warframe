@@ -58,11 +58,12 @@ fn run() -> Result<()> {
             }
             let summary = report.summary;
             log::info!(
-                "Import terminé : {} nœuds, {} tables, {} objets, {} drops, {} avertissements",
+                "Import terminé : {} nœuds, {} tables, {} objets, {} drops, {} reliques, {} avertissements",
                 summary.nodes,
                 summary.tables,
                 summary.items,
                 summary.drops,
+                summary.relics,
                 summary.warnings
             );
         }

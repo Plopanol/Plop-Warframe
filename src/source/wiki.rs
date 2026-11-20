@@ -611,7 +611,7 @@ fn enemy_drops(key: &str, raw: RawEnemyDrops, warnings: &mut Vec<String>) -> Vec
 
 /// Six decimals absorb the wiki's floating noise (7.6900000000000013 %) without losing any
 /// value it displays.
-fn round_chance(fraction: f64) -> f64 {
+pub(super) fn round_chance(fraction: f64) -> f64 {
     (fraction * 1_000_000.0).round() / 1_000_000.0
 }
 

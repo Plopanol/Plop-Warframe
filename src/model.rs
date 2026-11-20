@@ -291,6 +291,68 @@ pub fn node_faction_codes(faction: &str) -> Vec<&'static str> {
     codes
 }
 
+/// Refinement of a Void relic, which changes the chances of its rewards.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum Refinement {
+    Intact,
+    Exceptional,
+    Flawless,
+    Radiant,
+}
+
+impl Refinement {
+    pub const ALL: [Refinement; 4] = [
+        Refinement::Intact,
+        Refinement::Exceptional,
+        Refinement::Flawless,
+        Refinement::Radiant,
+    ];
+
+    /// Database code, also the English name used by the DE drop tables.
+    pub fn code(self) -> &'static str {
+        match self {
+            Refinement::Intact => "Intact",
+            Refinement::Exceptional => "Exceptional",
+            Refinement::Flawless => "Flawless",
+            Refinement::Radiant => "Radiant",
+        }
+    }
+
+    /// Inverse of [`Self::code`].
+    pub fn from_code(code: &str) -> Option<Self> {
+        Refinement::ALL
+            .into_iter()
+            .find(|refinement| refinement.code() == code)
+    }
+
+    /// French label shown in the UI.
+    pub fn label(self) -> &'static str {
+        match self {
+            Refinement::Intact => "Intacte",
+            Refinement::Exceptional => "Exceptionnelle",
+            Refinement::Flawless => "Impeccable",
+            Refinement::Radiant => "Éclatante",
+        }
+    }
+}
+
+/// One reward of a Void relic at a given refinement (`docs/04-REGLES-DROPS.md`, rule 16).
+#[derive(Debug, Clone, PartialEq)]
+pub struct RelicReward {
+    /// Relic name as DE writes it, e.g. `Lith Q3 Relic`.
+    pub relic: String,
+    pub refinement: Refinement,
+    pub item: String,
+    /// Fraction between 0 and 1.
+    pub chance: f64,
+    pub rarity: Rarity,
+}
+
+/// Era of a relic name: `Lith` for `Lith Q3 Relic`.
+pub fn relic_tier(relic: &str) -> &str {
+    relic.split_whitespace().next().unwrap_or_default()
+}
+
 /// Everything a source yields for one import.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct DropDataset {
@@ -299,6 +361,8 @@ pub struct DropDataset {
     pub tables: Vec<DropTable>,
     pub enemies: Vec<Enemy>,
     pub region_resources: Vec<RegionResources>,
+    /// Contents of the Void relics, one entry per relic, refinement and item.
+    pub relic_rewards: Vec<RelicReward>,
     /// Non-fatal anomalies (missing alias, malformed entry), in French for the import log.
     pub warnings: Vec<String>,
 }

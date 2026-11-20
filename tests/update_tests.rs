@@ -2,7 +2,7 @@
 
 use plop_warframe::db;
 use plop_warframe::source::{CacheError, CachedModule, ModuleCache};
-use plop_warframe::update::{self, DataPaths, MODULES, Origin, UpdateError};
+use plop_warframe::update::{self, DE_CACHE_FILE, DataPaths, MODULES, Origin, UpdateError};
 
 #[cfg(test)]
 fn clock() -> i64 {
@@ -113,6 +113,68 @@ fn progress_fraction_is_bounded() {
     assert_eq!(at(0, 0), 1.0);
     assert_eq!(
         update::step_count(Origin::Wiki),
-        update::MODULES.len() + update::enemy_modules().len() + 2
+        update::MODULES.len() + update::enemy_modules().len() + 3
     );
+}
+
+#[cfg(test)]
+fn store(cache: &ModuleCache, file: &str, text: &str, last_modified: Option<&str>) {
+    cache
+        .store(
+            file,
+            &CachedModule {
+                text: text.to_owned(),
+                downloaded_at: clock(),
+                last_modified: last_modified.map(str::to_owned),
+            },
+        )
+        .expect("store");
+}
+
+#[test]
+fn relics_are_imported_from_the_cached_de_page() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let paths = DataPaths::new(dir.path().join("data"));
+    let cache = ModuleCache::new(&paths.cache);
+    let fixtures = [
+        include_str!("fixtures/droptables_data.lua"),
+        include_str!("fixtures/missions_data.lua"),
+    ];
+    for ((_, file), text) in MODULES.iter().zip(fixtures) {
+        store(&cache, file, text, None);
+    }
+
+    // Without the DE page: no relic, one warning.
+    let report = update::run_import(&paths, Origin::Cache, &clock, &mut |_| {}).expect("import");
+    assert_eq!(report.summary.relics, 0);
+    assert!(
+        report
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("aucune relique"))
+    );
+
+    store(
+        &cache,
+        DE_CACHE_FILE,
+        include_str!("fixtures/droptables_de_relics.html"),
+        Some("Thu, 22 Oct 2026 19:04:13 GMT"),
+    );
+    let report = update::run_import(&paths, Origin::Cache, &clock, &mut |_| {}).expect("import");
+    assert_eq!(report.summary.relics, 8);
+    assert!(
+        !report
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("aucune relique"))
+    );
+    let conn = db::open(&paths.database).expect("open");
+    let rewards: i64 = conn
+        .query_row("SELECT count(*) FROM relic_reward", [], |row| row.get(0))
+        .expect("count");
+    assert_eq!(rewards, 79);
+    let run = db::stats(&conn).expect("stats").last_run.expect("run");
+    assert!(run.source_revision.as_deref().is_some_and(|revision| {
+        revision.ends_with(" ; tables officielles DE : Thu, 22 Oct 2026 19:04:13 GMT")
+    }));
 }

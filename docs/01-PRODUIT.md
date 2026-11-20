@@ -12,10 +12,11 @@ Joueur de Warframe, sur son poste Windows ou Linux, qui prépare ses sessions de
 
 ## Périmètre
 
-- Import des tables de drop des missions depuis le wiki (`Module:DropTables/data`, `Module:Missions/data`, `Module:Enemies/data/<faction>`) vers une base SQLite locale ; réimport depuis le cache sans réseau ; historique des imports.
+- Import des tables de drop des missions depuis le wiki (`Module:DropTables/data`, `Module:Missions/data`, `Module:Enemies/data/<faction>`) vers une base SQLite locale, et du contenu des reliques depuis les tables officielles de DE ([ADR-002](adr/ADR-002-tables-de-pour-reliques.md)) ; réimport depuis le cache sans réseau ; historique des imports.
 - Recherche par type de mission et objets sélectionnés, avec filtres de rotation, de missions spéciales (primes, Sortie, Arbitrages, Cauchemar…) et de Secteurs sombres, en deux modes : par objet et combiné (somme des chances par nœud et rotation), avec la chance par cycle AABC des missions sans fin.
 - Recherche par spot : pour des objets choisis, ennemis au meilleur taux par kill, puis nœuds où ils apparaissent, filtrés par type de mission et planète.
-- Interface Slint en français, trois onglets : Données, Recherche Mission et Recherche Spot.
+- Reliques d'une Warframe : pour chaque pièce Prime, reliques qui la donnent, chance par raffinement et présence dans les missions.
+- Interface Slint en français, quatre onglets : Données, Recherche Mission, Recherche Spot et Reliques.
 
 ## Exclusions
 
@@ -29,6 +30,7 @@ Joueur de Warframe, sur son poste Windows ou Linux, qui prépare ses sessions de
 1. Onglet Données : « Mettre à jour depuis le wiki » ; progression et journal, puis date, statut et volumes du dernier import.
 2. Onglet Recherche Mission : choisir un type de mission, ajouter des objets par autocomplétion, régler rotation, missions spéciales, Secteurs sombres et mode ; lire le tableau trié.
 3. Onglet Recherche Spot : ajouter des objets, filtrer par type de mission et planète ; lire les ennemis au meilleur taux, puis les nœuds où les trouver.
+4. Onglet Reliques : choisir une Warframe ; lire, par pièce, les reliques qui la donnent et leurs chances Intacte à Éclatante.
 
 ## Critères de succès observables
 

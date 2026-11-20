@@ -9,6 +9,7 @@ use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 use crate::db::{self, DbError, Stats};
 use crate::update::{self, DataPaths, Origin, UpdateReport};
 
+mod relics;
 mod search;
 mod spot;
 
@@ -102,8 +103,13 @@ pub fn report_lines(result: &Result<UpdateReport, update::UpdateError>) -> Vec<S
         Ok(report) => {
             let summary = &report.summary;
             let mut lines = vec![format!(
-                "Import terminé : {} nœuds, {} tables, {} objets, {} drops, {} avertissements.",
-                summary.nodes, summary.tables, summary.items, summary.drops, summary.warnings
+                "Import terminé : {} nœuds, {} tables, {} objets, {} drops, {} reliques, {} avertissements.",
+                summary.nodes,
+                summary.tables,
+                summary.items,
+                summary.drops,
+                summary.relics,
+                summary.warnings
             )];
             lines.extend(
                 report
@@ -146,10 +152,13 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
     append_lines(&window, lines);
     let (spot, lines) = spot::install(&window, paths.clone());
     append_lines(&window, lines);
+    let (relics, lines) = relics::install(&window, paths.clone());
+    append_lines(&window, lines);
     {
         let weak = window.as_weak();
         let search = Rc::downgrade(&search);
         let spot = Rc::downgrade(&spot);
+        let relics = Rc::downgrade(&relics);
         window.on_import_finished(move || {
             let Some(window) = weak.upgrade() else {
                 return;
@@ -160,6 +169,10 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
             }
             if let Some(spot) = spot.upgrade() {
                 let lines = spot.borrow_mut().reload(&window);
+                append_lines(&window, lines);
+            }
+            if let Some(relics) = relics.upgrade() {
+                let lines = relics.borrow_mut().reload(&window);
                 append_lines(&window, lines);
             }
         });
@@ -179,6 +192,7 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
         let paths = paths.clone();
         let search = Rc::downgrade(&search);
         let spot = Rc::downgrade(&spot);
+        let relics = Rc::downgrade(&relics);
         window_callback(
             &window,
             Box::new(move || {
@@ -189,6 +203,9 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
                     }
                     if let Some(spot) = spot.upgrade() {
                         spot.borrow_mut().close();
+                    }
+                    if let Some(relics) = relics.upgrade() {
+                        relics.borrow_mut().close();
                     }
                     start_import(&window, paths.clone(), origin, now);
                 }

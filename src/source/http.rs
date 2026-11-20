@@ -1,5 +1,5 @@
-//! Polite downloader for wiki modules (`?action=raw`): explicit User-Agent, timeouts and a
-//! pause between requests.
+//! Polite downloader for wiki modules (`?action=raw`) and the DE drop tables: explicit
+//! User-Agent, timeouts and a pause between requests.
 
 use std::time::Duration;
 
@@ -35,9 +35,9 @@ fn request_reason(error: &reqwest::Error) -> String {
 
 fn transport_reason(timeout: bool, connect: bool, detail: &str) -> String {
     if timeout {
-        "le wiki ne répond pas dans les délais, réessayez plus tard".to_owned()
+        "le serveur ne répond pas dans les délais, réessayez plus tard".to_owned()
     } else if connect {
-        "connexion au wiki impossible, vérifiez l'accès à Internet".to_owned()
+        "connexion au serveur impossible, vérifiez l'accès à Internet".to_owned()
     } else {
         format!("erreur réseau ({detail})")
     }
@@ -45,12 +45,12 @@ fn transport_reason(timeout: bool, connect: bool, detail: &str) -> String {
 
 fn status_reason(status: u16) -> String {
     match status {
-        404 => "page introuvable sur le wiki (réponse HTTP 404)".to_owned(),
-        429 => "le wiki limite les requêtes, réessayez plus tard (réponse HTTP 429)".to_owned(),
+        404 => "page introuvable sur le serveur (réponse HTTP 404)".to_owned(),
+        429 => "le serveur limite les requêtes, réessayez plus tard (réponse HTTP 429)".to_owned(),
         500..=599 => {
-            format!("le wiki est indisponible, réessayez plus tard (réponse HTTP {status})")
+            format!("le serveur est indisponible, réessayez plus tard (réponse HTTP {status})")
         }
-        _ => format!("réponse HTTP {status} inattendue du wiki"),
+        _ => format!("réponse HTTP {status} inattendue du serveur"),
     }
 }
 
@@ -92,12 +92,18 @@ impl ModuleFetcher {
     /// Downloads the raw wikitext of `page` (e.g. `Module:DropTables/data`). Requests are
     /// sequential and spaced by the pause, to spare the wiki.
     pub fn fetch_raw(&mut self, page: &str) -> Result<FetchedPage, FetchError> {
+        let url = format!("{}{}?action=raw", self.base_url, page);
+        self.fetch_url(page, &url)
+    }
+
+    /// Downloads `url` (another site, such as the DE drop tables), named `page` in errors,
+    /// with the same pause between requests.
+    pub fn fetch_url(&mut self, page: &str, url: &str) -> Result<FetchedPage, FetchError> {
         if self.requests > 0 {
             std::thread::sleep(self.pause);
         }
         self.requests += 1;
 
-        let url = format!("{}{}?action=raw", self.base_url, page);
         let request_error = |source| FetchError::Request {
             page: page.to_owned(),
             source,
@@ -142,10 +148,10 @@ mod tests {
         };
         assert_eq!(
             error.to_string(),
-            "téléchargement de « Module:A » : le wiki est indisponible, réessayez plus tard (réponse HTTP 503)"
+            "téléchargement de « Module:A » : le serveur est indisponible, réessayez plus tard (réponse HTTP 503)"
         );
         assert!(status_reason(404).contains("introuvable"));
         assert!(status_reason(429).contains("limite"));
-        assert_eq!(status_reason(302), "réponse HTTP 302 inattendue du wiki");
+        assert_eq!(status_reason(302), "réponse HTTP 302 inattendue du serveur");
     }
 }

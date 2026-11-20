@@ -2,10 +2,12 @@
 //! Schema reference: `docs/05-DATA-SCHEMAS.md`.
 
 mod import;
+mod relics;
 mod search;
 mod spot;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
+pub use relics::{RelicRow, WARFRAME_PARTS, relics_for_warframe, warframes};
 pub use search::{
     CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, NodeFilter, RotationFilter,
     SearchFilter, fold_text, item_categories, mission_types, search_by_item, search_combined,
@@ -62,6 +64,7 @@ fn sqlite_reason(error: &rusqlite::Error) -> String {
 const MIGRATIONS: &[&str] = &[
     include_str!("migrations/001_initial.sql"),
     include_str!("migrations/002_enemies.sql"),
+    include_str!("migrations/003_relics.sql"),
 ];
 
 fn latest_version() -> i64 {
