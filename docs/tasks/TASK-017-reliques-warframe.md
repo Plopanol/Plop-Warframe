@@ -12,7 +12,7 @@
   - [x] `--import` télécharge aussi la page DE ; `--import-cache` lit `cache/droptables_de.html`, absent : avertissement et aucune relique.
   - [x] Récompenses lues : relique, raffinement, objet, chance ; ligne mal formée en avertissement ; tests sur fixture.
   - [x] Liste des Warframes (pièces Neuroptics et Chassis Prime) ; Gyre → 4 pièces, dont Gyre Prime Blueprint dans Lith Q3.
-  - [x] Onglet Reliques : sélecteur de Warframe, colonnes Pièce, Relique, Intacte, Exceptionnelle, Impeccable, Éclatante, En mission, triables.
+  - [x] Onglet Reliques : choix de la Warframe par autocomplétion (comme les Objets), colonnes Pièce, Relique, Intacte, Exceptionnelle, Impeccable, Éclatante, En mission, triables.
   - [x] Vérification rapide et contrôle complet réussis.
   - [ ] Validation manuelle de l'onglet Reliques par l'utilisateur.
   - [ ] Fiche, index, roadmap et autorités touchées synchronisés ; liens vérifiés.
@@ -30,6 +30,7 @@
 
 - Lot 1, 2026-11-20 : page DE téléchargée une fois (4,4 Mo, `Last-Modified` 22 octobre 2026) et placée dans `data/cache/droptables_de.html` ; scanneur `src/source/de.rs` (`DeRelicSource`), `ModuleFetcher::fetch_url` (messages d'erreur réseau rendus neutres : « le serveur »), cache optionnel dans `update.rs`, migration `003_relics.sql`, `insert_relics` ; règles 16 et 17, schéma v3, ADR-002. `--import-cache` : 801 reliques, 19 190 récompenses, aucun avertissement DE.
 - Lot 2, 2026-11-20 : requêtes `src/db/relics.rs` (`warframes`, `relics_for_warframe`, « En mission » par jointure sur les tables de drop), vue `src/relic_view.rs`, contrôleur `src/ui_bridge/relics.rs`, onglet `RelicTab` (sélecteur `relic-warframe`, tableau `relic-rewards`) entre Recherche Spot et À propos ; mention des tables DE dans À propos ; 01-PRODUIT, 02-ARCHITECTURE, README. Données réelles : 51 Warframes, 60 reliques sur 801 en mission.
+- Lot 2, suite, 2026-11-20 (demande de l'utilisateur) : la liste déroulante devient une autocomplétion comme le filtre des Objets (saisie `relic-warframe-query`, suggestions `relic-warframe-suggestions`, puce de la Warframe choisie) ; `warframe_suggestions` met les noms qui commencent par la saisie en premier, sans casse ni accents.
 
 ## Validation et preuves
 

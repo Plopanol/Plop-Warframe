@@ -665,12 +665,16 @@ component SpotTab inherits VerticalBox {
 component RelicTab inherits VerticalBox {
     in property <bool> has-data;
     in property <bool> enabled;
-    in property <[string]> warframes;
-    in-out property <int> warframe-index;
+    in-out property <string> query;
+    in property <[string]> suggestions;
+    // Chosen Warframe, empty when none.
+    in property <string> selected;
     in property <string> summary;
     in property <[TableColumn]> columns;
     in property <[[StandardListViewItem]]> rows;
-    callback warframe-changed();
+    callback query-edited(string);
+    callback add-suggestion(int);
+    callback clear-warframe();
     callback sort-ascending(int);
     callback sort-descending(int);
 
@@ -689,20 +693,57 @@ component RelicTab inherits VerticalBox {
                 vertical-alignment: center;
             }
 
-            ComboBox {
-                accessible-id: "relic-warframe";
-                model: root.warframes;
-                current-index <=> root.warframe-index;
+            LineEdit {
+                accessible-id: "relic-warframe-query";
+                placeholder-text: "Choisir une Warframe (nom ou partie du nom)…";
+                text <=> root.query;
                 enabled: root.enabled;
-                min-width: 220px;
-                horizontal-stretch: 0;
-                selected => {
-                    root.warframe-changed();
+                edited(text) => {
+                    root.query-edited(text);
+                }
+                accepted => {
+                    root.add-suggestion(0);
                 }
             }
+        }
 
-            Rectangle {
-                horizontal-stretch: 1;
+        if root.suggestions.length > 0: Rectangle {
+            border-width: 1px;
+            border-color: Theme.border;
+            background: Theme.panel;
+            height: min(root.suggestions.length, 8) * 28px + 4px;
+            ListView {
+                accessible-id: "relic-warframe-suggestions";
+                for suggestion[index] in root.suggestions: Rectangle {
+                    height: 28px;
+                    background: relic-suggestion-touch.has-hover ? Theme.hover : transparent;
+                    relic-suggestion-touch := TouchArea {
+                        accessible-role: button;
+                        accessible-label: suggestion;
+                        enabled: root.enabled;
+                        clicked => {
+                            root.add-suggestion(index);
+                        }
+                    }
+
+                    Text {
+                        x: 8px;
+                        text: suggestion;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+
+        if root.selected != "": HorizontalLayout {
+            padding: 4px;
+            alignment: start;
+            Chip {
+                text: root.selected;
+                enabled: root.enabled;
+                remove => {
+                    root.clear-warframe();
+                }
             }
         }
 
@@ -835,12 +876,15 @@ export component AppWindow inherits Window {
     callback spot-node-sort-descending(int);
 
     in property <bool> relic-has-data;
-    in property <[string]> relic-warframes;
-    in-out property <int> relic-warframe-index;
+    in-out property <string> relic-query;
+    in property <[string]> relic-suggestions;
+    in property <string> relic-selected;
     in property <string> relic-summary;
     in property <[TableColumn]> relic-columns;
     in property <[[StandardListViewItem]]> relic-rows;
-    callback relic-warframe-changed();
+    callback relic-query-edited(string);
+    callback relic-add-suggestion(int);
+    callback relic-clear-warframe();
     callback relic-sort-ascending(int);
     callback relic-sort-descending(int);
 
@@ -999,13 +1043,20 @@ export component AppWindow inherits Window {
                 RelicTab {
                     has-data: root.relic-has-data;
                     enabled: !root.busy;
-                    warframes: root.relic-warframes;
-                    warframe-index <=> root.relic-warframe-index;
+                    query <=> root.relic-query;
+                    suggestions: root.relic-suggestions;
+                    selected: root.relic-selected;
                     summary: root.relic-summary;
                     columns: root.relic-columns;
                     rows: root.relic-rows;
-                    warframe-changed => {
-                        root.relic-warframe-changed();
+                    query-edited(text) => {
+                        root.relic-query-edited(text);
+                    }
+                    add-suggestion(index) => {
+                        root.relic-add-suggestion(index);
+                    }
+                    clear-warframe => {
+                        root.relic-clear-warframe();
                     }
                     sort-ascending(column) => {
                         root.relic-sort-ascending(column);

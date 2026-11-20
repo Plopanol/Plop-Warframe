@@ -5,11 +5,12 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use rusqlite::Connection;
+use slint::SharedString;
 
 use super::AppWindow;
 use super::search::{columns, rows, strings, with_state};
 use crate::db::{self, DbError};
-use crate::relic_view::{empty_relics, relic_table, summary};
+use crate::relic_view::{empty_relics, relic_table, summary, warframe_suggestions};
 use crate::search_view::ResultTable;
 use crate::update::DataPaths;
 
@@ -17,6 +18,8 @@ pub struct RelicState {
     paths: DataPaths,
     conn: Option<Connection>,
     warframes: Vec<String>,
+    suggestions: Vec<String>,
+    selected: Option<String>,
     table: ResultTable,
 }
 
@@ -28,13 +31,30 @@ pub fn install(window: &AppWindow, paths: DataPaths) -> (SharedRelics, Vec<Strin
         paths,
         conn: None,
         warframes: Vec::new(),
+        suggestions: Vec::new(),
+        selected: None,
         table: empty_relics(),
     }));
 
-    let changed = with_state(window, &state, |window, state: &mut RelicState, ()| {
+    window.on_relic_query_edited(with_state(
+        window,
+        &state,
+        |window, state: &mut RelicState, text: SharedString| {
+            state.update_suggestions(window, text.as_str());
+        },
+    ));
+    window.on_relic_add_suggestion(with_state(
+        window,
+        &state,
+        |window, state: &mut RelicState, index| {
+            state.add_suggestion(window, index);
+        },
+    ));
+    let clear = with_state(window, &state, |window, state: &mut RelicState, ()| {
+        state.selected = None;
         state.show_relics(window);
     });
-    window.on_relic_warframe_changed(move || changed(()));
+    window.on_relic_clear_warframe(move || clear(()));
     window.on_relic_sort_ascending(with_state(
         window,
         &state,
@@ -63,7 +83,6 @@ impl RelicState {
     /// Reopens the database after an import, keeping the chosen Warframe when it still exists.
     pub fn reload(&mut self, window: &AppWindow) -> Vec<String> {
         let mut lines = Vec::new();
-        let previous = self.selected(window).map(str::to_owned);
         self.conn = match self.open() {
             Ok(conn) => conn,
             Err(error) => {
@@ -81,13 +100,15 @@ impl RelicState {
             }
             None => Vec::new(),
         };
-        let index = previous
-            .and_then(|name| self.warframes.iter().position(|w| *w == name))
-            .and_then(|i| i32::try_from(i).ok())
-            .unwrap_or(0);
+        // The chosen Warframe stays when the new data still has it.
+        self.selected = self
+            .selected
+            .take()
+            .filter(|name| self.warframes.contains(name));
+        self.suggestions.clear();
         window.set_relic_has_data(!self.warframes.is_empty());
-        window.set_relic_warframes(strings(self.warframes.iter().map(String::as_str)));
-        window.set_relic_warframe_index(index);
+        window.set_relic_query(SharedString::new());
+        window.set_relic_suggestions(strings(std::iter::empty::<&str>()));
         self.show_relics(window);
         lines
     }
@@ -101,15 +122,33 @@ impl RelicState {
         }
     }
 
-    fn selected(&self, window: &AppWindow) -> Option<&str> {
-        usize::try_from(window.get_relic_warframe_index())
+    fn update_suggestions(&mut self, window: &AppWindow, text: &str) {
+        self.suggestions = warframe_suggestions(&self.warframes, text)
+            .into_iter()
+            .filter(|name| self.selected.as_deref() != Some(*name))
+            .map(str::to_owned)
+            .collect();
+        window.set_relic_suggestions(strings(self.suggestions.iter().map(String::as_str)));
+    }
+
+    fn add_suggestion(&mut self, window: &AppWindow, index: i32) {
+        let Some(name) = usize::try_from(index)
             .ok()
-            .and_then(|i| self.warframes.get(i))
-            .map(String::as_str)
+            .and_then(|i| self.suggestions.get(i))
+            .cloned()
+        else {
+            return;
+        };
+        self.selected = Some(name);
+        self.suggestions.clear();
+        window.set_relic_query(SharedString::new());
+        window.set_relic_suggestions(strings(std::iter::empty::<&str>()));
+        self.show_relics(window);
     }
 
     fn show_relics(&mut self, window: &AppWindow) {
-        let warframe = self.selected(window).map(str::to_owned);
+        window.set_relic_selected(self.selected.clone().unwrap_or_default().into());
+        let warframe = self.selected.clone();
         let found = match (&self.conn, &warframe) {
             (Some(conn), Some(name)) => db::relics_for_warframe(conn, name),
             _ => Ok(Vec::new()),

@@ -3,7 +3,7 @@
 
 use std::collections::BTreeSet;
 
-use crate::db::RelicRow;
+use crate::db::{RelicRow, fold_text};
 use crate::model::Refinement;
 use crate::search_view::{ResultTable, SortKey, TableRow, chance_cell, text_cell};
 
@@ -49,6 +49,19 @@ pub fn relic_table(rows: &[RelicRow]) -> ResultTable {
             })
             .collect(),
     }
+}
+
+/// Warframes matching `text` without case or accents: names starting with it first, then
+/// names containing it, each in list order; an empty text lists them all.
+pub fn warframe_suggestions<'a>(warframes: &'a [String], text: &str) -> Vec<&'a str> {
+    let needle = fold_text(text.trim());
+    let (mut starts, contains): (Vec<&str>, Vec<&str>) = warframes
+        .iter()
+        .map(String::as_str)
+        .filter(|name| fold_text(name).contains(&needle))
+        .partition(|name| fold_text(name).starts_with(&needle));
+    starts.extend(contains);
+    starts
 }
 
 /// Line above the table.
@@ -110,6 +123,18 @@ mod tests {
         let mut table = relic_table(&[low, row("B", "Lith B1 Relic", true)]);
         table.sort(2, true);
         assert_eq!(table.rows[0].cells[1], "Lith B1 Relic");
+    }
+
+    #[test]
+    fn suggestions_put_prefixes_first() {
+        let warframes: Vec<String> = ["Ash", "Gyre", "Nyx", "Styanax", "Wisp"]
+            .map(str::to_owned)
+            .to_vec();
+        assert_eq!(warframe_suggestions(&warframes, "ny"), ["Nyx"]);
+        assert_eq!(warframe_suggestions(&warframes, " A "), ["Ash", "Styanax"]);
+        assert_eq!(warframe_suggestions(&warframes, "GY"), ["Gyre"]);
+        assert_eq!(warframe_suggestions(&warframes, "").len(), 5);
+        assert!(warframe_suggestions(&warframes, "Excalibur").is_empty());
     }
 
     #[test]
