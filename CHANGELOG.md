@@ -2,6 +2,11 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.14
+
+- Onglet « Reliques » : colonne « Vaulted » (relique non disponible) d'après la liste des reliques de `@wfcd/items`, à côté de « En mission » ; filtres Toutes, Oui, Non sur les deux colonnes.
+- La mise à jour télécharge aussi `Relics.json` de WFCD, conservé dans le cache ; base au schéma 4.
+
 ## v0.1.13
 
 - Onglet « Reliques » : choix d'une Warframe par autocomplétion, puis pour chaque pièce Prime les reliques qui la donnent, chances Intacte, Exceptionnelle, Impeccable et Éclatante, et présence dans les missions ; tableau triable.

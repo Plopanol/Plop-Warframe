@@ -1,6 +1,6 @@
 # TASK-018 — Colonne « Vaulted » des reliques
 
-- **Statut :** En cours
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-017
@@ -12,9 +12,9 @@
   - [x] `--import` télécharge aussi `Relics.json` ; `--import-cache` lit `cache/wfcd_relics.json`, absent : avertissement et colonne « — ».
   - [x] Statut lu par relique (raffinements regroupés, entrées génériques ignorées, contradiction avertie) ; tests sur fixture.
   - [x] Colonnes « En mission » et « Vaulted » côte à côte, triables et filtrables ; Lith Q3 : vaulted Oui, Lith G14 : Non.
-  - [ ] Vérification rapide et contrôle complet réussis.
-  - [ ] Validation manuelle de l'onglet Reliques par l'utilisateur.
-  - [ ] Fiche, index, roadmap et autorités touchées synchronisés ; liens vérifiés.
+  - [x] Vérification rapide et contrôle complet réussis.
+  - [x] Validation manuelle de l'onglet Reliques par l'utilisateur.
+  - [x] Fiche, index, roadmap et autorités touchées synchronisés ; liens vérifiés.
 - **Risques :** changement de format du paquet WFCD ou retard de mise à jour ; parade : fichier optionnel, statut inconnu affiché « — », avertissements.
 - **Tests prévus :** `tests/relic_parse_tests.rs` (fixture `wfcd_relics.json`), `tests/update_tests.rs`, `tests/relic_tests.rs`, cellules de `src/relic_view.rs`.
 
@@ -28,7 +28,9 @@ Une session.
 
 ## Validation et preuves
 
-Non exécutée.
+- 2026-11-20, Windows 11 : vérification rapide réussie (fmt, Clippy, tests dont `wfcd_status_by_relic`, `vaulted_status_matches_relic_names_without_case`, `relics_without_wfcd_status_stay_unknown`, `filters_keep_matching_rows`) ; `slint-lsp format` 1.18.1 sans écart ; `--import-cache` sur `data/` : 765 vaulted, 34 disponibles, 2 inconnues.
+- 2026-11-20 : validation manuelle de l'onglet Reliques par l'utilisateur (colonnes En mission et Vaulted, filtres, tri, À propos) : conforme.
+- 2026-11-20 : clôture en 0.1.14, contrôle complet sur l'état final.
 
 ## Obstacles et reprise
 

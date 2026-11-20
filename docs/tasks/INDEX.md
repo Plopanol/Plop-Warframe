@@ -4,9 +4,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-018](TASK-018-reliques-vaulted.md) | Colonne « Vaulted » des reliques | En cours | Phase 2 — Interface | Normale |
+Aucune.
 
 ## À faire
 
@@ -24,6 +22,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-018](TASK-018-reliques-vaulted.md) | Colonne « Vaulted » des reliques | Terminée | Phase 2 — Interface | Normale |
 | [TASK-017](TASK-017-reliques-warframe.md) | Reliques d'une Warframe | Terminée | Phase 2 — Interface | Normale |
 | [TASK-016](TASK-016-secteurs-sombres.md) | Repérer et filtrer les Secteurs sombres | Terminée | Phase 2 — Interface | Normale |
 | [TASK-015](TASK-015-icone-coffre.md) | Icône en forme de coffre de loot | Terminée | Phase 2 — Interface | Normale |
