@@ -803,6 +803,121 @@ component RelicTab inherits VerticalBox {
     }
 }
 
+// Items tab: every @wfcd/items item, filtered by category and name, and the raw detail of
+// the clicked one. State and queries live in Rust (src/ui_bridge/items.rs, src/item_view.rs).
+component ItemTab inherits VerticalBox {
+    in property <bool> has-data;
+    in property <bool> enabled;
+    in property <[string]> categories;
+    in-out property <int> category-index;
+    in-out property <string> query;
+    in property <string> summary;
+    in property <[TableColumn]> columns;
+    in property <[[StandardListViewItem]]> rows;
+    in-out property <int> current-row;
+    in property <string> detail-title;
+    in property <[TableColumn]> detail-columns;
+    in property <[[StandardListViewItem]]> detail-rows;
+    callback query-edited(string);
+    callback category-changed();
+    callback item-selected(int);
+    callback sort-ascending(int);
+    callback sort-descending(int);
+    callback detail-sort-ascending(int);
+    callback detail-sort-descending(int);
+
+    if !root.has-data: Text {
+        text: "Aucun item en base : lancez une mise à jour depuis l'onglet Données.";
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        vertical-stretch: 1;
+    }
+    if root.has-data: VerticalLayout {
+        spacing: 8px;
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "Catégorie";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "item-wfcd-category";
+                model: root.categories;
+                current-index <=> root.category-index;
+                enabled: root.enabled;
+                min-width: 180px;
+                horizontal-stretch: 0;
+                selected => {
+                    root.category-changed();
+                }
+            }
+
+            Text {
+                text: "Nom";
+                vertical-alignment: center;
+            }
+
+            LineEdit {
+                accessible-id: "item-wfcd-query";
+                placeholder-text: "Nom français ou anglais, ou partie du nom…";
+                text <=> root.query;
+                enabled: root.enabled;
+                edited(text) => {
+                    root.query-edited(text);
+                }
+            }
+        }
+
+        Text {
+            text: root.summary;
+            color: Theme.muted;
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            vertical-stretch: 1;
+            StandardTableView {
+                accessible-id: "item-wfcd-results";
+                horizontal-stretch: 1;
+                columns: root.columns;
+                rows: root.rows;
+                current-row <=> root.current-row;
+                current-row-changed(row) => {
+                    root.item-selected(row);
+                }
+                sort-ascending(column) => {
+                    root.sort-ascending(column);
+                }
+                sort-descending(column) => {
+                    root.sort-descending(column);
+                }
+            }
+
+            VerticalLayout {
+                spacing: 8px;
+                horizontal-stretch: 1;
+                Heading {
+                    text: root.detail-title;
+                }
+
+                StandardTableView {
+                    accessible-id: "item-wfcd-detail";
+                    vertical-stretch: 1;
+                    columns: root.detail-columns;
+                    rows: root.detail-rows;
+                    sort-ascending(column) => {
+                        root.detail-sort-ascending(column);
+                    }
+                    sort-descending(column) => {
+                        root.detail-sort-descending(column);
+                    }
+                }
+            }
+        }
+    }
+}
+
 component AboutTab inherits VerticalBox {
     in property <string> version;
     alignment: start;
@@ -927,6 +1042,25 @@ export component AppWindow inherits Window {
     callback relic-filters-changed();
     callback relic-sort-ascending(int);
     callback relic-sort-descending(int);
+
+    in property <bool> item-has-data;
+    in property <[string]> item-categories;
+    in-out property <int> item-category-index;
+    in-out property <string> item-query;
+    in property <string> item-summary;
+    in property <[TableColumn]> item-columns;
+    in property <[[StandardListViewItem]]> item-rows;
+    in-out property <int> item-current-row: -1;
+    in property <string> item-detail-title;
+    in property <[TableColumn]> item-detail-columns;
+    in property <[[StandardListViewItem]]> item-detail-rows;
+    callback item-query-edited(string);
+    callback item-category-changed();
+    callback item-selected(int);
+    callback item-sort-ascending(int);
+    callback item-sort-descending(int);
+    callback item-detail-sort-ascending(int);
+    callback item-detail-sort-descending(int);
 
     VerticalLayout {
     // Header bar, as the wiki's dark top band.
@@ -1109,6 +1243,45 @@ export component AppWindow inherits Window {
                     }
                     sort-descending(column) => {
                         root.relic-sort-descending(column);
+                    }
+                }
+            }
+
+            Tab {
+                title: "Items";
+                ItemTab {
+                    has-data: root.item-has-data;
+                    enabled: !root.busy;
+                    categories: root.item-categories;
+                    category-index <=> root.item-category-index;
+                    query <=> root.item-query;
+                    summary: root.item-summary;
+                    columns: root.item-columns;
+                    rows: root.item-rows;
+                    current-row <=> root.item-current-row;
+                    detail-title: root.item-detail-title;
+                    detail-columns: root.item-detail-columns;
+                    detail-rows: root.item-detail-rows;
+                    query-edited(text) => {
+                        root.item-query-edited(text);
+                    }
+                    category-changed => {
+                        root.item-category-changed();
+                    }
+                    item-selected(row) => {
+                        root.item-selected(row);
+                    }
+                    sort-ascending(column) => {
+                        root.item-sort-ascending(column);
+                    }
+                    sort-descending(column) => {
+                        root.item-sort-descending(column);
+                    }
+                    detail-sort-ascending(column) => {
+                        root.item-detail-sort-ascending(column);
+                    }
+                    detail-sort-descending(column) => {
+                        root.item-detail-sort-descending(column);
                     }
                 }
             }

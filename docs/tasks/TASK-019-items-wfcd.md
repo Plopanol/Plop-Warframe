@@ -29,12 +29,13 @@ Deux lots, chacun confié à un sous-agent, l'orchestrateur relisant et commitan
 | Lot | Contenu | Préconditions | Contrôles | État |
 |---|---|---|---|---|
 | 1 | Import : version `X-JSD-Version`, source `WfcdItemsSource`, cache `wfcd/`, migration 5 (`wfcd_item`), comptes par catégorie, ADR-004, docs 02, 04, 05 | Arbitrages du 2026-11-20 | Vérification rapide, `--import-cache` | Fait |
-| 2 | Onglet Items : requêtes, `src/item_view.rs`, pont Slint, `ItemTab`, doc 01 | Lot 1 | Vérification rapide, contrôle complet, validation manuelle | À faire |
+| 2 | Onglet Items : requêtes, `src/item_view.rs`, pont Slint, `ItemTab`, doc 01 | Lot 1 | Vérification rapide, contrôle complet, validation manuelle | Fait, validation manuelle en attente |
 
 ## Journal des lots
 
 - 2026-11-20 : les 27 fichiers téléchargés une fois dans `data/cache/wfcd/` (version 1.1276.51, environ 33 Mo) : 20 166 items, `uniqueName` et `name` partout, aucun doublon entre fichiers ; `fr.json` : 19 511 traductions indexées par `uniqueName`.
 - 2026-11-20, lot 1 : import des 27 fichiers (sous-agent, relu) ; fichiers absents regroupés en un avertissement ; `.meta` de dev écrits à la main (`version=1.1276.51`) pour les fichiers posés sans application. `--import-cache` : 20 166 items WFCD (Arcanes 172, Arch-Gun 20, Arch-Melee 8, Archwing 5, Components 2225, Enemy 638, Fish 126, Gear 184, Glyphs 1723, Honoria 219, Melee 270, Misc 1265, Mods 1809, Node 269, Pets 66, Primary 197, Quests 49, Railjack 143, Relics 3208, Resources 242, Secondary 149, Sentinels 17, SentinelWeapons 24, Sigils 337, Skins 6678, Warframes 123), dont 18 099 avec nom français ; vaulted inchangé (765, 34, 2).
+- 2026-11-20, lot 2 : onglet Items (sous-agent, relu) : catégorie, nom (anglais ou français, sous-chaîne sans casse ni accent), 500 résultats au plus avec total, détail Champ / Valeur / Français (clés en ordre alphabétique, `name`, `uniqueName`, `category`, `type`, `description` en tête, l'ordre d'origine n'étant pas conservé par `serde_json`). Nom français vide (certains skins) traité comme absent à l'import : 17 982 items avec nom français. « ash » : Ash puis Ash Prime en tête ; détail d'Ash : 69 lignes, dont 7 traduites.
 
 ## Validation et preuves
 

@@ -136,6 +136,8 @@ impl DropSource for WfcdItemsSource {
                 let name_fr = translation
                     .and_then(|value| value.get("name"))
                     .and_then(Value::as_str)
+                    // Some skins have an empty French name; the English one is better shown.
+                    .filter(|name| !name.trim().is_empty())
                     .map(str::to_owned);
                 let json = serde_json::to_string(&entry)
                     .map_err(|error| structure(format!("{file} : {error}")))?;
@@ -283,7 +285,8 @@ mod tests {
                     .to_owned(),
             ),
         ];
-        let fr = r#"{"/W/Excalibur": {"name": "Excalibur FR", "description": "Épée"}}"#;
+        let fr = r#"{"/W/Excalibur": {"name": "Excalibur FR", "description": "Épée"},
+                     "/M/Serration": {"name": " "}}"#;
         let dataset = WfcdItemsSource::new(files, Some(fr.to_owned()))
             .load()
             .expect("load");
@@ -304,7 +307,7 @@ mod tests {
                     name: "Serration".into(),
                     name_fr: None,
                     json: r#"{"name":"Serration","uniqueName":"/M/Serration"}"#.into(),
-                    json_fr: None,
+                    json_fr: Some(r#"{"name":" "}"#.into()),
                 },
             ]
         );

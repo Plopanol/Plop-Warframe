@@ -5,6 +5,7 @@ mod import;
 mod relics;
 mod search;
 mod spot;
+mod wfcd;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
 pub use relics::{RelicRow, WARFRAME_PARTS, relics_for_warframe, warframes};
@@ -16,6 +17,7 @@ pub use search::{
 pub use spot::{
     EnemyDropRow, PlanetRow, SpotFilter, SpotRow, enemies_for_items, planets, spots_for_items,
 };
+pub use wfcd::{WfcdItemHit, search_wfcd_items, wfcd_categories, wfcd_item_detail};
 
 use std::path::Path;
 
