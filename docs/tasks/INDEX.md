@@ -1,6 +1,6 @@
 # Index des tâches
 
-Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-019.
+Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-020.
 
 ## Actives
 
@@ -10,7 +10,9 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## À faire
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-019](TASK-019-items-wfcd.md) | Récupérer tous les items du jeu (WFCD) | À faire | Phase 2 — Interface | Normale |
 
 ## Reportées
 
