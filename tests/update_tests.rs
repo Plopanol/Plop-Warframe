@@ -2,7 +2,9 @@
 
 use plop_warframe::db;
 use plop_warframe::source::{CacheError, CachedModule, ModuleCache};
-use plop_warframe::update::{self, DE_CACHE_FILE, DataPaths, MODULES, Origin, UpdateError};
+use plop_warframe::update::{
+    self, DE_CACHE_FILE, DataPaths, MODULES, Origin, UpdateError, WFCD_CACHE_FILE,
+};
 
 #[cfg(test)]
 fn clock() -> i64 {
@@ -113,7 +115,7 @@ fn progress_fraction_is_bounded() {
     assert_eq!(at(0, 0), 1.0);
     assert_eq!(
         update::step_count(Origin::Wiki),
-        update::MODULES.len() + update::enemy_modules().len() + 3
+        update::MODULES.len() + update::enemy_modules().len() + 4
     );
 }
 
@@ -168,13 +170,41 @@ fn relics_are_imported_from_the_cached_de_page() {
             .iter()
             .any(|warning| warning.contains("aucune relique"))
     );
+    assert!(
+        report
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("statut vaulted inconnu"))
+    );
+
+    store(
+        &cache,
+        WFCD_CACHE_FILE,
+        include_str!("fixtures/wfcd_relics.json"),
+        None,
+    );
+    let report = update::run_import(&paths, Origin::Cache, &clock, &mut |_| {}).expect("import");
+    assert!(
+        !report
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("statut vaulted inconnu"))
+    );
     let conn = db::open(&paths.database).expect("open");
+    let vaulted: Option<bool> = conn
+        .query_row(
+            "SELECT vaulted FROM relic WHERE name = 'Lith Q3 Relic'",
+            [],
+            |row| row.get(0),
+        )
+        .expect("vaulted");
+    assert_eq!(vaulted, Some(true));
     let rewards: i64 = conn
         .query_row("SELECT count(*) FROM relic_reward", [], |row| row.get(0))
         .expect("count");
     assert_eq!(rewards, 79);
     let run = db::stats(&conn).expect("stats").last_run.expect("run");
     assert!(run.source_revision.as_deref().is_some_and(|revision| {
-        revision.ends_with(" ; tables officielles DE : Thu, 22 Oct 2026 19:04:13 GMT")
+        revision.contains(" ; tables officielles DE : Thu, 22 Oct 2026 19:04:13 GMT ; ")
     }));
 }

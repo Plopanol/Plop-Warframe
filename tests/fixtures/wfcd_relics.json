@@ -1,0 +1,164 @@
+[
+  {
+    "name": "Axi A1 Exceptional",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionESilver",
+    "vaulted": true
+  },
+  {
+    "name": "Axi A1 Flawless",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionEGold",
+    "vaulted": true
+  },
+  {
+    "name": "Axi A1 Intact",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionEBronze",
+    "vaulted": true
+  },
+  {
+    "name": "Axi A1 Radiant",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionEPlatinum",
+    "vaulted": true
+  },
+  {
+    "name": "Axi A7 Exceptional",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionAshVaubanVaultASilver",
+    "vaulted": true
+  },
+  {
+    "name": "Axi A7 Flawless",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionAshVaubanVaultAGold",
+    "vaulted": true
+  },
+  {
+    "name": "Axi A7 Intact",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionAshVaubanVaultABronze",
+    "vaulted": true
+  },
+  {
+    "name": "Axi A7 Radiant",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionAshVaubanVaultAPlatinum",
+    "vaulted": true
+  },
+  {
+    "name": "Axi Relic",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjection"
+  },
+  {
+    "name": "Axi T13 Exceptional",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionGyrePrimeBSilver",
+    "vaulted": true
+  },
+  {
+    "name": "Axi T13 Flawless",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionGyrePrimeBGold",
+    "vaulted": true
+  },
+  {
+    "name": "Axi T13 Intact",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionGyrePrimeBBronze",
+    "vaulted": true
+  },
+  {
+    "name": "Axi T13 Radiant",
+    "uniqueName": "/Lotus/Types/Game/Projections/T4VoidProjectionGyrePrimeBPlatinum",
+    "vaulted": true
+  },
+  {
+    "name": "Lith G14 Exceptional",
+    "uniqueName": "/Lotus/Types/Game/Projections/T1VoidProjectionGyrePrimeDSilver",
+    "vaulted": false
+  },
+  {
+    "name": "Lith G14 Flawless",
+    "uniqueName": "/Lotus/Types/Game/Projections/T1VoidProjectionGyrePrimeDGold",
+    "vaulted": false
+  },
+  {
+    "name": "Lith G14 Intact",
+    "uniqueName": "/Lotus/Types/Game/Projections/T1VoidProjectionGyrePrimeDBronze",
+    "vaulted": false
+  },
+  {
+    "name": "Lith G14 Radiant",
+    "uniqueName": "/Lotus/Types/Game/Projections/T1VoidProjectionGyrePrimeDPlatinum",
+    "vaulted": false
+  },
+  {
+    "name": "Lith Q3 Exceptional",
+    "uniqueName": "/Lotus/Types/Game/Projections/T1VoidProjectionStyanaxPrimeASilver",
+    "vaulted": true
+  },
+  {
+    "name": "Lith Q3 Flawless",
+    "uniqueName": "/Lotus/Types/Game/Projections/T1VoidProjectionStyanaxPrimeAGold",
+    "vaulted": true
+  },
+  {
+    "name": "Lith Q3 Intact",
+    "uniqueName": "/Lotus/Types/Game/Projections/T1VoidProjectionStyanaxPrimeABronze",
+    "vaulted": true
+  },
+  {
+    "name": "Lith Q3 Radiant",
+    "uniqueName": "/Lotus/Types/Game/Projections/T1VoidProjectionStyanaxPrimeAPlatinum",
+    "vaulted": true
+  },
+  {
+    "name": "Meso E7 Exceptional",
+    "uniqueName": "/Lotus/Types/Game/Projections/T2VoidProjectionVorunaPrimeBSilver",
+    "vaulted": true
+  },
+  {
+    "name": "Meso E7 Flawless",
+    "uniqueName": "/Lotus/Types/Game/Projections/T2VoidProjectionVorunaPrimeBGold",
+    "vaulted": true
+  },
+  {
+    "name": "Meso E7 Intact",
+    "uniqueName": "/Lotus/Types/Game/Projections/T2VoidProjectionVorunaPrimeBBronze",
+    "vaulted": true
+  },
+  {
+    "name": "Meso E7 Radiant",
+    "uniqueName": "/Lotus/Types/Game/Projections/T2VoidProjectionVorunaPrimeBPlatinum",
+    "vaulted": true
+  },
+  {
+    "name": "Requiem I Exceptional",
+    "uniqueName": "/Lotus/Types/Game/Projections/T5VoidProjectionImmortalASilver",
+    "vaulted": true
+  },
+  {
+    "name": "Requiem I Flawless",
+    "uniqueName": "/Lotus/Types/Game/Projections/T5VoidProjectionImmortalAGold",
+    "vaulted": true
+  },
+  {
+    "name": "Requiem I Intact",
+    "uniqueName": "/Lotus/Types/Game/Projections/T5VoidProjectionImmortalABronze",
+    "vaulted": true
+  },
+  {
+    "name": "Requiem I Radiant",
+    "uniqueName": "/Lotus/Types/Game/Projections/T5VoidProjectionImmortalAPlatinum",
+    "vaulted": true
+  },
+  {
+    "name": "Void Relic",
+    "uniqueName": "/Lotus/Types/Game/Projections/T0VoidProjection"
+  },
+  {
+    "name": "Void Relic",
+    "uniqueName": "/Lotus/Types/Game/Projections/T5VoidProjectionImmortalOmni"
+  },
+  {
+    "name": "Meso X1 Intact",
+    "uniqueName": "/Test/MesoX1",
+    "vaulted": false
+  },
+  {
+    "name": "Meso X1 Radiant",
+    "uniqueName": "/Test/MesoX1Radiant",
+    "vaulted": true
+  }
+]

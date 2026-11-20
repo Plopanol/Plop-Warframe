@@ -348,6 +348,14 @@ pub struct RelicReward {
     pub rarity: Rarity,
 }
 
+/// Whether a relic is vaulted, i.e. no longer dropped (`docs/04-REGLES-DROPS.md`, rule 17).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RelicStatus {
+    /// Relic name as DE writes it, e.g. `Lith Q3 Relic`.
+    pub relic: String,
+    pub vaulted: bool,
+}
+
 /// Era of a relic name: `Lith` for `Lith Q3 Relic`.
 pub fn relic_tier(relic: &str) -> &str {
     relic.split_whitespace().next().unwrap_or_default()
@@ -363,6 +371,8 @@ pub struct DropDataset {
     pub region_resources: Vec<RegionResources>,
     /// Contents of the Void relics, one entry per relic, refinement and item.
     pub relic_rewards: Vec<RelicReward>,
+    /// Vaulted status of the relics, when the WFCD list is available.
+    pub relic_status: Vec<RelicStatus>,
     /// Non-fatal anomalies (missing alias, malformed entry), in French for the import log.
     pub warnings: Vec<String>,
 }
