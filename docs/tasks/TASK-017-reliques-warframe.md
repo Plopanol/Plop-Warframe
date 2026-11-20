@@ -1,6 +1,6 @@
 # TASK-017 — Reliques d'une Warframe
 
-- **Statut :** En cours
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-011
@@ -14,8 +14,8 @@
   - [x] Liste des Warframes (pièces Neuroptics et Chassis Prime) ; Gyre → 4 pièces, dont Gyre Prime Blueprint dans Lith Q3.
   - [x] Onglet Reliques : choix de la Warframe par autocomplétion (comme les Objets), colonnes Pièce, Relique, Intacte, Exceptionnelle, Impeccable, Éclatante, En mission, triables.
   - [x] Vérification rapide et contrôle complet réussis.
-  - [ ] Validation manuelle de l'onglet Reliques par l'utilisateur.
-  - [ ] Fiche, index, roadmap et autorités touchées synchronisés ; liens vérifiés.
+  - [x] Validation manuelle de l'onglet Reliques par l'utilisateur.
+  - [x] Fiche, index, roadmap et autorités touchées synchronisés ; liens vérifiés.
 - **Risques :** changement de format de la page DE ; parade : section absente en erreur typée, ligne inattendue en avertissement, fixture de non-régression.
 - **Tests prévus :** `tests/parse_tests.rs` ou dédié (fixture `droptables_de_relics.html`), import, update depuis le cache, requêtes `tests/relic_tests.rs`, cellules de `src/relic_view.rs`.
 
@@ -24,7 +24,7 @@
 | Lot | Contenu | Préconditions | Contrôles | État |
 |---|---|---|---|---|
 | 1 | Données : ADR-002, lecture DE, cache et téléchargement, migration 3, import, docs | Source arbitrée (2026-11-20) | Vérification rapide, `--import-cache` | Terminé |
-| 2 | Interface : requêtes, vue, onglet Reliques | Lot 1 | Vérification rapide, contrôle complet, validation manuelle | Implémenté, validation manuelle en attente |
+| 2 | Interface : requêtes, vue, onglet Reliques | Lot 1 | Vérification rapide, contrôle complet, validation manuelle | Terminé |
 
 ## Journal des lots
 
@@ -35,7 +35,9 @@
 ## Validation et preuves
 
 - 2026-11-20, Windows 11 : `tools/Test-Projet.ps1 -Complet` réussi (fmt, Clippy, tests dont `tests/relic_parse_tests.rs`, `tests/relic_tests.rs`, `relic_view`, release, licences, NOTICES, Test-Docs 4/4) ; `slint-lsp format` 1.18.1 sans écart ; `--import-cache` sur `data/` : 801 reliques.
-- Validation manuelle de l'onglet Reliques : non exécutée, demandée à l'utilisateur.
+- 2026-11-20 : après l'autocomplétion, vérification rapide réussie.
+- 2026-11-20 : validation manuelle de l'onglet Reliques par l'utilisateur (autocomplétion de la Warframe, puce, tableau Gyre, tri, réimport) : conforme.
+- 2026-11-20 : clôture en 0.1.13, contrôle complet relancé sur l'état final.
 
 ## Obstacles et reprise
 

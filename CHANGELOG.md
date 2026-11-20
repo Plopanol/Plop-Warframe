@@ -2,6 +2,12 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.13
+
+- Onglet « Reliques » : choix d'une Warframe par autocomplétion, puis pour chaque pièce Prime les reliques qui la donnent, chances Intacte, Exceptionnelle, Impeccable et Éclatante, et présence dans les missions ; tableau triable.
+- Contenu des reliques lu dans les tables de drop officielles de DE (`warframe.com/droptables`), téléchargées avec les modules du wiki et conservées dans le cache ; base au schéma 3.
+- Messages d'erreur réseau neutres (« le serveur »), communs au wiki et aux tables DE.
+
 ## v0.1.12
 
 - Recherche Mission : colonne « Secteur sombre » et filtre « Secteurs sombres » (Inclus, Exclus, Uniquement) ; les bonus de Secteur sombre ne modifient pas les chances de rotation.
