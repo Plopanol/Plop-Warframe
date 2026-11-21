@@ -7,5 +7,6 @@ pub mod relic_view;
 pub mod search_view;
 pub mod source;
 pub mod spot_view;
+pub mod star_chart_view;
 pub mod ui_bridge;
 pub mod update;

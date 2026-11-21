@@ -153,7 +153,7 @@ pub enum NodeFilter {
 }
 
 impl NodeFilter {
-    fn code(self) -> i64 {
+    pub(super) fn code(self) -> i64 {
         match self {
             NodeFilter::Include => 0,
             NodeFilter::Exclude => 1,
