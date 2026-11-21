@@ -4,9 +4,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-020](TASK-020-onglet-carte-stellaire.md) | Onglet Carte stellaire | À valider | Phase 2 — Interface | Normale |
+Aucune.
 
 ## À faire
 
@@ -22,6 +20,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-020](TASK-020-onglet-carte-stellaire.md) | Onglet Carte stellaire | Terminée | Phase 2 — Interface | Normale |
 | [TASK-019](TASK-019-items-wfcd.md) | Récupérer tous les items du jeu (WFCD) | Terminée | Phase 2 — Interface | Normale |
 | [TASK-018](TASK-018-reliques-vaulted.md) | Colonne « Vaulted » des reliques | Terminée | Phase 2 — Interface | Normale |
 | [TASK-017](TASK-017-reliques-warframe.md) | Reliques d'une Warframe | Terminée | Phase 2 — Interface | Normale |
