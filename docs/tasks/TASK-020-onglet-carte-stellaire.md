@@ -1,6 +1,6 @@
 # TASK-020 — Onglet Carte stellaire
 
-- **Statut :** En cours
+- **Statut :** À valider
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-016
@@ -30,7 +30,8 @@
 
 ## Validation et preuves
 
-Aucune pour l'instant.
+- 2026-11-21, Windows 11 : `tools/Test-Projet.ps1 -Complet` réussi (fmt, Clippy, tests dont `tests/star_chart_tests.rs` 5/5 et `star_chart_view` 6/6, release, licences, NOTICES, Test-Docs 4/4) ; `slint-lsp format` 1.18.1 sans écart ; `--import-cache` relancé sur `data/` (524 nœuds).
+- Validation manuelle de l'onglet Carte stellaire : en attente.
 
 ## Obstacles et reprise
 

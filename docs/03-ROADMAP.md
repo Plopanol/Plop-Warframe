@@ -45,4 +45,4 @@ Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Wind
 
 ## Prochaine tâche
 
-[TASK-020](tasks/TASK-020-onglet-carte-stellaire.md)
+Aucune tâche planifiée.

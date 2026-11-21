@@ -6,7 +6,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-020](TASK-020-onglet-carte-stellaire.md) | Onglet Carte stellaire | En cours | Phase 2 — Interface | Normale |
+| [TASK-020](TASK-020-onglet-carte-stellaire.md) | Onglet Carte stellaire | À valider | Phase 2 — Interface | Normale |
 
 ## À faire
 
