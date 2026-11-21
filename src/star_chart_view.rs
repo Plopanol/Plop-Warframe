@@ -1,5 +1,5 @@
 //! Texts of the Star Chart tab, independent of Slint so they can be tested: filter choices,
-//! level input and node table (rule 16 of `docs/04-REGLES-DROPS.md`).
+//! level input and node table (rule 20 of `docs/04-REGLES-DROPS.md`).
 
 use crate::db::{StarChartNode, fold_text};
 use crate::search_view::{

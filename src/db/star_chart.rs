@@ -1,5 +1,5 @@
 //! Star Chart tab queries: playable nodes of the star chart with their mission type, faction and
-//! enemy levels (rule 16 of `docs/04-REGLES-DROPS.md`).
+//! enemy levels (rule 20 of `docs/04-REGLES-DROPS.md`).
 
 use rusqlite::{Connection, params};
 

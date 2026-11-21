@@ -1,4 +1,4 @@
-//! Star Chart queries on a small hand-made dataset (rule 16 of `docs/04-REGLES-DROPS.md`).
+//! Star Chart queries on a small hand-made dataset (rule 20 of `docs/04-REGLES-DROPS.md`).
 
 use plop_warframe::db::{self, ImportRun, NodeFilter, StarChartFilter};
 use plop_warframe::model::{DropDataset, MissionType, Node};

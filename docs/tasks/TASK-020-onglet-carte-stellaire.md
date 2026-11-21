@@ -26,7 +26,7 @@
 | Lot | Contenu | Préconditions | Contrôles | État |
 |---|---|---|---|---|
 | 1 | Requête `src/db/star_chart.rs`, vue `src/star_chart_view.rs`, tests | Aucune | Vérification rapide | Fait |
-| 2 | Pont UI, onglet Slint, docs 01, 02, 04 | Lot 1 | Contrôle complet, validation manuelle | À faire |
+| 2 | Pont UI, onglet Slint, docs 01, 02, 04 | Lot 1 | Contrôle complet, validation manuelle | Fait, validation manuelle en attente |
 
 ## Validation et preuves
 
