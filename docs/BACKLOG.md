@@ -20,3 +20,5 @@ Idées hors périmètre : non planifiées, jamais implémentées d'office. Une i
 
 ### 2026-11-21 — Recherche type mission uniquement
 
+### 2026-11-21 — Lister les missions prerequis pour avec une warframe
+
