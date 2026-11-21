@@ -380,7 +380,11 @@ impl SpotState {
 }
 
 /// Label of the selector entry at `index`, when `label` keeps it.
-fn label_at<T>(choices: &[T], index: i32, label: impl Fn(&T) -> Option<String>) -> Option<String> {
+pub(super) fn label_at<T>(
+    choices: &[T],
+    index: i32,
+    label: impl Fn(&T) -> Option<String>,
+) -> Option<String> {
     usize::try_from(index)
         .ok()
         .and_then(|i| choices.get(i))
@@ -388,7 +392,11 @@ fn label_at<T>(choices: &[T], index: i32, label: impl Fn(&T) -> Option<String>) 
 }
 
 /// Index of the entry labelled `label`, or 0 ("every…").
-fn index_of<T>(choices: &[T], label: Option<String>, text: impl Fn(&T) -> &String) -> i32 {
+pub(super) fn index_of<T>(
+    choices: &[T],
+    label: Option<String>,
+    text: impl Fn(&T) -> &String,
+) -> i32 {
     label
         .and_then(|label| choices.iter().position(|c| *text(c) == label))
         .and_then(|i| i32::try_from(i).ok())

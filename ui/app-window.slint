@@ -918,6 +918,155 @@ component ItemTab inherits VerticalBox {
     }
 }
 
+component StarChartTab inherits VerticalBox {
+    in property <bool> has-data;
+    in property <bool> enabled;
+    in property <[string]> mission-types;
+    in-out property <int> mission-type-index;
+    in property <[string]> planets;
+    in-out property <int> planet-index;
+    in property <[string]> factions;
+    in-out property <int> faction-index;
+    in-out property <int> dark-sectors-index;
+    in-out property <string> min-level;
+    in-out property <string> max-level;
+    in property <string> summary;
+    in property <[TableColumn]> columns;
+    in property <[[StandardListViewItem]]> rows;
+    callback filters-changed();
+    callback sort-ascending(int);
+    callback sort-descending(int);
+
+    if !root.has-data: Text {
+        text: "Aucun nœud en base : lancez une mise à jour depuis l'onglet Données.";
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        vertical-stretch: 1;
+    }
+    if root.has-data: VerticalLayout {
+        spacing: 8px;
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "Type";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "star-chart-mission-type";
+                model: root.mission-types;
+                current-index <=> root.mission-type-index;
+                enabled: root.enabled;
+                min-width: 200px;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+
+            Text {
+                text: "Planète";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "star-chart-planet";
+                model: root.planets;
+                current-index <=> root.planet-index;
+                enabled: root.enabled;
+                min-width: 160px;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+
+            Text {
+                text: "Faction";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "star-chart-faction";
+                model: root.factions;
+                current-index <=> root.faction-index;
+                enabled: root.enabled;
+                min-width: 160px;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            alignment: start;
+            Text {
+                text: "Niveau min";
+                vertical-alignment: center;
+            }
+
+            LineEdit {
+                accessible-id: "star-chart-min-level";
+                placeholder-text: "ex. 15";
+                text <=> root.min-level;
+                enabled: root.enabled;
+                width: 80px;
+                edited(text) => {
+                    root.filters-changed();
+                }
+            }
+
+            Text {
+                text: "Niveau max";
+                vertical-alignment: center;
+            }
+
+            LineEdit {
+                accessible-id: "star-chart-max-level";
+                placeholder-text: "ex. 20";
+                text <=> root.max-level;
+                enabled: root.enabled;
+                width: 80px;
+                edited(text) => {
+                    root.filters-changed();
+                }
+            }
+
+            Text {
+                text: "Secteurs sombres";
+                vertical-alignment: center;
+            }
+
+            ComboBox {
+                accessible-id: "star-chart-dark-sectors";
+                model: ["Inclus", "Exclus", "Uniquement"];
+                current-index <=> root.dark-sectors-index;
+                enabled: root.enabled;
+                selected => {
+                    root.filters-changed();
+                }
+            }
+        }
+
+        Text {
+            text: root.summary;
+            color: Theme.muted;
+        }
+
+        StandardTableView {
+            accessible-id: "star-chart-results";
+            vertical-stretch: 1;
+            columns: root.columns;
+            rows: root.rows;
+            sort-ascending(column) => {
+                root.sort-ascending(column);
+            }
+            sort-descending(column) => {
+                root.sort-descending(column);
+            }
+        }
+    }
+}
+
 component AboutTab inherits VerticalBox {
     in property <string> version;
     alignment: start;
@@ -1061,6 +1210,22 @@ export component AppWindow inherits Window {
     callback item-sort-descending(int);
     callback item-detail-sort-ascending(int);
     callback item-detail-sort-descending(int);
+    in property <bool> star-chart-has-data;
+    in property <[string]> star-chart-mission-types;
+    in-out property <int> star-chart-mission-type-index;
+    in property <[string]> star-chart-planets;
+    in-out property <int> star-chart-planet-index;
+    in property <[string]> star-chart-factions;
+    in-out property <int> star-chart-faction-index;
+    in-out property <int> star-chart-dark-sectors-index;
+    in-out property <string> star-chart-min-level;
+    in-out property <string> star-chart-max-level;
+    in property <string> star-chart-summary;
+    in property <[TableColumn]> star-chart-columns;
+    in property <[[StandardListViewItem]]> star-chart-rows;
+    callback star-chart-filters-changed();
+    callback star-chart-sort-ascending(int);
+    callback star-chart-sort-descending(int);
 
     VerticalLayout {
     // Header bar, as the wiki's dark top band.
@@ -1282,6 +1447,35 @@ export component AppWindow inherits Window {
                     }
                     detail-sort-descending(column) => {
                         root.item-detail-sort-descending(column);
+                    }
+                }
+            }
+
+            Tab {
+                title: "Carte stellaire";
+                StarChartTab {
+                    has-data: root.star-chart-has-data;
+                    enabled: !root.busy;
+                    mission-types: root.star-chart-mission-types;
+                    mission-type-index <=> root.star-chart-mission-type-index;
+                    planets: root.star-chart-planets;
+                    planet-index <=> root.star-chart-planet-index;
+                    factions: root.star-chart-factions;
+                    faction-index <=> root.star-chart-faction-index;
+                    dark-sectors-index <=> root.star-chart-dark-sectors-index;
+                    min-level <=> root.star-chart-min-level;
+                    max-level <=> root.star-chart-max-level;
+                    summary: root.star-chart-summary;
+                    columns: root.star-chart-columns;
+                    rows: root.star-chart-rows;
+                    filters-changed => {
+                        root.star-chart-filters-changed();
+                    }
+                    sort-ascending(column) => {
+                        root.star-chart-sort-ascending(column);
+                    }
+                    sort-descending(column) => {
+                        root.star-chart-sort-descending(column);
                     }
                 }
             }

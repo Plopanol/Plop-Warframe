@@ -5,6 +5,7 @@ mod import;
 mod relics;
 mod search;
 mod spot;
+mod star_chart;
 mod wfcd;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
@@ -16,6 +17,10 @@ pub use search::{
 };
 pub use spot::{
     EnemyDropRow, PlanetRow, SpotFilter, SpotRow, enemies_for_items, planets, spots_for_items,
+};
+pub use star_chart::{
+    EXCLUDED_MISSION_TYPES, StarChartChoices, StarChartFilter, StarChartNode, star_chart_choices,
+    star_chart_nodes,
 };
 pub use wfcd::{WfcdItemHit, search_wfcd_items, wfcd_categories, wfcd_item_detail};
 

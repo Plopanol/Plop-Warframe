@@ -378,7 +378,7 @@ pub fn chance_cell(chance: Option<f64>) -> (String, SortKey) {
 }
 
 /// "Secteur sombre" cell of a Dark Sector node; other nodes leave it empty.
-const DARK_SECTOR_MARK: &str = "Oui";
+pub const DARK_SECTOR_MARK: &str = "Oui";
 
 fn location_cells(location: &Location) -> Vec<(String, SortKey)> {
     let pool = pool_label(location.rotation_kind, location.role, location.rotation);

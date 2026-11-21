@@ -2,6 +2,10 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.16
+
+- Onglet « Carte stellaire » : nœuds de la carte (planète, nœud, type de mission, faction, niveaux, Secteur sombre), filtrés par type, planète, faction, niveau min–max (chevauchement) et Secteurs sombres ; jonctions, relais, hubs, Conclave et missions spéciales exclus ; tableau triable.
+
 ## v0.1.15
 
 - Onglet « Items » : recherche des items du jeu par catégorie et par nom (anglais ou français, sans casse ni accent), puis, à la sélection, toutes leurs informations en tableau Champ / Valeur / Français.
