@@ -13,6 +13,16 @@ use crate::source::WFCD_CATEGORIES;
 pub const ITEM_COLUMNS: &[&str] = &["Nom", "Nom anglais", "Catégorie"];
 pub const DETAIL_COLUMNS: &[&str] = &["Champ", "Valeur", "Français"];
 
+/// Only web addresses are delegated to the browser, never local paths or other schemes.
+pub fn web_url(text: &str) -> Option<reqwest::Url> {
+    let text = text.trim();
+    if text.chars().any(char::is_whitespace) {
+        return None;
+    }
+    let url = reqwest::Url::parse(text).ok()?;
+    (matches!(url.scheme(), "http" | "https") && url.host_str().is_some()).then_some(url)
+}
+
 /// First entry of the category selector.
 pub const ALL_CATEGORIES: &str = "Toutes";
 
@@ -189,6 +199,37 @@ fn scalar_text(value: &Value) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn web_links_are_detected_by_value_in_any_detail_field() -> Result<(), serde_json::Error> {
+        let table = detail_table(
+            r#"{"introduced":{"url":"https://wiki.warframe.com/w/Update_1#Changes"},"wikiUrl":"http://wiki.warframe.com/w/Ash","other":["https://example.org/a?b=1&c=2"],"name":"Ash"}"#,
+            Some(r#"{"wikiUrl":"https://wiki.warframe.com/w/Ash/fr"}"#),
+        )?;
+        assert_eq!(
+            table
+                .rows
+                .iter()
+                .flat_map(|row| &row.cells)
+                .filter(|text| web_url(text).is_some())
+                .count(),
+            4
+        );
+        for invalid in [
+            "",
+            "Ash",
+            "https://",
+            "https://example.org/a b",
+            "javascript:alert(1)",
+            "file:///C:/test",
+            "mailto:a@example.org",
+            "//wiki.warframe.com/w/Ash",
+        ] {
+            assert!(web_url(invalid).is_none(), "{invalid}");
+        }
+        assert!(web_url(" HTTPS://wiki.warframe.com/w/Ash ").is_some());
+        Ok(())
+    }
 
     fn hit(id: i64, name: &str, name_fr: Option<&str>) -> WfcdItemHit {
         WfcdItemHit {

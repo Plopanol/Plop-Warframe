@@ -39,6 +39,7 @@ Jalon : `--import` remplit la base depuis le wiki et une requête de test retrou
 | [TASK-018](tasks/TASK-018-reliques-vaulted.md) | Colonne Vaulted des reliques (WFCD) | TASK-017 |
 | [TASK-019](tasks/TASK-019-items-wfcd.md) | Items du jeu WFCD en cache et en base | TASK-018 |
 | [TASK-020](tasks/TASK-020-onglet-carte-stellaire.md) | Onglet Carte stellaire (nœuds par type et niveau) | TASK-016 |
+| [TASK-021](tasks/TASK-021-liens-items.md) | Liens dans les champs des items | TASK-019 |
 | [TASK-012](tasks/TASK-012-controle-linux.md) | Contrôle Linux (reporté) | TASK-008 |
 
 Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Windows et Linux.

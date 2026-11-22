@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use rusqlite::Connection;
-use slint::SharedString;
+use slint::{ComponentHandle, SharedString};
 
 use super::AppWindow;
 use super::search::{columns, rows, strings, with_state};
@@ -31,6 +31,26 @@ pub type SharedItems = Rc<RefCell<ItemState>>;
 
 /// Wires the Items tab callbacks and loads the database; returns log lines for a read error.
 pub fn install(window: &AppWindow, paths: DataPaths) -> (SharedItems, Vec<String>) {
+    window.on_item_is_web_url(|text| crate::item_view::web_url(&text).is_some());
+    let weak = window.as_weak();
+    window.on_item_open_url(move |text| {
+        let Some(url) = crate::item_view::web_url(&text) else {
+            return;
+        };
+        let weak = weak.clone();
+        std::thread::spawn(move || {
+            if let Err(error) = open_browser(url.as_str()) {
+                log::error!("Ouverture du navigateur pour {url} : {error}");
+                if let Err(error) = weak.upgrade_in_event_loop(move |window| {
+                    window.set_item_link_error(
+                        format!("Impossible d'ouvrir le navigateur : {error}").into(),
+                    );
+                }) {
+                    log::error!("Affichage de l'erreur du navigateur : {error}");
+                }
+            }
+        });
+    });
     let state = Rc::new(RefCell::new(ItemState {
         paths,
         conn: None,
@@ -206,6 +226,7 @@ impl ItemState {
     }
 
     fn show_detail(&mut self, window: &AppWindow, name: Option<&str>, table: ResultTable) {
+        window.set_item_link_error(SharedString::default());
         self.detail = table;
         window.set_item_detail_title(detail_title(name).into());
         window.set_item_detail_columns(columns(&self.detail));
@@ -227,5 +248,31 @@ impl ItemState {
             self.detail.sort(column, descending);
             window.set_item_detail_rows(rows(&self.detail));
         }
+    }
+}
+
+fn open_browser(url: &str) -> std::io::Result<()> {
+    use std::process::Command;
+
+    #[cfg(target_os = "windows")]
+    let mut command = {
+        use std::os::windows::process::CommandExt;
+        let mut command = Command::new("rundll32.exe");
+        command.arg("url.dll,FileProtocolHandler");
+        command.creation_flags(0x0800_0000);
+        command
+    };
+    #[cfg(not(target_os = "windows"))]
+    let mut command = Command::new("xdg-open");
+
+    let output = command.arg(url).output()?;
+    if output.status.success() {
+        Ok(())
+    } else {
+        Err(std::io::Error::other(format!(
+            "{} : {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        )))
     }
 }

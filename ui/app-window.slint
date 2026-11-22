@@ -818,6 +818,11 @@ component ItemTab inherits VerticalBox {
     in property <string> detail-title;
     in property <[TableColumn]> detail-columns;
     in property <[[StandardListViewItem]]> detail-rows;
+    in property <string> link-error;
+    pure callback is-web-url(string) -> bool;
+    callback open-url(string);
+    private property <int> detail-sort-column: -1;
+    private property <bool> detail-descending: false;
     callback query-edited(string);
     callback category-changed();
     callback item-selected(int);
@@ -901,17 +906,69 @@ component ItemTab inherits VerticalBox {
                     text: root.detail-title;
                 }
 
-                StandardTableView {
-                    accessible-id: "item-wfcd-detail";
+                HorizontalLayout {
+                    spacing: 0px;
+                    for column[index] in root.detail-columns: Button {
+                        accessible-id: "item-wfcd-detail-sort-" + index;
+                        text: column.title;
+                        horizontal-stretch: 1;
+                        clicked => {
+                            root.detail-descending = root.detail-sort-column == index && !root.detail-descending;
+                            root.detail-sort-column = index;
+                            if root.detail-descending {
+                                root.detail-sort-descending(index);
+                            } else {
+                                root.detail-sort-ascending(index);
+                            }
+                        }
+                    }
+                }
+
+                ListView {
                     vertical-stretch: 1;
-                    columns: root.detail-columns;
-                    rows: root.detail-rows;
-                    sort-ascending(column) => {
-                        root.detail-sort-ascending(column);
+                    for row[row-index] in root.detail-rows: Rectangle {
+                        height: 42px;
+                        background: mod(row-index, 2) == 0 ? Theme.content : Theme.panel;
+                        HorizontalLayout {
+                            spacing: 0px;
+                            for cell[column-index] in row: Rectangle {
+                                horizontal-stretch: 1;
+                                min-width: 0px;
+                                private property <bool> is-link: column-index > 0 && root.is-web-url(cell.text);
+                                label := Text {
+                                    x: 6px;
+                                    width: parent.width - 12px;
+                                    height: parent.height;
+                                    text: cell.text;
+                                    color: parent.is-link ? Theme.accent : Theme.text;
+                                    overflow: elide;
+                                    vertical-alignment: center;
+                                }
+
+                                if self.is-link: Rectangle {
+                                    x: 6px;
+                                    y: parent.height / 2 + 9px;
+                                    width: min(label.preferred-width, parent.width - 12px);
+                                    height: 1px;
+                                    background: Theme.accent;
+                                }
+
+                                if self.is-link: TouchArea {
+                                    accessible-role: button;
+                                    accessible-id: "item-wfcd-link-" + row-index + "-" + column-index;
+                                    accessible-label: cell.text;
+                                    enabled: root.enabled;
+                                    mouse-cursor: pointer;
+                                    clicked => { root.open-url(cell.text); }
+                                }
+                            }
+                        }
                     }
-                    sort-descending(column) => {
-                        root.detail-sort-descending(column);
-                    }
+                }
+
+                if root.link-error != "": Text {
+                    text: root.link-error;
+                    wrap: word-wrap;
                 }
             }
         }
@@ -1203,6 +1260,9 @@ export component AppWindow inherits Window {
     in property <string> item-detail-title;
     in property <[TableColumn]> item-detail-columns;
     in property <[[StandardListViewItem]]> item-detail-rows;
+    in property <string> item-link-error;
+    pure callback item-is-web-url(string) -> bool;
+    callback item-open-url(string);
     callback item-query-edited(string);
     callback item-category-changed();
     callback item-selected(int);
@@ -1427,6 +1487,9 @@ export component AppWindow inherits Window {
                     detail-title: root.item-detail-title;
                     detail-columns: root.item-detail-columns;
                     detail-rows: root.item-detail-rows;
+                    link-error: root.item-link-error;
+                    is-web-url(text) => { root.item-is-web-url(text) }
+                    open-url(text) => { root.item-open-url(text); }
                     query-edited(text) => {
                         root.item-query-edited(text);
                     }

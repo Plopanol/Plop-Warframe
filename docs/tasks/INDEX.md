@@ -1,10 +1,12 @@
 # Index des tâches
 
-Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-021.
+Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-022.
 
 ## Actives
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-021](TASK-021-liens-items.md) | Liens dans les champs des items | À valider | Phase 2 — Interface | Normale |
 
 ## À faire
 
