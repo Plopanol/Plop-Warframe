@@ -60,6 +60,7 @@ Plan validé par l'utilisateur le 2026-11-22 (Q-004), avec filtre par chevauchem
 - 2026-11-22 : l'utilisateur valide le remplissage et le redimensionnement du tableau des ressources (BUG-002). Les validations fonctionnelles du profil, du calcul, des filtres et de la conservation des recettes manuelles restent à confirmer ; la tâche demeure `À valider`.
 - 2026-11-22 : l'utilisateur confirme ensuite explicitement que les quatre parcours sont conformes : niveau conservé après redémarrage, totaux de Rhino, filtres de spots et recette manuelle conservée après réimport du cache. Validation fonctionnelle acquise ; contrôle complet de la version 0.1.20 en cours.
 - 2026-11-22 : contrôle complet officiel réussi sur la version 0.1.20 : fmt, Clippy sans avertissement, 136 tests réussis, construction release, licences, NOTICES.md à jour et quatre contrôles documentaires réussis. Le test de performance sur base de développement reste ignoré par défaut. Journal local : `target/recipe-complet.log`. Aucun échec restant ; validation manuelle des deux écrans et des quatre parcours confirmée par l'utilisateur. Clôture et fusion locale dans `main`, sans push ni génération de livrable.
+- 2026-11-22 : fusion locale en avance rapide dans `main` au commit `42cccaa`, puis construction release depuis `main` réussie. BUG-002 clos après validation utilisateur et reconstruction de la branche principale. La demande ultérieure de livrable, push et nettoyage est distincte de cette clôture.
 
 ## Obstacles et reprise
 

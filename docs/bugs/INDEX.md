@@ -6,10 +6,12 @@ Statuts : Signalé, Confirmé, En cours, Bloqué, Corrigé à vérifier, Clos, D
 
 | ID | Titre | Statut | Gravité | Composant |
 |---|---|---|---|---|
-| [BUG-002](BUG-002-tableau-ressources-dimensions.md) | Tableau des ressources réduit | Corrigé à vérifier | Normale | Interface Recettes |
+
+Aucun.
 
 ## Fermés
 
 | ID | Titre | Statut | Gravité | Composant |
 |---|---|---|---|---|
+| [BUG-002](BUG-002-tableau-ressources-dimensions.md) | Tableau des ressources réduit | Clos | Normale | Interface Recettes |
 | [BUG-001](BUG-001-localisation-coffres-orokin-deimos.md) | Localisation des coffres Orokin sur Deimos | Clos | Normale | Import wiki et recherche Mission |

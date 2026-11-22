@@ -1,6 +1,6 @@
 # BUG-002 — Tableau des ressources réduit
 
-- **Statut :** Corrigé à vérifier
+- **Statut :** Clos
 - **Gravité :** Normale
 - **Composant :** Interface Recettes
 - **Signalé le :** 2026-11-22
@@ -31,3 +31,4 @@ Correction poursuivie sur la branche de TASK-023, dont ces écrans attendent enc
 - Validation visuelle, contrôle complet et incrément de version restent attendus avec la clôture de TASK-023 ; pas de fusion à ce stade.
 - 2026-11-22 : validation visuelle du tableau reconstruit confirmée par l'utilisateur (« Valider :) »), en réponse à la demande de vérification du remplissage et du redimensionnement. Cette validation ne porte pas sur les autres parcours de TASK-023.
 - 2026-11-22 : l'utilisateur valide ensuite explicitement les quatre autres parcours de TASK-023. Contrôle complet de la version 0.1.20 réussi : 136 tests, fmt, Clippy, release, licences, notices et Test-Docs 4/4. Le correctif UI validé est celui du commit `ec4dc09` ; aucun changement de comportement depuis cette validation.
+- 2026-11-22 : fusion en avance rapide dans `main` jusqu'au commit `42cccaa`, puis construction release depuis `main` réussie (`target/recipe-main-build.log`). Le code UI est identique à celui validé par l'utilisateur ; seuls la version et les documents de clôture ont changé depuis le correctif testé. Vérification distincte de la capture initiale : tableau reconstruit et validé par l'utilisateur, contrôle complet et reconstruction de la branche principale réussis. BUG-002 passe à `Clos` en 0.1.20.
