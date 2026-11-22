@@ -15,6 +15,8 @@ import {
     GridBox,
 } from "std-widgets.slint";
 import { Theme, Heading } from "theme.slint";
+import { CharacterTab, RecipesTab, Crafting } from "recipes.slint";
+export { Crafting, RecipeIngredient } from "recipes.slint";
 
 // Texts of the Data tab, computed in Rust from the database (src/ui_bridge.rs).
 export struct DataStatus {
@@ -1363,7 +1365,7 @@ export component AppWindow inherits Window {
                 title: "Données";
                 DataTab {
                     status: root.data-status;
-                    busy: root.busy;
+                    busy: root.busy || Crafting.calculating;
                     progress: root.progress;
                     log-lines: root.log-lines;
                     update-from-wiki => {
@@ -1582,6 +1584,20 @@ export component AppWindow inherits Window {
                     sort-descending(column) => {
                         root.star-chart-sort-descending(column);
                     }
+                }
+            }
+
+            Tab {
+                title: "Personnage";
+                CharacterTab {
+                    enabled: !root.busy;
+                }
+            }
+
+            Tab {
+                title: "Recettes";
+                RecipesTab {
+                    enabled: !root.busy;
                 }
             }
 

@@ -6,7 +6,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
-| [TASK-023](TASK-023-recettes-et-personnage.md) | Recettes et profil personnage | En cours | Phase 2 — Interface | Normale |
+| [TASK-023](TASK-023-recettes-et-personnage.md) | Recettes et profil personnage | À valider | Phase 2 — Interface | Normale |
 
 ## À faire
 

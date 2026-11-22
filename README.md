@@ -6,11 +6,13 @@ Interface en français ; Windows (Linux prévu). Détail du produit : [docs/01-P
 
 ## Fonctionnalités
 
-- **Données** : import des modules Lua du wiki (`Module:DropTables/data`, `Module:Missions/data`, `Module:Enemies/data/<faction>`), réimport depuis le cache sans réseau, historique des imports.
+- **Données** : import des modules Lua du wiki (`Module:DropTables/data`, `Module:Missions/data`, `Module:Enemies/data/<faction>`, `Module:Blueprints/data`), réimport depuis le cache sans réseau, historique des imports.
 - **Recherche Mission** : pour un type de mission (Survie, Défense, Excavation…) et des objets, nœuds triés par chance, avec filtres de rotation et de missions spéciales (primes, Sortie, Arbitrages, Cauchemar…) ; mode par objet ou combiné, chance par cycle AABC des missions sans fin.
 - **Recherche Spot** : ennemis au meilleur taux par kill pour les objets choisis, puis nœuds où ils apparaissent, filtrés par type de mission et planète.
 - **Reliques** : pour une Warframe, reliques qui donnent chacune de ses pièces Prime, chances Intacte à Éclatante, présence dans les missions et statut vaulted (filtrables), d'après les [tables de drop officielles](https://www.warframe.com/droptables) de DE et la liste des reliques de [`@wfcd/items`](https://github.com/WFCD/warframe-items).
 - **Items** : catalogue des items de `@wfcd/items`, recherche par catégorie et par nom français ou anglais, détail de chaque champ avec sa traduction française.
+- **Personnage** : niveau maximal des ennemis, conservé localement et utilisé par les recettes avec le filtre par chevauchement.
+- **Recettes** : catalogue des schémas du wiki, saisie de recettes locales, calcul des ressources groupées de toutes les sous-recettes, schémas et crédits de fabrication ; meilleurs spots connus filtrés par niveau et type de mission. Les recettes locales et le profil survivent aux réimports ; aucun stock n'est déduit.
 
 Les noms d'objets et de nœuds restent en anglais, comme dans le jeu.
 

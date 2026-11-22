@@ -62,6 +62,8 @@ Le calcul déplie les recettes connues et additionne les besoins avant d'arrondi
 
 Le profil est un plafond de niveau des ennemis, sans rang de maîtrise ni stock (arbitrage Q-004 du 2026-11-22). Le filtre utilise le chevauchement de TASK-020 : minimum annoncé du nœud inférieur ou égal au plafond ; nœud sans minimum exclu dès qu'un plafond est présent. Un nœud 15–25 reste visible avec un plafond de 20 ; cela ne garantit pas les niveaux pendant une mission sans fin. Les spots reprennent les probabilités de récompense et par kill des recherches existantes, affichées séparément ; missions spéciales sans nœud et lieux non jouables exclus. Aucune estimation de rendement par minute. Les ressources sans lieu connu restent affichées.
 
+Pour un ingrédient ou schéma présent dans les récompenses d'une relique, la recherche propose les missions qui donnent cette relique, hors reliques connues vaulted, au raffinement Intact. Plafond et type de mission portent sur la mission d'obtention de la relique, pas sur une fissure en temps réel. Les deux taux restent affichés séparément ; le produit sert seulement au classement de ces parcours en deux étapes. Jusqu'à trois lignes par ingrédient et par mode (récompense directe, ennemi, relique), sans comparaison de rendement entre ces modes. Les autres raffinements restent consultables dans l'onglet Reliques.
+
 ## Cas limites
 
 - `Rewards` peut ne contenir que `A`, ou `A` et `B` seulement.

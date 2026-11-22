@@ -28,6 +28,17 @@ fn rhino_totals_group_resources_and_keep_blueprints_separate() {
             ("Rubedo".into(), 1200)
         ])
     );
+    let conn = db::open_in_memory().unwrap();
+    let view = plop_warframe::recipe_view::present(&conn, &result, Some(20), None).unwrap();
+    assert_eq!(view.resources.len(), 6);
+    assert_eq!(view.blueprints.len(), 4);
+    assert_eq!(view.steps.len(), 4);
+    assert!(
+        view.resources
+            .iter()
+            .all(|r| r[2].contains("Aucun spot connu"))
+    );
+    assert!(view.summary.contains("70000"));
 }
 
 #[cfg(test)]
@@ -133,6 +144,26 @@ fn spots_apply_overlap_and_type_to_both_reward_and_enemy_sources() {
     );
     assert!(
         db::recipe_spots(&conn, "Inconnu", Some(20), None)
+            .unwrap()
+            .is_empty()
+    );
+    conn.execute_batch(
+        r#"
+        INSERT INTO item VALUES (2,'Lith R1','Relic');
+        INSERT INTO "drop" VALUES (2,1,'NONE',2,0.2,'common',1);
+        INSERT INTO relic(id,name,tier,vaulted) VALUES (1,'Lith R1 Relic','Lith',0);
+        INSERT INTO relic_reward VALUES (1,1,'Intact','Prime Part',0.1,'rare');
+    "#,
+    )
+    .unwrap();
+    let found = db::recipe_spots(&conn, "Prime Part", Some(20), Some(1)).unwrap();
+    assert_eq!(found.len(), 1);
+    assert_eq!(found[0].node, "Overlap");
+    assert_eq!(found[0].relic, Some(("Lith R1 Relic".into(), 0.1)));
+    assert_eq!(found[0].chance, 0.2);
+    conn.execute("UPDATE relic SET vaulted=1", []).unwrap();
+    assert!(
+        db::recipe_spots(&conn, "Prime Part", Some(20), Some(1))
             .unwrap()
             .is_empty()
     );

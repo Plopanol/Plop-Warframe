@@ -60,10 +60,38 @@ pub struct RecipeSpot {
     pub estimated: bool,
     pub enemy: Option<String>,
     pub location: Option<super::Location>,
+    pub relic: Option<(String, f64)>,
 }
 
 /// Mission rewards and per-kill chances stay separate: they have different denominators.
 pub fn recipe_spots(
+    conn: &Connection,
+    item: &str,
+    max_level: Option<u32>,
+    mission_type: Option<i64>,
+) -> Result<Vec<RecipeSpot>, DbError> {
+    let mut spots = direct_recipe_spots(conn, item, max_level, mission_type)?;
+    let mut query = conn.prepare("SELECT r.name, max(rr.chance) FROM relic_reward rr JOIN relic r ON r.id=rr.relic_id WHERE rr.item_name=?1 AND rr.refinement='Intact' AND r.vaulted IS NOT 1 GROUP BY r.id ORDER BY r.name")?;
+    let relics = query
+        .query_map([item], |r| {
+            Ok((r.get::<_, String>(0)?, r.get::<_, f64>(1)?))
+        })?
+        .collect::<Result<Vec<_>, _>>()?;
+    for (relic, chance) in relics {
+        let item_name = relic.strip_suffix(" Relic").unwrap_or(&relic);
+        for mut spot in direct_recipe_spots(conn, item_name, max_level, mission_type)? {
+            if spot.location.is_some() {
+                spot.relic = Some((relic.clone(), chance));
+                spots.push(spot);
+            }
+        }
+    }
+    let score = |s: &RecipeSpot| s.chance * s.relic.as_ref().map_or(1.0, |(_, c)| *c);
+    spots.sort_by(|a, b| score(b).total_cmp(&score(a)));
+    Ok(spots)
+}
+
+fn direct_recipe_spots(
     conn: &Connection,
     item: &str,
     max_level: Option<u32>,
@@ -103,6 +131,7 @@ pub fn recipe_spots(
                 estimated: false,
                 enemy: None,
                 location: Some(row.location),
+                relic: None,
             });
         }
     }
@@ -125,6 +154,7 @@ pub fn recipe_spots(
                 estimated: row.estimated,
                 enemy: Some(row.best_enemy),
                 location: None,
+                relic: None,
             });
         }
     }

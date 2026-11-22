@@ -1,6 +1,6 @@
 # TASK-023 — Recettes et profil personnage
 
-- **Statut :** En cours
+- **Statut :** À valider
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-019, TASK-020
@@ -30,14 +30,14 @@ Plan validé par l'utilisateur le 2026-11-22 (Q-004), avec filtre par chevauchem
 
 ## Critères d'acceptation proposés
 
-- [ ] Source des recettes qualifiée sur fixtures, couverture et limites documentées, mapping sans ambiguïté des objets et des sous-recettes.
-- [ ] Profil Personnage persistant, niveau maximal des ennemis positif, saisie invalide expliquée.
-- [ ] Recherche de recette dans le catalogue et création/modification d'une recette locale avec ingrédients, quantités et sous-recettes ; données utilisateur conservées après réimport.
-- [ ] Vue hiérarchique et tableau des besoins totaux regroupés par identité d'objet ; quantités multipliées à chaque niveau et quantités produites par fabrication prises en compte.
-- [ ] Cycles, débordements et sous-recettes manquantes signalés ; une recette incomplète ne produit jamais un total présenté comme complet.
-- [ ] Schémas nécessaires à obtenir distingués des composants construits ; coûts de fabrication affichés séparément des ressources et des lieux de farm.
-- [ ] Spots par ingrédient, filtrés par type de mission et plafond du profil ; sources absentes signalées, taux estimés marqués, probabilités de rotation et par kill distinguées.
-- [ ] Tests métier et base hors ligne : imbrication, ingrédient partagé, rendement de fabrication, cycle, données manquantes, persistance et filtres.
+- [x] Source des recettes qualifiée sur fixtures, couverture et limites documentées, mapping sans ambiguïté des objets et des sous-recettes.
+- [x] Profil Personnage persistant, niveau maximal des ennemis positif, saisie invalide expliquée.
+- [x] Recherche de recette dans le catalogue et création/modification d'une recette locale avec ingrédients, quantités et sous-recettes ; données utilisateur conservées après réimport.
+- [x] Détail des dépendances de fabrication et tableau des besoins totaux regroupés par identité d'objet ; quantités multipliées à chaque niveau et quantités produites par fabrication prises en compte.
+- [x] Cycles, débordements et sous-recettes manquantes signalés ; une recette incomplète ne produit jamais un total présenté comme complet.
+- [x] Schémas nécessaires à obtenir distingués des composants construits ; coûts de fabrication affichés séparément des ressources et des lieux de farm.
+- [x] Spots par ingrédient, filtrés par type de mission et plafond du profil ; sources absentes signalées, taux estimés marqués, probabilités de rotation et par kill distinguées.
+- [x] Tests métier et base hors ligne : imbrication, ingrédient partagé, rendement de fabrication, cycle, données manquantes, persistance et filtres.
 - [ ] Contrôle complet réussi ; validation manuelle par l'utilisateur des deux écrans et du parcours de fabrication.
 
 ## Exécution proposée
@@ -46,7 +46,7 @@ Plan validé par l'utilisateur le 2026-11-22 (Q-004), avec filtre par chevauchem
 |---|---|---|---|---|
 | 1 | Qualifier la source et ses identifiants, fixtures, import et stockage des recettes | Q-004 tranchée, source qualifiée avant implémentation de son import | Tests source/base, vérification rapide | Fait |
 | 2 | Calcul récursif, regroupement, erreurs et recherche des spots filtrés | Lot 1 | Tests métier/requêtes, vérification rapide | Fait |
-| 3 | Profil et recettes locales persistants, écrans Personnage et Recettes, documentation | Lot 2 | Vérification rapide, contrôle complet, validation manuelle | À faire |
+| 3 | Profil et recettes locales persistants, écrans Personnage et Recettes, documentation | Lot 2 | Vérification rapide, contrôle complet, validation manuelle | En cours |
 
 ## Validation et preuves
 
@@ -54,6 +54,9 @@ Plan validé par l'utilisateur le 2026-11-22 (Q-004), avec filtre par chevauchem
 - 2026-11-22 : plan validé par l'utilisateur avec filtre par chevauchement des niveaux.
 - 2026-11-22, lot 1 : vérification rapide réussie ; import depuis le cache du projet, 1 249 recettes et deux résultats contradictoires exclus avec avertissement. Commit `0c100ad`.
 - 2026-11-22, lot 2 : huit tests recettes réussis, dont Rhino (70 000 crédits, 700 Circuits, 1 500 Ferrite, 1 200 Rubedo, 250 Polymer Bundle, 150 Alloy Plate et 2 Neurodes), arrondi des sous-recettes partagées, cycle, manque, dépassement et filtre par chevauchement appliqué aux récompenses comme aux ennemis.
+- 2026-11-22, lot 3 : formatage Slint 1.18.1, vérification rapide officielle (fmt, Clippy sans avertissement et tous les tests), construction debug et Test-Docs (4/4) réussis. Les huit tests recettes couvrent aussi l'affichage des besoins sans source et l'obtention par relique sous les filtres, hors reliques connues vaulted. Journaux locaux : `target/recipe-lot3-check.log` et `target/recipe-import.log`.
+- Validation manuelle demandée à l'utilisateur le 2026-11-22 : profil 20 conservé après redémarrage ; Rhino avec six ressources groupées, quatre schémas et 70 000 crédits ; filtre de mission et chevauchement ; saisie d'une recette et d'une sous-recette conservées après réimport depuis le cache. Exécutable debug construit : `target/debug/plop-warframe.exe`.
+- Validation visuelle et contrôle complet non exécutés à ce stade : en attente du retour utilisateur, puis clôture (version, changelog et contrôle complet final). Branche conservée, sans fusion ni push.
 
 ## Obstacles et reprise
 

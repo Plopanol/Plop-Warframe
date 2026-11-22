@@ -1,0 +1,370 @@
+import {
+    Button,
+    CheckBox,
+    ComboBox,
+    GroupBox,
+    LineEdit,
+    ListView,
+    StandardTableView,
+    TabWidget,
+    VerticalBox,
+    HorizontalBox,
+} from "std-widgets.slint";
+import { Theme, Heading } from "theme.slint";
+
+export struct RecipeIngredient { name: string, quantity: string, crafted: bool }
+
+export global Crafting {
+    in-out property <string> level;
+    in-out property <string> profile-message;
+    in-out property <string> query;
+    in-out property <[string]> catalogue;
+    in-out property <int> catalogue-index: -1;
+    in-out property <string> catalogue-summary;
+    in-out property <string> result;
+    in-out property <string> blueprint;
+    in-out property <string> produced: "1";
+    in-out property <string> credits: "0";
+    in-out property <string> target: "1";
+    in-out property <string> ingredient;
+    in-out property <string> ingredient-quantity: "1";
+    in-out property <bool> ingredient-crafted;
+    in-out property <[RecipeIngredient]> ingredients;
+    in-out property <[string]> mission-types;
+    in-out property <int> mission-index;
+    in-out property <string> message;
+    in-out property <string> summary: "Sélectionnez une recette, puis calculez ses besoins.";
+    in-out property <bool> calculating;
+    in-out property <[[StandardListViewItem]]> resources;
+    in-out property <[[StandardListViewItem]]> blueprints;
+    in-out property <[string]> steps;
+    callback save-profile();
+    callback search();
+    callback select(int);
+    callback new-recipe();
+    callback add-ingredient();
+    callback remove-ingredient(int);
+    callback save-recipe();
+    callback calculate();
+    callback invalidate();
+}
+
+export component CharacterTab inherits VerticalBox {
+    in property <bool> enabled: true;
+    alignment: start;
+    Heading {
+        text: "Personnage";
+    }
+
+    Text {
+        text: "Niveau maximal des ennemis que vous souhaitez affronter";
+        color: Theme.text;
+    }
+
+    HorizontalBox {
+        alignment: start;
+        LineEdit {
+            accessible-id: "character-max-enemy-level";
+            placeholder-text: "Sans plafond";
+            text <=> Crafting.level;
+            width: 160px;
+            enabled: root.enabled && !Crafting.calculating;
+        }
+
+        Button {
+            accessible-id: "character-save";
+            text: "Enregistrer";
+            enabled: root.enabled && !Crafting.calculating;
+            clicked => { Crafting.save-profile(); }
+        }
+    }
+
+    Text {
+        text: "Le filtre utilise les niveaux annoncés des missions. Avec un plafond de 20, une mission 15–25 reste proposée par chevauchement. Les niveaux peuvent ensuite augmenter dans les missions sans fin.";
+        wrap: word-wrap;
+        color: Theme.muted;
+    }
+
+    Text {
+        text: Crafting.profile-message;
+        wrap: word-wrap;
+        color: Theme.accent;
+    }
+}
+
+component FarmTable inherits StandardTableView {
+    columns: [
+        { title: "Ingrédient", horizontal-stretch: 1.2 },
+        { title: "Quantité", horizontal-stretch: 0.5 },
+        { title: "Lieu", horizontal-stretch: 1.8 },
+        { title: "Niveau", horizontal-stretch: 0.6 },
+        { title: "Obtention", horizontal-stretch: 1.8 },
+        { title: "Chance", horizontal-stretch: 0.7 },
+    ];
+}
+
+export component RecipesTab inherits VerticalBox {
+    in property <bool> enabled: true;
+    private property <bool> editable: root.enabled && !Crafting.calculating;
+    Heading {
+        text: "Recettes et lieux de récolte";
+    }
+
+    HorizontalBox {
+        LineEdit {
+            accessible-id: "recipe-search";
+            placeholder-text: "Rechercher une recette, par exemple Rhino";
+            text <=> Crafting.query;
+            enabled: root.editable;
+            horizontal-stretch: 1;
+            edited => { Crafting.search(); }
+        }
+
+        ComboBox {
+            accessible-id: "recipe-catalogue";
+            model: Crafting.catalogue;
+            current-index <=> Crafting.catalogue-index;
+            enabled: root.editable;
+            width: 350px;
+            selected => { Crafting.select(self.current-index); }
+        }
+
+        Button {
+            accessible-id: "recipe-new";
+            text: "Nouvelle recette";
+            enabled: root.editable;
+            clicked => { Crafting.new-recipe(); }
+        }
+    }
+
+    Text {
+        text: Crafting.catalogue-summary;
+        color: Theme.muted;
+    }
+
+    HorizontalBox {
+        Text {
+            text: "Quantité à fabriquer";
+            vertical-alignment: center;
+        }
+
+        LineEdit {
+            accessible-id: "recipe-target";
+            width: 70px;
+            text <=> Crafting.target;
+            enabled: root.editable;
+            edited => { Crafting.invalidate(); }
+        }
+
+        ComboBox {
+            accessible-id: "recipe-mission-type";
+            model: Crafting.mission-types;
+            current-index <=> Crafting.mission-index;
+            enabled: root.editable;
+            horizontal-stretch: 1;
+            selected => { Crafting.invalidate(); }
+        }
+
+        Button {
+            accessible-id: "recipe-calculate";
+            text: Crafting.calculating ? "Calcul en cours…" : "Calculer les besoins";
+            enabled: root.editable && Crafting.result != "";
+            clicked => { Crafting.calculate(); }
+        }
+    }
+
+    Text {
+        text: Crafting.message;
+        color: Theme.accent;
+        wrap: word-wrap;
+    }
+
+    Text {
+        text: Crafting.summary;
+        color: Theme.text;
+        wrap: word-wrap;
+    }
+
+    TabWidget {
+        vertical-stretch: 1;
+        Tab {
+            title: "Ressources et pièces";
+            FarmTable {
+                accessible-id: "recipe-resources";
+                rows: Crafting.resources;
+            }
+        }
+
+        Tab {
+            title: "Schémas requis";
+            VerticalBox {
+                Text {
+                    text: "Quantités de fabrications utilisant chaque schéma. Un schéma réutilisable peut servir plusieurs fois.";
+                    wrap: word-wrap;
+                    color: Theme.muted;
+                }
+
+                FarmTable {
+                    accessible-id: "recipe-blueprints";
+                    rows: Crafting.blueprints;
+                    vertical-stretch: 1;
+                }
+            }
+        }
+
+        Tab {
+            title: "Détail des fabrications";
+            ListView {
+                accessible-id: "recipe-steps";
+                for step in Crafting.steps: Text {
+                    text: step;
+                    wrap: word-wrap;
+                    color: Theme.text;
+                }
+            }
+        }
+
+        Tab {
+            title: "Saisie de la recette";
+            VerticalBox {
+                HorizontalBox {
+                    Text {
+                        text: "Résultat";
+                        vertical-alignment: center;
+                    }
+
+                    LineEdit {
+                        accessible-id: "recipe-result";
+                        text <=> Crafting.result;
+                        enabled: root.editable;
+                        edited => { Crafting.invalidate(); }
+                    }
+
+                    Text {
+                        text: "Schéma";
+                        vertical-alignment: center;
+                    }
+
+                    LineEdit {
+                        accessible-id: "recipe-blueprint-name";
+                        text <=> Crafting.blueprint;
+                        enabled: root.editable;
+                        edited => { Crafting.invalidate(); }
+                    }
+                }
+
+                HorizontalBox {
+                    Text {
+                        text: "Quantité produite";
+                        vertical-alignment: center;
+                    }
+
+                    LineEdit {
+                        accessible-id: "recipe-produced";
+                        width: 80px;
+                        text <=> Crafting.produced;
+                        enabled: root.editable;
+                        edited => { Crafting.invalidate(); }
+                    }
+
+                    Text {
+                        text: "Crédits par fabrication";
+                        vertical-alignment: center;
+                    }
+
+                    LineEdit {
+                        accessible-id: "recipe-credits";
+                        width: 120px;
+                        text <=> Crafting.credits;
+                        enabled: root.editable;
+                        edited => { Crafting.invalidate(); }
+                    }
+
+                    Button {
+                        accessible-id: "recipe-save";
+                        text: "Enregistrer la recette locale";
+                        enabled: root.editable;
+                        clicked => { Crafting.save-recipe(); }
+                    }
+                }
+
+                Text {
+                    text: "Utilisez les noms anglais complets du catalogue pour relier les sous-recettes et retrouver les drops. Une recette locale est prioritaire sur le wiki et reste conservée aux mises à jour.";
+                    wrap: word-wrap;
+                    color: Theme.muted;
+                }
+
+                HorizontalBox {
+                    LineEdit {
+                        accessible-id: "recipe-ingredient-name";
+                        placeholder-text: "Ingrédient ou résultat d’une sous-recette";
+                        text <=> Crafting.ingredient;
+                        enabled: root.editable;
+                        horizontal-stretch: 1;
+                    }
+
+                    LineEdit {
+                        accessible-id: "recipe-ingredient-quantity";
+                        width: 80px;
+                        text <=> Crafting.ingredient-quantity;
+                        enabled: root.editable;
+                    }
+
+                    CheckBox {
+                        accessible-id: "recipe-ingredient-crafted";
+                        text: "À fabriquer";
+                        checked <=> Crafting.ingredient-crafted;
+                        enabled: root.editable;
+                    }
+
+                    Button {
+                        accessible-id: "recipe-add-ingredient";
+                        text: "Ajouter";
+                        enabled: root.editable;
+                        clicked => { Crafting.add-ingredient(); }
+                    }
+                }
+
+                ListView {
+                    accessible-id: "recipe-ingredients";
+                    vertical-stretch: 1;
+                    for item[index] in Crafting.ingredients: HorizontalBox {
+                        Text {
+                            text: item.name;
+                            color: Theme.text;
+                            horizontal-stretch: 1;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: item.quantity;
+                            color: Theme.text;
+                            width: 100px;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: item.crafted ? "À fabriquer" : "Objet ou ressource";
+                            color: Theme.muted;
+                            width: 140px;
+                            vertical-alignment: center;
+                        }
+
+                        Button {
+                            accessible-id: "recipe-remove-ingredient-" + index;
+                            text: "Retirer";
+                            enabled: root.editable;
+                            clicked => { Crafting.remove-ingredient(index); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Text {
+        text: "Spots connus : jusqu’à trois lieux par mode d’obtention et par ingrédient, classés par chance. Une chance par kill n’est pas comparable à une récompense de mission ; les ressources par minute ne sont pas connues.";
+        wrap: word-wrap;
+        color: Theme.muted;
+    }
+}

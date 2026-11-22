@@ -48,4 +48,4 @@ Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Wind
 
 ## Prochaine tâche
 
-[TASK-023 — Recettes et profil personnage](tasks/TASK-023-recettes-et-personnage.md)
+Aucune tâche planifiée.

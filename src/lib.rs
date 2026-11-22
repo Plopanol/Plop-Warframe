@@ -3,6 +3,7 @@
 pub mod db;
 pub mod item_view;
 pub mod model;
+pub mod recipe_view;
 pub mod recipes;
 pub mod relic_view;
 pub mod search_view;

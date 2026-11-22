@@ -17,7 +17,9 @@ Joueur de Warframe, sur son poste Windows ou Linux, qui prépare ses sessions de
 - Recherche par spot : pour des objets choisis, ennemis au meilleur taux par kill, puis nœuds où ils apparaissent, filtrés par type de mission et planète.
 - Reliques d'une Warframe : pour chaque pièce Prime, reliques qui la donnent, chance par raffinement, présence dans les missions et statut vaulted (`@wfcd/items`, [ADR-003](adr/ADR-003-statut-vaulted-wfcd.md)), filtrables.
 - Catalogue des items de `@wfcd/items` ([ADR-004](adr/ADR-004-items-wfcd.md)) : recherche par catégorie et par nom français ou anglais, détail brut de l'item avec sa traduction française.
-- Interface Slint en français, six onglets : Données, Recherche Mission, Recherche Spot, Reliques, Items et Carte stellaire.
+- Profil Personnage : niveau maximal des ennemis persistant, appliqué par chevauchement aux spots des recettes ; aucun stock ni compte de jeu.
+- Recettes du wiki et recettes locales saisies manuellement : sous-recettes dépliées, ressources groupées, schémas et crédits séparés, meilleurs spots connus par ingrédient filtrés par type de mission et profil.
+- Interface Slint en français, huit onglets : Données, Recherche Mission, Recherche Spot, Reliques, Items, Carte stellaire, Personnage et Recettes.
 
 ## Exclusions
 
@@ -34,6 +36,8 @@ Joueur de Warframe, sur son poste Windows ou Linux, qui prépare ses sessions de
 4. Onglet Reliques : choisir une Warframe ; lire, par pièce, les reliques qui la donnent et leurs chances Intacte à Éclatante ; filtrer par « En mission » et « Vaulted ».
 5. Onglet Items : choisir une catégorie, taper tout ou partie d'un nom français ou anglais ; cliquer un item pour lire chacun de ses champs, sa valeur et sa traduction française ; cliquer une valeur HTTP/HTTPS soulignée pour ouvrir son adresse dans le navigateur par défaut. L'adresse `wikiaUrl`, si valide, apparaît aussi comme lien à côté du nom dans le titre du détail.
 6. Onglet Carte stellaire : filtrer les nœuds par type de mission, planète, faction, niveau min–max et Secteurs sombres ; lire planète, nœud, type, faction et niveaux (Jupiter, Io, Défense, 15-20).
+7. Onglet Personnage : saisir le niveau maximal des ennemis puis enregistrer ; vide signifie sans plafond. Un plafond de 20 retient une mission 15–25 par chevauchement (Q-004).
+8. Onglet Recettes : rechercher un résultat ou un schéma, sélectionner la recette, choisir la quantité et le type de mission puis calculer. Lire ressources/pièces groupées, schémas requis et détail des fabrications. « Nouvelle recette » puis « Saisie de la recette » permet de saisir le résultat, son schéma, ses quantités et ingrédients, dont les sous-recettes à fabriquer, puis de sauvegarder une recette locale prioritaire conservée aux réimports. Le calcul utilise le brouillon affiché, sans obligation de l'enregistrer. Changer la recette, le profil enregistré ou les filtres invalide les résultats et demande un nouveau calcul.
 
 ## Critères de succès observables
 

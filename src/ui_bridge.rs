@@ -10,6 +10,7 @@ use crate::db::{self, DbError, ImportSummary, Stats};
 use crate::update::{self, DataPaths, Origin, UpdateReport};
 
 mod items;
+mod recipes;
 mod relics;
 mod search;
 mod spot;
@@ -175,6 +176,7 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
     append_lines(&window, lines);
     let (star_chart, lines) = star_chart::install(&window, paths.clone());
     append_lines(&window, lines);
+    let recipes = recipes::install(&window, paths.clone());
     {
         let weak = window.as_weak();
         let search = Rc::downgrade(&search);
@@ -182,6 +184,7 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
         let relics = Rc::downgrade(&relics);
         let items = Rc::downgrade(&items);
         let star_chart = Rc::downgrade(&star_chart);
+        let recipes = Rc::downgrade(&recipes);
         window.on_import_finished(move || {
             let Some(window) = weak.upgrade() else {
                 return;
@@ -205,6 +208,9 @@ pub fn run(paths: DataPaths, now: fn() -> i64) -> Result<(), slint::PlatformErro
             if let Some(star_chart) = star_chart.upgrade() {
                 let lines = star_chart.borrow_mut().reload(&window);
                 append_lines(&window, lines);
+            }
+            if let Some(recipes) = recipes.upgrade() {
+                recipes.borrow_mut().reload(&window);
             }
         });
     }
