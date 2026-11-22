@@ -4,9 +4,7 @@ Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Report
 
 ## Actives
 
-| ID | Titre | Statut | Phase | Priorité |
-|---|---|---|---|---|
-| [TASK-023](TASK-023-recettes-et-personnage.md) | Recettes et profil personnage | À valider | Phase 2 — Interface | Normale |
+Aucune.
 
 ## À faire
 
@@ -22,6 +20,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-023](TASK-023-recettes-et-personnage.md) | Recettes et profil personnage | Terminée | Phase 2 — Interface | Normale |
 | [TASK-022](TASK-022-nettoyage-repo.md) | Initialiser le nettoyage du dépôt | Terminée | Phase 2 — Interface | Normale |
 | [TASK-021](TASK-021-liens-items.md) | Liens dans les champs des items | Terminée | Phase 2 — Interface | Normale |
 | [TASK-020](TASK-020-onglet-carte-stellaire.md) | Onglet Carte stellaire | Terminée | Phase 2 — Interface | Normale |

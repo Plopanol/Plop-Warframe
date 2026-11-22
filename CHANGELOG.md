@@ -2,6 +2,12 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.20
+
+- Onglet « Personnage » : plafond de niveau des ennemis conservé localement, appliqué par chevauchement aux spots des recettes (TASK-023).
+- Onglet « Recettes » : catalogue du wiki et saisie manuelle, calcul des besoins de toutes les sous-recettes avec ressources regroupées, schémas et crédits séparés, spots filtrés par niveau et type de mission ; recettes locales conservées aux réimports (TASK-023).
+- Le tableau « Ressources et pièces » remplit l'espace disponible et suit le redimensionnement de la fenêtre (BUG-002).
+
 ## v0.1.19
 
 - Outillage : nettoyage local des sorties Rust avec inventaire par défaut, option de conservation du cache et refus des fichiers suivis, liens et dépôts imbriqués ; données et livrables préservés (TASK-022).

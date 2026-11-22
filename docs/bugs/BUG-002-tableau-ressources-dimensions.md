@@ -29,3 +29,5 @@ Correction poursuivie sur la branche de TASK-023, dont ces écrans attendent enc
 - 2026-11-22 : formatage Slint 1.18.1, vérification rapide officielle (fmt, Clippy et tests) et construction debug réussis. Journaux locaux : `target/bug002-rapide.log`, `target/bug002-build.log`.
 - Test initial échoué sur la capture utilisateur ; validation du correctif par redimensionnement demandée après reconstruction.
 - Validation visuelle, contrôle complet et incrément de version restent attendus avec la clôture de TASK-023 ; pas de fusion à ce stade.
+- 2026-11-22 : validation visuelle du tableau reconstruit confirmée par l'utilisateur (« Valider :) »), en réponse à la demande de vérification du remplissage et du redimensionnement. Cette validation ne porte pas sur les autres parcours de TASK-023.
+- 2026-11-22 : l'utilisateur valide ensuite explicitement les quatre autres parcours de TASK-023. Contrôle complet de la version 0.1.20 réussi : 136 tests, fmt, Clippy, release, licences, notices et Test-Docs 4/4. Le correctif UI validé est celui du commit `ec4dc09` ; aucun changement de comportement depuis cette validation.
