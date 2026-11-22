@@ -1,6 +1,6 @@
 # BUG-001 — Localisation des coffres Orokin sur Deimos
 
-- **Statut :** Confirmé
+- **Statut :** Corrigé à vérifier
 - **Gravité :** Normale
 - **Composant :** Import wiki et recherche Mission
 - **Signalé le :** 2026-11-22
@@ -32,6 +32,12 @@ La divergence établie porte sur l'exploitation de la localisation par l'applica
 
 ## Correction et vérification
 
-Aucune correction applicative dans cette demande de vérification. La localisation des récompenses annexes doit conserver la distinction entre récompense de coffre et récompense de mission. Prévoir un test de non-régression sur Blind Rage, les nœuds autorisés et les exclusions avant correction.
+Correction du 2026-11-22, version 0.1.17 : `DerelictVault` est liée en rôle `extra` aux cinq nœuds compatibles de Deimos du tileset Orokin Derelict (Capture, Exterminate, Sabotage, Mobile Defense, Survival). La table doit exister et ne pas être ignorée ; aucun lien en double n'est ajouté. Les autres nœuds et tilesets sont exclus. Le pseudo-nœud spécial disparaît quand les nœuds réels utilisent la table. Le pool s'affiche « Coffre Orokin (clé Dragon) » ; le taux reste propre au coffre, sans rotation ni chance AABC. Cette correction s'applique à tous les objets de la table.
 
-Contrôles du 2026-11-22 : comparaison des sources locales et lecture du code réussies ; consultation de la page Orokin Vault réussie. Construction, tests applicatifs et validation manuelle non exécutés (diagnostic documentaire uniquement).
+Tests de non-régression : `blind_rage_is_found_in_deimos_vaults_without_special_missions` dans `tests/import_tests.rs` vérifie le parcours import → SQLite → recherche par objet et combinée, les cinq nœuds exacts, le taux, le rôle annexe, l'absence de rotation/AABC et le filtre Capture (Horend seul). `orokin_vault_results_explain_the_dragon_key_requirement` dans `src/search_view.rs` vérifie le texte du pool. Les deux tests ont échoué avant correction le 2026-11-22 (aucun résultat et ancien libellé) ; le test d'import ciblé passe après correction.
+
+Contrôles du 2026-11-22 : `pwsh -NoProfile -File tools/Test-Projet.ps1 -Complet` réussi avec `CARGO_INCREMENTAL=0` (contournement documenté du refus de liens physiques du cache incrémental dans le bac à sable) : formatage, Clippy sans avertissement, 122 tests réussis, construction release, licences, notices à jour et quatre contrôles documentaires réussis. Le test de performance sur base de développement reste ignoré par défaut. Les premières passes ont détecté les attentes de comptage de l'ancien pseudo-nœud ; elles ont été actualisées (523 nœuds au lieu de 524), puis les contrôles ont réussi. Aucun échec restant.
+
+Validation manuelle par l'utilisateur non exécutée ; le bug reste `Corrigé à vérifier` jusqu'à ce retour. La base existante doit être réimportée depuis le cache avec l'exécutable reconstruit pour recevoir les nouveaux liens ; aucun téléchargement n'est nécessaire.
+
+Parcours manuel attendu sur l'exécutable reconstruit et la base réimportée depuis le cache : onglet Mission, sélectionner Blind Rage, tous types de mission, missions spéciales exclues → Dirus, Formido, Horend, Phlegyas, Terrorem sur Deimos à 4,17 %, pool « Coffre Orokin (clé Dragon) », aucune chance AABC ; filtre Capture → Horend seul ; ni Hyf, ni Magnacidium, ni Exequias, ni Cambion Drift dans les résultats. Vérifier les modes par objet et combiné.

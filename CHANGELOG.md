@@ -2,6 +2,10 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.17
+
+- Recherche Mission : les récompenses des coffres Orokin, dont Blind Rage à 4,17 %, apparaissent sur les cinq missions compatibles de Deimos, avec la mention « Coffre Orokin (clé Dragon) » ; correction commune à tous les objets de cette table (BUG-001).
+
 ## v0.1.16
 
 - Onglet « Carte stellaire » : nœuds de la carte (planète, nœud, type de mission, faction, niveaux, Secteur sombre), filtrés par type, planète, faction, niveau min–max (chevauchement) et Secteurs sombres ; jonctions, relais, hubs, Conclave et missions spéciales exclus ; tableau triable.

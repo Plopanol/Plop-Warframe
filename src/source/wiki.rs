@@ -438,6 +438,24 @@ fn build_dataset(
             }
         }
 
+        // Vault rewards are not mission rewards: the wiki describes their locations in
+        // MissionTypes.LocationNote instead of giving each node an ExtraDropTableAlias.
+        if raw.planet.as_deref() == Some("Deimos")
+            && raw.tileset.as_deref() == Some("Orokin Derelict")
+            && matches!(
+                raw.mission_type.as_deref(),
+                Some("Capture" | "Exterminate" | "Sabotage" | "Mobile Defense" | "Survival")
+            )
+            && tables_by_alias.contains_key("DerelictVault")
+            && !tables.iter().any(|link| link.alias == "DerelictVault")
+        {
+            tables.push(NodeTable {
+                alias: "DerelictVault".to_owned(),
+                role: TableRole::Extra,
+            });
+            used_aliases.insert("DerelictVault".to_owned());
+        }
+
         nodes.push(Node {
             key,
             tileset: raw.tileset.filter(|tileset| !tileset.trim().is_empty()),

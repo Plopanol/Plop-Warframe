@@ -381,7 +381,11 @@ pub fn chance_cell(chance: Option<f64>) -> (String, SortKey) {
 pub const DARK_SECTOR_MARK: &str = "Oui";
 
 fn location_cells(location: &Location) -> Vec<(String, SortKey)> {
-    let pool = pool_label(location.rotation_kind, location.role, location.rotation);
+    let pool = if location.table_alias == "DerelictVault" {
+        "Coffre Orokin (clé Dragon)".to_owned()
+    } else {
+        pool_label(location.rotation_kind, location.role, location.rotation)
+    };
     // Pools sort by kind then letter, which the label text gives.
     vec![
         text_cell(&location.node_name),
@@ -427,6 +431,17 @@ mod tests {
             quantity: 1,
             aabc,
         }
+    }
+
+    #[test]
+    fn orokin_vault_results_explain_the_dragon_key_requirement() {
+        let mut row = item_row("Horend", "Blind Rage", 0.0417, None);
+        row.location.table_alias = "DerelictVault".to_owned();
+        row.location.role = TableRole::Extra;
+        row.location.rotation_kind = RotationKind::None;
+        row.location.rotation = Rotation::None;
+        let cells = location_cells(&row.location);
+        assert_eq!(cells[4].0, "Coffre Orokin (clé Dragon)");
     }
 
     #[test]

@@ -58,7 +58,7 @@ fn counts_match_the_fixtures() {
     // 357 map nodes plus one pseudo-node per table no node uses.
     let map_nodes = data.nodes.iter().filter(|node| !node.is_special).count();
     assert_eq!(map_nodes, 357);
-    assert_eq!(data.nodes.len() - map_nodes, 167);
+    assert_eq!(data.nodes.len() - map_nodes, 166);
     assert!(data.mission_types.len() >= 40);
 }
 

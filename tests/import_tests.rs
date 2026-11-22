@@ -76,7 +76,7 @@ fn reopening_a_file_keeps_data_and_version() {
     }
     let conn = db::open(&path).expect("reopen");
     assert_eq!(db::schema_version(&conn).expect("version"), 5);
-    assert_eq!(db::stats(&conn).expect("stats").nodes, 524);
+    assert_eq!(db::stats(&conn).expect("stats").nodes, 523);
 }
 
 #[test]
@@ -98,12 +98,12 @@ fn newer_schema_is_refused() {
 fn full_import_fills_the_tables() {
     let mut conn = db::open_in_memory().expect("open");
     let summary = db::import_dataset(&mut conn, dataset(), RUN, &clock).expect("import");
-    assert_eq!(summary.nodes, 524);
+    assert_eq!(summary.nodes, 523);
     assert_eq!(summary.tables, 341);
     assert_eq!(summary.drops, 6753);
 
     let stats = db::stats(&conn).expect("stats");
-    assert_eq!(stats.nodes, 524);
+    assert_eq!(stats.nodes, 523);
     assert_eq!(stats.drops, 6753);
     assert_eq!(usize::try_from(stats.items).expect("items"), summary.items);
     let run = stats.last_run.expect("run");
@@ -134,6 +134,69 @@ fn full_import_fills_the_tables() {
         )
         .expect("Survival");
     assert!(survival_endless);
+}
+
+#[test]
+fn blind_rage_is_found_in_deimos_vaults_without_special_missions() {
+    use plop_warframe::db::{NodeFilter, SearchFilter};
+    use plop_warframe::model::TableRole;
+
+    let mut conn = db::open_in_memory().expect("open");
+    db::import_dataset(&mut conn, dataset(), RUN, &clock).expect("import");
+    let item_id = conn
+        .query_row("SELECT id FROM item WHERE name = 'Blind Rage'", [], |row| {
+            row.get(0)
+        })
+        .expect("Blind Rage");
+    let filter = SearchFilter {
+        item_ids: vec![item_id],
+        specials: NodeFilter::Exclude,
+        ..SearchFilter::default()
+    };
+    let rows = db::search_by_item(&conn, &filter).expect("search");
+    let mut names: Vec<_> = rows
+        .iter()
+        .map(|row| row.location.node_name.as_str())
+        .collect();
+    names.sort_unstable();
+    assert_eq!(
+        names,
+        ["Dirus", "Formido", "Horend", "Phlegyas", "Terrorem"]
+    );
+    for row in &rows {
+        assert_eq!(row.location.planet, "Deimos");
+        assert_eq!(row.location.table_alias, "DerelictVault");
+        assert_eq!(row.location.role, TableRole::Extra);
+        assert_eq!(row.location.rotation_kind, RotationKind::None);
+        assert_eq!(row.location.rotation, Rotation::None);
+        assert!((row.chance - 0.0417).abs() < 1e-9);
+        assert_eq!(row.aabc, None);
+    }
+    let combined = db::search_combined(&conn, &filter).expect("combined search");
+    assert_eq!(combined.len(), 5);
+    assert!(
+        combined
+            .iter()
+            .all(|row| (row.chance - 0.0417).abs() < 1e-9)
+    );
+
+    let capture = conn
+        .query_row(
+            "SELECT id FROM mission_type WHERE name = 'Capture'",
+            [],
+            |row| row.get(0),
+        )
+        .expect("Capture");
+    let captures = db::search_by_item(
+        &conn,
+        &SearchFilter {
+            mission_type_id: Some(capture),
+            ..filter
+        },
+    )
+    .expect("capture search");
+    assert_eq!(captures.len(), 1);
+    assert_eq!(captures[0].location.node_name, "Horend");
 }
 
 #[test]

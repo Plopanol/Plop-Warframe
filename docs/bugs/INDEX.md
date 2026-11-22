@@ -6,7 +6,7 @@ Statuts : Signalé, Confirmé, En cours, Bloqué, Corrigé à vérifier, Clos, D
 
 | ID | Titre | Statut | Gravité | Composant |
 |---|---|---|---|---|
-| [BUG-001](BUG-001-localisation-coffres-orokin-deimos.md) | Localisation des coffres Orokin sur Deimos | Confirmé | Normale | Import wiki et recherche Mission |
+| [BUG-001](BUG-001-localisation-coffres-orokin-deimos.md) | Localisation des coffres Orokin sur Deimos | Corrigé à vérifier | Normale | Import wiki et recherche Mission |
 
 ## Fermés
 

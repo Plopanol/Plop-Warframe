@@ -80,7 +80,7 @@ fn import_from_cache_fills_the_database() {
         steps.push((progress.done, progress.total, progress.message.to_owned()))
     })
     .expect("import");
-    assert_eq!(report.summary.nodes, 524);
+    assert_eq!(report.summary.nodes, 523);
     assert_eq!(report.warnings.len(), report.summary.warnings);
     let total = update::step_count(Origin::Cache);
     assert_eq!(steps.len(), total);
