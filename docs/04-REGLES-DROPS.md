@@ -54,6 +54,10 @@ Autorité pour la lecture des sources du wiki et leur traduction en données. Un
 
 ## Cas limites
 
+### Recettes (TASK-023)
+
+`Module:Blueprints/data?action=raw` est exécuté par `BlueprintSource` derrière `DropSource`, avec le Lua restreint d'ADR-001. Les groupes du module sont parcourus jusqu'aux entrées `Parts` : `Result` devient l'identité anglaise complète, `Name` le schéma à obtenir, `Credits` le coût et `Parts[].Count` la quantité. Les noms relatifs des pièces (`Neuroptics`, `Chassis`, `Systems`, etc.) sont qualifiés par leur résultat parent ; `Prime Chassis` de Rhino Prime devient Rhino Prime Chassis, tandis que `WarframePart` porte déjà son nom complet. Les composants PrimePart sont préfixés par le résultat (Acceltra Prime Barrel). Une sous-recette manquante doit rester explicitement incomplète. Le module observé ne donne pas de quantité produite : 1 par défaut, modifiable par une recette locale. Catalogue absent du cache : avertissement ; module malformé : import annulé. Le téléchargement des recettes est optionnel et conserve le cache précédent en cas d'échec.
+
 - `Rewards` peut ne contenir que `A`, ou `A` et `B` seulement.
 - Une entrée peut ne porter que deux champs (sans chance) : ignorée avec avertissement.
 - Les tables suffixées `-UNUSED` sont importées comme les autres ; leur exclusion éventuelle relève de la recherche.

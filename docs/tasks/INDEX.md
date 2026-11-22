@@ -1,10 +1,12 @@
 # Index des tâches
 
-Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-023.
+Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-024.
 
 ## Actives
 
-Aucune.
+| ID | Titre | Statut | Phase | Priorité |
+|---|---|---|---|---|
+| [TASK-023](TASK-023-recettes-et-personnage.md) | Recettes et profil personnage | En cours | Phase 2 — Interface | Normale |
 
 ## À faire
 

@@ -2,6 +2,7 @@
 //! `@wfcd/items` for every item and the vaulted status of relics.
 //! Every source goes through [`DropSource`] so a source can be replaced later.
 
+mod blueprints;
 mod cache;
 mod de;
 mod http;
@@ -9,6 +10,7 @@ mod lua;
 mod wfcd;
 mod wiki;
 
+pub use blueprints::{BLUEPRINTS_CACHE, BLUEPRINTS_MODULE, BlueprintSource};
 pub use cache::{CacheError, CachedModule, ModuleCache};
 pub use de::{DE_DROP_TABLES, DE_DROP_TABLES_URL, DeRelicSource, parse_relic_rewards};
 pub use http::{FetchError, FetchedPage, ModuleFetcher, WIKI_BASE_URL};

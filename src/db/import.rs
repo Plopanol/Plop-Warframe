@@ -82,7 +82,8 @@ fn load(
     // Children first, for the foreign keys. Without AUTOINCREMENT, ids restart at 1, so two
     // imports of the same data give identical rows.
     tx.execute_batch(
-        "DELETE FROM wfcd_item;
+        "DELETE FROM recipe;
+         DELETE FROM wfcd_item;
          DELETE FROM relic_reward;
          DELETE FROM relic;
          DELETE FROM region_resource;
@@ -151,6 +152,12 @@ fn load(
     drop(items);
     let relic_count = insert_relics(&tx, dataset)?;
     let wfcd_items_by_category = insert_wfcd_items(&tx, dataset)?;
+    for recipe in &dataset.recipes {
+        tx.execute(
+            "INSERT INTO recipe(result,json) VALUES (?1,?2)",
+            params![recipe.result, serde_json::to_string(recipe)?],
+        )?;
+    }
 
     let summary = ImportSummary {
         run_id,

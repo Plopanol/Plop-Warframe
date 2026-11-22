@@ -4,6 +4,7 @@ Copies figées des sources lues par le parseur, pour des tests hors ligne et dé
 
 | Fichier | Source | Téléchargé le |
 |---|---|---|
+| `blueprints.lua` | `https://wiki.warframe.com/w/Module:Blueprints/data?action=raw`, extrait réduit aux champs utiles de Rhino et de ses trois composants | 2026-11-22 |
 | `droptables_data.lua` | `https://wiki.warframe.com/w/Module:DropTables/data?action=raw` | 2026-11-19 |
 | `missions_data.lua` | `https://wiki.warframe.com/w/Module:Missions/data?action=raw` | 2026-11-19 |
 | `enemies/<faction>.lua` (12 fichiers) | `https://wiki.warframe.com/w/Module:Enemies/data/<faction>?action=raw` | 2026-11-19 |

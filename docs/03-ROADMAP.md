@@ -41,10 +41,11 @@ Jalon : `--import` remplit la base depuis le wiki et une requête de test retrou
 | [TASK-020](tasks/TASK-020-onglet-carte-stellaire.md) | Onglet Carte stellaire (nœuds par type et niveau) | TASK-016 |
 | [TASK-021](tasks/TASK-021-liens-items.md) | Liens dans les champs des items | TASK-019 |
 | [TASK-022](tasks/TASK-022-nettoyage-repo.md) | Nettoyage local sécurisé des sorties Rust | TASK-021 |
+| [TASK-023](tasks/TASK-023-recettes-et-personnage.md) | Profil personnage, recettes imbriquées et spots par ingrédient | TASK-019, TASK-020 |
 | [TASK-012](tasks/TASK-012-controle-linux.md) | Contrôle Linux (reporté) | TASK-008 |
 
 Jalon : critères de succès de [01-PRODUIT](01-PRODUIT.md) vérifiés sous Windows et Linux.
 
 ## Prochaine tâche
 
-Aucune tâche planifiée.
+[TASK-023 — Recettes et profil personnage](tasks/TASK-023-recettes-et-personnage.md)

@@ -380,6 +380,7 @@ pub struct WfcdItem {
 /// Everything a source yields for one import.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct DropDataset {
+    pub recipes: Vec<crate::recipes::Recipe>,
     pub mission_types: Vec<MissionType>,
     pub nodes: Vec<Node>,
     pub tables: Vec<DropTable>,

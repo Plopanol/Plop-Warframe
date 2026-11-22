@@ -1,6 +1,7 @@
 //! Import use case shared by the CLI and the UI: download (or read the cache), parse, store.
 //! Blocking: run it on a worker thread.
 
+use crate::source::{BLUEPRINTS_CACHE, BLUEPRINTS_MODULE, BlueprintSource};
 use std::path::{Path, PathBuf};
 
 use crate::db::{self, DbError, ImportRun, ImportSummary};
@@ -93,7 +94,7 @@ impl Progress<'_> {
 /// Number of progress steps of an import: one per download, reading, writing.
 pub fn step_count(origin: Origin) -> usize {
     match origin {
-        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 3 + WFCD_CATEGORIES.len() + 1,
+        Origin::Wiki => MODULES.len() + ENEMY_FACTIONS.len() + 4 + WFCD_CATEGORIES.len() + 1,
         Origin::Cache => 2,
     }
 }
@@ -192,6 +193,21 @@ pub fn run_import(
                 },
             )?;
         }
+        step("Téléchargement des recettes…");
+        match fetcher.fetch_raw(BLUEPRINTS_MODULE) {
+            Ok(page) => cache.store(
+                BLUEPRINTS_CACHE,
+                &CachedModule {
+                    text: page.text,
+                    downloaded_at: now(),
+                    last_modified: page.last_modified,
+                    version: page.version,
+                },
+            )?,
+            Err(error) => cache_warnings.push(format!(
+                "{error} ; recettes précédentes du cache conservées si présentes"
+            )),
+        }
         step(&format!("Téléchargement des {DE_DROP_TABLES}…"));
         let page_data = fetcher.fetch_url(DE_DROP_TABLES, DE_DROP_TABLES_URL)?;
         cache.store(
@@ -241,6 +257,19 @@ pub fn run_import(
     let mut dataset = WikiSource::new(drop_tables.text, missions.text)
         .with_enemy_modules(enemy_texts)
         .load()?;
+    match cache.load(BLUEPRINTS_CACHE) {
+        Ok(module) => {
+            let recipes = BlueprintSource(&module.text).load()?;
+            dataset.recipes = recipes.recipes;
+            dataset.warnings.extend(recipes.warnings);
+            revision.push_str(&format!(" ; {BLUEPRINTS_MODULE} : {}", when(&module)));
+        }
+        Err(CacheError::Missing(_)) => cache_warnings.push(
+            "Recettes absentes du cache : mettez à jour depuis le wiki pour charger le catalogue."
+                .to_owned(),
+        ),
+        Err(error) => return Err(error.into()),
+    }
     match cache.load(DE_CACHE_FILE) {
         Ok(page) => {
             let relics = DeRelicSource::new(page.text.as_str()).load()?;

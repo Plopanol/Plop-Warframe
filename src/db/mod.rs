@@ -2,6 +2,7 @@
 //! Schema reference: `docs/05-DATA-SCHEMAS.md`.
 
 mod import;
+mod recipes;
 mod relics;
 mod search;
 mod spot;
@@ -9,6 +10,7 @@ mod star_chart;
 mod wfcd;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
+pub use recipes::{profile_level, recipes, save_local_recipe, save_profile_level};
 pub use relics::{RelicRow, WARFRAME_PARTS, relics_for_warframe, warframes};
 pub use search::{
     CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, NodeFilter, RotationFilter,
@@ -34,6 +36,10 @@ pub const DATABASE_FILE: &str = "plop-warframe.sqlite3";
 
 #[derive(Debug, thiserror::Error)]
 pub enum DbError {
+    #[error("recette enregistrée illisible : {0}")]
+    RecipeJson(#[from] serde_json::Error),
+    #[error(transparent)]
+    Recipe(#[from] crate::recipes::RecipeError),
     #[error("base de données : {}", sqlite_reason(.0))]
     Sqlite(#[from] rusqlite::Error),
     #[error(
@@ -74,6 +80,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("migrations/003_relics.sql"),
     include_str!("migrations/004_relic_vaulted.sql"),
     include_str!("migrations/005_wfcd_items.sql"),
+    include_str!("migrations/006_recipes.sql"),
 ];
 
 fn latest_version() -> i64 {

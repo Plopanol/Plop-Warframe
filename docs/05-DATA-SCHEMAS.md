@@ -10,6 +10,7 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 |---|---|
 | `plop-warframe.sqlite3` | Base |
 | `cache/<module>.lua` | Texte brut du module téléchargé (`?action=raw`) |
+| `cache/blueprints_data.lua` (et `.meta`) | Module Lua des recettes, optionnel pour les anciens caches |
 | `cache/<module>.lua.meta` | Date de téléchargement (secondes Unix), en-tête `Last-Modified` et, si connue, version du paquet (`version=`) |
 | `cache/droptables_de.html` (et `.meta`) | Page des tables officielles de DE, lue pour les reliques ; absente : import sans reliques, avec avertissement |
 | `cache/wfcd/<Catégorie>.json`, `cache/wfcd/fr.json` (et `.meta`) | 26 fichiers de catégorie et traduction française de `@wfcd/items` ; le `.meta` ajoute `version=` (en-tête `X-JSD-Version`) ; les fichiers absents donnent un avertissement commun ; `Relics.json` sert aussi au statut vaulted |
@@ -26,11 +27,15 @@ Dossier de données : `data/` à côté de l'exécutable, ou `--data-dir <dossie
 | 3 | `003_relics.sql` | Reliques et leurs récompenses (tables officielles de DE) |
 | 4 | `004_relic_vaulted.sql` | Statut vaulted des reliques (WFCD) |
 | 5 | `005_wfcd_items.sql` | Items de `@wfcd/items` |
+| 6 | `006_recipes.sql` | Recettes du wiki, recettes locales et profil personnage |
 
-## Tables (version 5)
+## Tables (version 6)
 
 | Table | Clé naturelle | Rôle |
 |---|---|---|
+| `recipe` | `result` | Recettes du wiki en JSON typé : résultat anglais complet, schéma, quantité produite, crédits et ingrédients |
+| `local_recipe` | `result` | Recettes locales prioritaires pour un résultat identique ; conservées au réimport |
+| `character_profile` | `id = 1` | Niveau maximal des ennemis positif, ou `NULL` sans plafond ; conservé au réimport |
 | `planet` | `name` | Planète, ou `Type` de la table pour une mission spéciale ; `(inconnu)` si vide |
 | `mission_type` | `name` | Type de mission (nom anglais du wiki) et `is_endless` |
 | `node` | `key` | Nœud ou pseudo-nœud spécial (`is_special`), faction (texte du wiki), niveaux, Secteur sombre, `tileset` |
@@ -56,4 +61,4 @@ Codes de rareté : `very_common`, `common`, `uncommon`, `rare`, `ultra_rare`, `l
 
 ## Import
 
-Une seule transaction vide puis recharge toutes les tables sauf `import_run` ; sans `AUTOINCREMENT`, les identifiants repartent de 1, si bien que deux imports des mêmes données donnent des lignes identiques. Une ligne `import_run` est créée avant la transaction (`running`), passée à `success` dans la transaction ou à `failed` avec le message d'erreur après l'annulation : un échec laisse les données précédentes intactes.
+Une seule transaction vide puis recharge les tables importées ; `import_run`, `local_recipe` et `character_profile` sont conservées. Sans `AUTOINCREMENT`, les identifiants repartent de 1, si bien que deux imports des mêmes données donnent des lignes identiques. Une ligne `import_run` est créée avant la transaction (`running`), passée à `success` dans la transaction ou à `failed` avec le message d'erreur après l'annulation : un échec laisse les données précédentes intactes.

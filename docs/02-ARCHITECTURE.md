@@ -40,6 +40,8 @@ Les avertissements de lecture des sources sont portés par `DropDataset::warning
 
 ## Données
 
+Recettes (TASK-023) : `src/source/blueprints.rs` exécute le module de recettes du wiki et produit les types de `src/recipes.rs` ; `src/db/recipes.rs` conserve séparément catalogue, recettes locales et profil personnage. Les données utilisateur survivent aux réimports.
+
 - Sources : modules Lua du wiki pour les missions et les ennemis, tables officielles de DE pour le contenu des reliques, `@wfcd/items` pour leur statut vaulted et pour le catalogue de tous les items ; règles de lecture dans [04-REGLES-DROPS](04-REGLES-DROPS.md) ; fixtures dans `tests/fixtures/`.
 - Emplacement (arbitrage Q-001 du 2026-11-19, conforme au socle) : dossier `data/` à côté de l'exécutable, remplaçable par l'argument `--data-dir <dossier>` ; en construction de développement, `data/` à la racine du dépôt (TASK-009), chemin absent des constructions release ; il contient la base `plop-warframe.sqlite3` et le cache des sources `cache/` (dont `cache/wfcd/`). Aucun chemin sous `%APPDATA%` ni dans le profil utilisateur.
 - Base SQLite : schéma dans [05-DATA-SCHEMAS](05-DATA-SCHEMAS.md).

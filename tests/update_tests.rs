@@ -128,7 +128,7 @@ fn progress_fraction_is_bounded() {
         update::step_count(Origin::Wiki),
         update::MODULES.len()
             + update::enemy_modules().len()
-            + 3
+            + 4
             + plop_warframe::source::wfcd_item_files().len()
     );
 }
