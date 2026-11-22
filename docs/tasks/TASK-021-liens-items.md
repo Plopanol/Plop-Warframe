@@ -1,6 +1,6 @@
 # TASK-021 — Liens dans les champs des items
 
-- **Statut :** À valider
+- **Statut :** Terminée
 - **Phase :** Phase 2 — Interface
 - **Priorité :** Normale
 - **Dépendances :** TASK-019
@@ -9,12 +9,12 @@
 - **Objectif :** ouvrir dans le navigateur les URL affichées dans les détails des items, notamment `introduced.url`.
 - **Travail à réaliser :** détecter les valeurs HTTP/HTTPS dans tous les champs et leur traduction, les afficher comme liens, ouvrir le navigateur par défaut au clic, conserver le tri et signaler les erreurs récupérables.
 - **Critères d'acceptation :**
-  - [ ] Le titre affiche « Détail : NOM – URL », avec `wikiaUrl` cliquable à côté du nom ; sans adresse valide, seul le nom apparaît.
-  - [ ] Les valeurs HTTP/HTTPS sont soulignées et cliquables dans les colonnes Valeur et Français, indépendamment du nom du champ.
-  - [ ] Le clic ouvre l'adresse dans le navigateur par défaut sans bloquer l'interface ; une erreur de lancement est journalisée et affichée.
-  - [ ] Les valeurs ordinaires restent du texte ; le tri reste utilisable.
+  - [x] Le titre affiche « Détail : NOM – URL », avec `wikiaUrl` cliquable à côté du nom ; sans adresse valide, seul le nom apparaît.
+  - [x] Les valeurs HTTP/HTTPS sont soulignées et cliquables dans les colonnes Valeur et Français, indépendamment du nom du champ.
+  - [x] Le clic ouvre l'adresse dans le navigateur par défaut sans bloquer l'interface ; une erreur de lancement est journalisée et affichée.
+  - [x] Les valeurs ordinaires restent du texte ; le tri reste utilisable.
   - [x] Contrôles rapides, complets et construction debug réussis.
-  - [ ] Validation manuelle par l'utilisateur sur Windows.
+  - [x] Validation manuelle par l'utilisateur sur Windows.
 - **Risques :** navigateur indisponible ; URL invalide dans les données.
 - **Tests prévus :** détection des adresses imbriquées et traduites, exclusion des autres protocoles et des adresses invalides ; validation manuelle de l'affichage, du clic et du tri.
 
@@ -34,7 +34,8 @@ Complément demandé le 2026-11-22 : afficher aussi `wikiaUrl` dans l'en-tête, 
 - Non exécutés : clic réel dans le navigateur (validation utilisateur), essai Linux ; aucun téléchargement effectué.
 - Complément d'en-tête : sélectionner un item avec `wikiaUrl`, vérifier « Détail : NOM – URL » et cliquer l'adresse ; changer d'item et de recherche pour vérifier que le lien suit la sélection et disparaît sans adresse valide. Les liens du tableau restent disponibles.
 - 2026-11-22, complément d'en-tête : contrôle complet et construction debug réussis sans avertissement, avec `CARGO_INCREMENTAL=0` (fmt, Clippy, 128 tests réussis et 1 test de performance ignoré, release, licences, notices et 4 contrôles documentaires). `detail_header_uses_only_a_valid_wikia_url` couvre l'adresse de l'item, son absence, une valeur nulle et un protocole non web. Validation manuelle toujours attendue.
-- Version et changelog à mettre à jour à la clôture après validation manuelle ; branche conservée sans fusion.
+- 2026-11-22 : validation manuelle de l'utilisateur (« Je valide :) ») ; critères d'affichage et d'ouverture acceptés. Clôture en 0.1.18 ; version et changelog mis à jour.
+- 2026-11-22 : contrôle complet de clôture en 0.1.18 réussi (fmt, Clippy, 128 tests, release, licences, notices, documentation). Le premier essai avait rencontré l'exécutable debug ouvert (`os error 5`) ; instance du dépôt fermée normalement après vérification du chemin, selon la leçon du coffre `environnement/exe-verrouille-windows.md`. L'application installée est préservée.
 
 ## Obstacles et reprise
 

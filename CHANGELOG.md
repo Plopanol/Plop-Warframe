@@ -2,6 +2,10 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.18
+
+- Onglet « Items » : URL HTTP/HTTPS cliquables dans les valeurs et traductions ; lien `wikiaUrl` à côté du nom dans le titre du détail, ouvert dans le navigateur par défaut (TASK-021).
+
 ## v0.1.17
 
 - Recherche Mission : les récompenses des coffres Orokin, dont Blind Rage à 4,17 %, apparaissent sur les cinq missions compatibles de Deimos, avec la mention « Coffre Orokin (clé Dragon) » ; correction commune à tous les objets de cette table (BUG-001).
