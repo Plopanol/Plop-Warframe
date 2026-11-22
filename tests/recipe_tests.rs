@@ -1,8 +1,142 @@
+use plop_warframe::recipes::{RecipeError, plan};
 use plop_warframe::{
     db,
     recipes::{Ingredient, Recipe},
     source::{BlueprintSource, DropSource},
 };
+use std::collections::BTreeMap;
+
+#[test]
+fn rhino_totals_group_resources_and_keep_blueprints_separate() {
+    let data = fixture();
+    let recipes = data
+        .recipes
+        .into_iter()
+        .map(|r| (r.result.clone(), r))
+        .collect();
+    let result = plan(&recipes, "Rhino", 1).unwrap();
+    assert_eq!(result.credits, 70_000);
+    assert_eq!(result.blueprints.len(), 4);
+    assert_eq!(
+        result.resources,
+        BTreeMap::from([
+            ("Alloy Plate".into(), 150),
+            ("Circuits".into(), 700),
+            ("Ferrite".into(), 1500),
+            ("Neurodes".into(), 2),
+            ("Polymer Bundle".into(), 250),
+            ("Rubedo".into(), 1200)
+        ])
+    );
+}
+
+#[cfg(test)]
+fn recipe(name: &str, yield_count: u32, parts: &[(&str, u32)]) -> Recipe {
+    Recipe {
+        result: name.into(),
+        blueprint: format!("{name} Blueprint"),
+        quantity: yield_count,
+        credits: 1,
+        ingredients: parts
+            .iter()
+            .map(|(n, q)| Ingredient {
+                name: (*n).into(),
+                quantity: *q,
+                crafted: false,
+            })
+            .collect(),
+    }
+}
+
+#[test]
+fn shared_recipe_demands_are_rounded_after_aggregation() {
+    let recipes = [
+        recipe("Root", 1, &[("A", 1), ("B", 1)]),
+        recipe("A", 1, &[("Shared", 1)]),
+        recipe("B", 1, &[("Shared", 1)]),
+        recipe("Shared", 2, &[("Ferrite", 5)]),
+    ]
+    .into_iter()
+    .map(|r| (r.result.clone(), r))
+    .collect();
+    let result = plan(&recipes, "Root", 1).unwrap();
+    assert_eq!(result.resources["Ferrite"], 5);
+    assert_eq!(
+        result
+            .steps
+            .iter()
+            .find(|s| s.result == "Shared")
+            .unwrap()
+            .runs,
+        1
+    );
+    assert_eq!(plan(&recipes, "Root", 3).unwrap().resources["Ferrite"], 15);
+}
+
+#[test]
+fn cycles_missing_recipes_and_overflows_are_explicit_errors() {
+    let mut recipes: BTreeMap<_, _> = [recipe("A", 1, &[("B", 1)]), recipe("B", 1, &[("A", 1)])]
+        .into_iter()
+        .map(|r| (r.result.clone(), r))
+        .collect();
+    assert!(matches!(plan(&recipes, "A", 1), Err(RecipeError::Cycle(_))));
+    recipes.remove("B");
+    recipes.get_mut("A").unwrap().ingredients[0].crafted = true;
+    assert!(matches!(
+        plan(&recipes, "A", 1),
+        Err(RecipeError::Missing(_))
+    ));
+    let recipes = [
+        recipe("A", 1, &[("B", u32::MAX)]),
+        recipe("B", 1, &[("Ferrite", u32::MAX)]),
+    ]
+    .into_iter()
+    .map(|r| (r.result.clone(), r))
+    .collect();
+    assert!(matches!(
+        plan(&recipes, "A", u32::MAX),
+        Err(RecipeError::Overflow)
+    ));
+    assert!(plan(&recipes, "A", 0).is_err());
+}
+
+#[test]
+fn spots_apply_overlap_and_type_to_both_reward_and_enemy_sources() {
+    let conn = db::open_in_memory().unwrap();
+    conn.execute_batch(r#"
+        INSERT INTO planet VALUES (1,'Earth');
+        INSERT INTO mission_type VALUES (1,'Defense',1),(2,'Survival',1);
+        INSERT INTO node(id,key,name,planet_id,mission_type_id,min_level,max_level) VALUES
+            (1,'overlap','Overlap',1,1,15,25),(2,'high','High',1,1,21,30),(3,'unknown','Unknown',1,1,NULL,NULL),(4,'survival','Survival',1,2,10,20);
+        INSERT INTO node_faction VALUES (1,'grineer'),(2,'grineer'),(3,'grineer'),(4,'grineer');
+        INSERT INTO item VALUES (1,'Ferrite','Resource');
+        INSERT INTO enemy VALUES (1,'Lancer','Lancer','grineer');
+        INSERT INTO enemy_drop VALUES (1,1,1,0.1,'common');
+        INSERT INTO drop_table VALUES (1,'t','Test','Defense',NULL,'none');
+        INSERT INTO node_drop_table VALUES (1,1,'main'),(2,1,'main'),(3,1,'main'),(4,1,'main');
+        INSERT INTO "drop" VALUES (1,1,'NONE',1,0.5,'common',1);
+    "#).unwrap();
+    let found = db::recipe_spots(&conn, "Ferrite", Some(20), Some(1)).unwrap();
+    assert_eq!(found.len(), 2);
+    assert!(found.iter().all(|r| r.node == "Overlap"));
+    assert!(found.iter().any(|r| r.enemy.is_some() && r.chance == 0.1));
+    assert!(
+        found
+            .iter()
+            .any(|r| r.location.is_some() && r.chance == 0.5)
+    );
+    assert_eq!(
+        db::recipe_spots(&conn, "Ferrite", None, None)
+            .unwrap()
+            .len(),
+        8
+    );
+    assert!(
+        db::recipe_spots(&conn, "Inconnu", Some(20), None)
+            .unwrap()
+            .is_empty()
+    );
+}
 
 #[cfg(test)]
 fn fixture() -> plop_warframe::model::DropDataset {

@@ -10,7 +10,9 @@ mod star_chart;
 mod wfcd;
 
 pub use import::{ImportRun, ImportSummary, import_dataset};
-pub use recipes::{profile_level, recipes, save_local_recipe, save_profile_level};
+pub use recipes::{
+    RecipeSpot, profile_level, recipe_spots, recipes, save_local_recipe, save_profile_level,
+};
 pub use relics::{RelicRow, WARFRAME_PARTS, relics_for_warframe, warframes};
 pub use search::{
     CombinedRow, ItemDropRow, ItemHit, Location, MissionTypeRow, NodeFilter, RotationFilter,

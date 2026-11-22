@@ -45,13 +45,15 @@ Plan validé par l'utilisateur le 2026-11-22 (Q-004), avec filtre par chevauchem
 | Lot | Contenu | Préconditions | Contrôles | État |
 |---|---|---|---|---|
 | 1 | Qualifier la source et ses identifiants, fixtures, import et stockage des recettes | Q-004 tranchée, source qualifiée avant implémentation de son import | Tests source/base, vérification rapide | Fait |
-| 2 | Calcul récursif, regroupement, erreurs et recherche des spots filtrés | Lot 1 | Tests métier/requêtes, vérification rapide | À faire |
+| 2 | Calcul récursif, regroupement, erreurs et recherche des spots filtrés | Lot 1 | Tests métier/requêtes, vérification rapide | Fait |
 | 3 | Profil et recettes locales persistants, écrans Personnage et Recettes, documentation | Lot 2 | Vérification rapide, contrôle complet, validation manuelle | À faire |
 
 ## Validation et preuves
 
 - 2026-11-22 : état initial sur `main`, aucune branche non fusionnée ; fichier utilisateur non suivi `docs/archive/openapi.json` préservé. Branche de cadrage : `task/023-recettes-et-personnage`.
 - 2026-11-22 : plan validé par l'utilisateur avec filtre par chevauchement des niveaux.
+- 2026-11-22, lot 1 : vérification rapide réussie ; import depuis le cache du projet, 1 249 recettes et deux résultats contradictoires exclus avec avertissement. Commit `0c100ad`.
+- 2026-11-22, lot 2 : huit tests recettes réussis, dont Rhino (70 000 crédits, 700 Circuits, 1 500 Ferrite, 1 200 Rubedo, 250 Polymer Bundle, 150 Alloy Plate et 2 Neurodes), arrondi des sous-recettes partagées, cycle, manque, dépassement et filtre par chevauchement appliqué aux récompenses comme aux ennemis.
 
 ## Obstacles et reprise
 
