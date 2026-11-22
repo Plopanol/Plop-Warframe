@@ -1,6 +1,6 @@
 # BUG-001 — Localisation des coffres Orokin sur Deimos
 
-- **Statut :** Corrigé à vérifier
+- **Statut :** Clos
 - **Gravité :** Normale
 - **Composant :** Import wiki et recherche Mission
 - **Signalé le :** 2026-11-22
@@ -38,8 +38,8 @@ Tests de non-régression : `blind_rage_is_found_in_deimos_vaults_without_special
 
 Contrôles du 2026-11-22 : `pwsh -NoProfile -File tools/Test-Projet.ps1 -Complet` réussi avec `CARGO_INCREMENTAL=0` (contournement documenté du refus de liens physiques du cache incrémental dans le bac à sable) : formatage, Clippy sans avertissement, 122 tests réussis, construction release, licences, notices à jour et quatre contrôles documentaires réussis. Le test de performance sur base de développement reste ignoré par défaut. Les premières passes ont détecté les attentes de comptage de l'ancien pseudo-nœud ; elles ont été actualisées (523 nœuds au lieu de 524), puis les contrôles ont réussi. Aucun échec restant.
 
-Validation manuelle par l'utilisateur non exécutée ; le bug reste `Corrigé à vérifier` jusqu'à ce retour. La base existante doit être réimportée depuis le cache avec l'exécutable reconstruit pour recevoir les nouveaux liens ; aucun téléchargement n'est nécessaire.
+Validation manuelle acceptée par l'utilisateur le 2026-11-22 après présentation du parcours ci-dessous sur la version 0.1.17 reconstruite depuis `main` et la base réimportée : « Parfait, je valide :) ». Le bug passe à `Clos`.
 
-Vérification locale après fusion du commit `29f9ec3` dans `main`, le 2026-11-22 : `cargo build --locked` puis `target/debug/plop-warframe.exe --import-cache` réussis, sans accès réseau. Une lecture SQLite de `data/plop-warframe.sqlite3` retrouve exactement Dirus, Formido, Horend, Phlegyas et Terrorem pour Blind Rage, tous sur Deimos, rôle `extra`, chance `0.0417`. Des avertissements de données wiki sur les emplacements d'ennemis sont consignés dans le journal local `target/bug-001-import-cache.log` ; ils n'empêchent pas l'import. La validation visuelle reste à effectuer sur `target/debug/plop-warframe.exe`.
+Vérification locale après fusion du commit `29f9ec3` dans `main`, le 2026-11-22 : `cargo build --locked` puis `target/debug/plop-warframe.exe --import-cache` réussis, sans accès réseau. Une lecture SQLite de `data/plop-warframe.sqlite3` retrouve exactement Dirus, Formido, Horend, Phlegyas et Terrorem pour Blind Rage, tous sur Deimos, rôle `extra`, chance `0.0417`. Des avertissements de données wiki sur les emplacements d'ennemis sont consignés dans le journal local `target/bug-001-import-cache.log` ; ils n'empêchent pas l'import.
 
 Parcours manuel attendu sur l'exécutable reconstruit et la base réimportée depuis le cache : onglet Mission, sélectionner Blind Rage, tous types de mission, missions spéciales exclues → Dirus, Formido, Horend, Phlegyas, Terrorem sur Deimos à 4,17 %, pool « Coffre Orokin (clé Dragon) », aucune chance AABC ; filtre Capture → Horend seul ; ni Hyf, ni Magnacidium, ni Exequias, ni Cambion Drift dans les résultats. Vérifier les modes par objet et combiné.
