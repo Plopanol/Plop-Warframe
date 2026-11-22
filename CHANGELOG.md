@@ -2,6 +2,10 @@
 
 Format : une section `## vX.Y.Z` par version, la plus récente en tête.
 
+## v0.1.19
+
+- Outillage : nettoyage local des sorties Rust avec inventaire par défaut, option de conservation du cache et refus des fichiers suivis, liens et dépôts imbriqués ; données et livrables préservés (TASK-022).
+
 ## v0.1.18
 
 - Onglet « Items » : URL HTTP/HTTPS cliquables dans les valeurs et traductions ; lien `wikiaUrl` à côté du nom dans le titre du détail, ouvert dans le navigateur par défaut (TASK-021).

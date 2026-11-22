@@ -1,6 +1,6 @@
 # Index des tâches
 
-Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-022.
+Statuts : À cadrer, À faire, En cours, Bloquée, À valider, Terminée, Reportée, Abandonnée. La fiche fait foi ; la roadmap, en profil complet, porte l'ordre et la `Prochaine tâche`. Prochain identifiant libre : TASK-023.
 
 ## Actives
 
@@ -20,6 +20,7 @@ Aucune.
 
 | ID | Titre | Statut | Phase | Priorité |
 |---|---|---|---|---|
+| [TASK-022](TASK-022-nettoyage-repo.md) | Initialiser le nettoyage du dépôt | Terminée | Phase 2 — Interface | Normale |
 | [TASK-021](TASK-021-liens-items.md) | Liens dans les champs des items | Terminée | Phase 2 — Interface | Normale |
 | [TASK-020](TASK-020-onglet-carte-stellaire.md) | Onglet Carte stellaire | Terminée | Phase 2 — Interface | Normale |
 | [TASK-019](TASK-019-items-wfcd.md) | Récupérer tous les items du jeu (WFCD) | Terminée | Phase 2 — Interface | Normale |

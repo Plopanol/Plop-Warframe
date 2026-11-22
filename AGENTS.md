@@ -208,6 +208,10 @@ Windows x64, archive zip de l'exécutable ; commande `pwsh -File tools/livrable.
 
 ## Règles propres au projet
 
+<!-- commun-ecart: .agents/skills/nettoyer-repo/SKILL.md — nettoyage adapté aux outils de compilation du projet -->
+
+- Nettoyage local : `tools/Nettoyer-Repo.ps1` inventorie `target/` et ne le supprime qu'avec `-Execute` ; `-ConserverCacheRust` le préserve. Procédure : skill `nettoyer-repo`.
+
 - Lire les données du wiki en exécutant ses modules Lua dans un interpréteur embarqué, jamais par analyse du HTML rendu, parce que la page `Drop_Tables` ne contient pas les tables ([ADR-001](docs/adr/ADR-001-modules-lua-wiki-source-donnees.md)) ; seul le contenu des reliques vient des tables officielles de DE ([ADR-002](docs/adr/ADR-002-tables-de-pour-reliques.md)) et leur statut vaulted de `@wfcd/items` ([ADR-003](docs/adr/ADR-003-statut-vaulted-wfcd.md)).
 - Faire passer toute source de données par le trait `DropSource`, parce que la source peut changer (tables officielles de DE).
 - Réserver le réseau à une action explicite de l'utilisateur et tester sur `tests/fixtures/`, parce que les tests doivent rester hors ligne et déterministes.

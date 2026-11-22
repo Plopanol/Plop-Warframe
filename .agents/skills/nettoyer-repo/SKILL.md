@@ -1,25 +1,18 @@
 ---
 name: nettoyer-repo
-description: Inventorie ou nettoie les sorties de compilation, caches régénérables et logs locaux désignés du dépôt. À la première utilisation, crée le script et adapte le skill aux langages et commandes du projet.
+description: Inventorie ou nettoie target/ de Plop-Warframe, avec conservation optionnelle du cache Rust. Préserve data/, livrable/ et les caches globaux.
 ---
-Si cette ligne est lue par l'agent, il faut creer le tools et le skill en fonction du projet. Puis supprimer cette ligne
 
 # Nettoyer le dépôt
 
-## Première utilisation
-
-1. Lire `AGENTS.md`, les manifestes, les commandes de compilation et les règles Git du dépôt. Identifier les sorties et caches que ces commandes peuvent reconstruire. N'inclure un log que si son chemin est explicitement désigné. Préserver les données utilisateur et les livrables non régénérables.
-2. Créer `tools/Nettoyer-Repo.ps1` (ou `tool/Nettoyer-Repo.ps1` si le projet utilise `tool/`). Définir la liste des chemins à partir des outils de compilation du projet. Limiter le script à la racine Git courante. Il affiche par défaut les chemins candidats et leur taille, puis supprime seulement avec `-Execute`. Si le projet utilise Rust, proposer `-ConserverCacheRust` pour préserver tout `target`, y compris `debug` et `release`, pendant le nettoyage des autres artefacts.
-3. Pour chaque candidat, vérifier que le chemin reste dans le dépôt, que les entrées à supprimer sont ignorées par Git et qu'aucune n'est suivie. Exclure les liens symboliques, les jonctions, les sous-modules et les dépôts imbriqués. Refaire les vérifications avant la suppression. Signaler les refus et erreurs avec un code de sortie non nul. Laisser les caches globaux hors du périmètre.
-4. Vérifier sur des artefacts de test que l'inventaire ne modifie rien, que `-Execute` ne supprime que les éléments prévus, qu'un fichier suivi reste présent et, pour Rust, que l'option de conservation protège `target`.
-5. Dans `AGENTS.md`, hors des blocs communs, ajouter la déclaration ci-dessous pour protéger le skill local lors des synchronisations. Puis adapter `.agents/skills/nettoyer-repo/SKILL.md` avec le chemin du script, les cibles et les options réelles. Retirer la phrase d'amorçage et les étapes de première utilisation. Garder le nom, l'en-tête YAML et la procédure d'utilisation et de maintenance. Si le skill doit aussi servir pendant la demande en cours, appliquer ensuite cette procédure.
-
-   ```markdown
-   <!-- commun-ecart: .agents/skills/nettoyer-repo/SKILL.md — nettoyage adapté aux outils de compilation du projet -->
-   ```
+L'outil local est `tools/Nettoyer-Repo.ps1`. Sa cible unique est `target/`, y compris debug et release. Aucun log ni cache de données n'est inclus. `data/`, `livrable/` et les caches globaux sont toujours hors périmètre.
 
 ## Utilisation et maintenance
 
-1. Avant chaque nettoyage, vérifier que les cibles du script correspondent aux langages, aux commandes de compilation et aux chemins de sortie actuels. Si le projet a changé, adapter ensemble le script et le skill local, puis vérifier les nouveaux chemins avec les mêmes garde-fous.
-2. Depuis la racine Git, lancer `pwsh -File tools/Nettoyer-Repo.ps1` (ou la commande sous `tool/`) avec les options de conservation demandées. Examiner l'inventaire et signaler les candidats écartés ou les erreurs.
-3. Si la demande autorise la suppression, relancer avec les mêmes options et `-Execute`. Indiquer ce qui a été supprimé, conservé ou laissé en place à cause d'une erreur.
+1. Vérifier que les sorties de compilation restent dans `target/`. Si les chemins ou la toolchain changent, adapter ensemble le script, ce skill et ses tests avant tout nettoyage.
+2. Depuis la racine Git, lancer `pwsh -NoProfile -File tools/Nettoyer-Repo.ps1`. L'inventaire affiche le chemin et sa taille sans rien supprimer. Ajouter `-ConserverCacheRust` si demandé : tout `target/`, debug et release compris, est alors conservé.
+3. Si l'utilisateur a autorisé le nettoyage, relancer avec les mêmes options et `-Execute`. Préparer auparavant le livrable demandé ; la suppression de `target/` enlève les exécutables de développement. Ne pas supprimer des données ou d'anciens livrables pour contourner un refus.
+4. Le script refuse les chemins hors dépôt, fichiers suivis ou non ignorés, sous-modules, liens, jonctions et dépôts imbriqués. Sur erreur, conserver les éléments refusés et rendre compte ; ne pas élargir la suppression.
+5. Après une modification de l'outil, exécuter `pwsh -NoProfile -File tools/Test-Nettoyer-Repo.ps1` : les tests utilisent un dépôt temporaire et vérifient l'inventaire, la suppression ciblée, la conservation Rust, les refus et la préservation des données et livrables.
+
+Rapport : chemins supprimés, volume libéré, éléments conservés et éventuels refus ou erreurs.

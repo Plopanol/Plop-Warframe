@@ -37,6 +37,8 @@ Lancement, construction, outils. La vérification rapide et le contrôle complet
 | Construire | `cargo build --release --locked` |
 | Licences des dépendances | `cargo deny check licenses` |
 | Régénérer les notices de licences (après un changement de `Cargo.lock`) | `pwsh -NoProfile -File tools/New-Notices.ps1` |
+| Inventorier les sorties Rust ; supprimer seulement avec `-Execute` | `pwsh -NoProfile -File tools/Nettoyer-Repo.ps1 [-Execute] [-ConserverCacheRust]` |
+| Vérifier les garde-fous du nettoyage dans un dépôt temporaire | `pwsh -NoProfile -File tools/Test-Nettoyer-Repo.ps1` |
 
 ## Commits
 
