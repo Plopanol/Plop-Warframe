@@ -1,6 +1,6 @@
 # BUG-002 — Tableau des ressources réduit
 
-- **Statut :** Signalé
+- **Statut :** Corrigé à vérifier
 - **Gravité :** Normale
 - **Composant :** Interface Recettes
 - **Signalé le :** 2026-11-22
@@ -18,7 +18,7 @@ Le tableau remplit en largeur et en hauteur l'espace disponible sous les onglets
 
 ## Diagnostic et correction
 
-Dans `ui/recipes.slint`, `FarmTable` est directement enfant de `Tab`, sans conteneur de disposition ; il conserve sa taille préférée. Correction prévue : ajouter un `VerticalBox` et étirer le tableau dans les deux directions, comme les autres vues tabulaires de l'application.
+Dans `ui/recipes.slint`, `FarmTable` était directement enfant de `Tab`, sans conteneur de disposition ; il conservait sa taille préférée. Correction du 2026-11-22 : ajout d'un `VerticalBox` et étirement du tableau dans les deux directions, comme les autres vues tabulaires de l'application.
 
 Correction poursuivie sur la branche de TASK-023, dont ces écrans attendent encore la validation utilisateur ; aucune fusion avant cette validation.
 
@@ -26,4 +26,6 @@ Correction poursuivie sur la branche de TASK-023, dont ces écrans attendent enc
 
 - Test manuel à effectuer sur l'application reconstruite : afficher les ressources d'une recette, agrandir puis réduire la fenêtre ; le tableau doit remplir la zone disponible, avec défilement des résultats.
 - Pas de test d'UI automatisé, conformément au socle d'AGENTS.md.
-- Contrôles de construction et de formatage à exécuter ; validation visuelle et contrôle complet restent attendus avant clôture.
+- 2026-11-22 : formatage Slint 1.18.1, vérification rapide officielle (fmt, Clippy et tests) et construction debug réussis. Journaux locaux : `target/bug002-rapide.log`, `target/bug002-build.log`.
+- Test initial échoué sur la capture utilisateur ; validation du correctif par redimensionnement demandée après reconstruction.
+- Validation visuelle, contrôle complet et incrément de version restent attendus avec la clôture de TASK-023 ; pas de fusion à ce stade.

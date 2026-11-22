@@ -6,7 +6,7 @@ Statuts : Signalé, Confirmé, En cours, Bloqué, Corrigé à vérifier, Clos, D
 
 | ID | Titre | Statut | Gravité | Composant |
 |---|---|---|---|---|
-| [BUG-002](BUG-002-tableau-ressources-dimensions.md) | Tableau des ressources réduit | Signalé | Normale | Interface Recettes |
+| [BUG-002](BUG-002-tableau-ressources-dimensions.md) | Tableau des ressources réduit | Corrigé à vérifier | Normale | Interface Recettes |
 
 ## Fermés
 

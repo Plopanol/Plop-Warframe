@@ -60,4 +60,6 @@ Plan validé par l'utilisateur le 2026-11-22 (Q-004), avec filtre par chevauchem
 
 ## Obstacles et reprise
 
+Retour de validation du 2026-11-22 : tableau « Ressources et pièces » réduit et centré ([BUG-002](../bugs/BUG-002-tableau-ressources-dimensions.md)). Conteneur de disposition et étirement ajoutés ; vérification rapide et construction debug réussies. Validation visuelle du remplissage et du redimensionnement attendue.
+
 Le cache WFCD seul ne contient pas les ingrédients des sous-composants Rhino. Résolu le 2026-11-22 par lecture du module Lua `Blueprints/data` (516 720 octets), y compris les champs `Cost` intégrés aux pièces. Import local : 1 249 recettes. Deux résultats ont plusieurs coûts contradictoires dans la source, Pride Blade et Wrath Blade : ils sont exclus avec avertissement et doivent être renseignés manuellement pour obtenir un calcul complet. Aucun coût n'est choisi arbitrairement.

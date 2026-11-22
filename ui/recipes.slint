@@ -189,9 +189,13 @@ export component RecipesTab inherits VerticalBox {
         vertical-stretch: 1;
         Tab {
             title: "Ressources et pièces";
-            FarmTable {
-                accessible-id: "recipe-resources";
-                rows: Crafting.resources;
+            VerticalBox {
+                FarmTable {
+                    accessible-id: "recipe-resources";
+                    rows: Crafting.resources;
+                    horizontal-stretch: 1;
+                    vertical-stretch: 1;
+                }
             }
         }
 
