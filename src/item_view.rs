@@ -23,6 +23,16 @@ pub fn web_url(text: &str) -> Option<reqwest::Url> {
     (matches!(url.scheme(), "http" | "https") && url.host_str().is_some()).then_some(url)
 }
 
+/// The header links to the item's wiki page, rather than an update or another source.
+pub fn detail_wiki_url(json: &str) -> Result<Option<String>, serde_json::Error> {
+    let value: Value = serde_json::from_str(json)?;
+    Ok(value
+        .get("wikiaUrl")
+        .and_then(Value::as_str)
+        .filter(|text| web_url(text).is_some())
+        .map(|text| text.trim().to_owned()))
+}
+
 /// First entry of the category selector.
 pub const ALL_CATEGORIES: &str = "Toutes";
 
@@ -199,6 +209,26 @@ fn scalar_text(value: &Value) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn detail_header_uses_only_a_valid_wikia_url() -> Result<(), serde_json::Error> {
+        assert_eq!(
+            detail_wiki_url(
+                r#"{"name":"Ash","wikiaUrl":"https://wiki.warframe.com/w/Ash","introduced":{"url":"https://wiki.warframe.com/w/Update_1"}}"#
+            )?,
+            Some("https://wiki.warframe.com/w/Ash".to_owned())
+        );
+        for json in [
+            r#"{}"#,
+            r#"{"wikiaUrl":null}"#,
+            r#"{"wikiaUrl":"file:///C:/test"}"#,
+            r#"{"introduced":{"url":"https://example.org"}}"#,
+        ] {
+            assert_eq!(detail_wiki_url(json)?, None);
+        }
+        assert!(detail_wiki_url("not json").is_err());
+        Ok(())
+    }
 
     #[test]
     fn web_links_are_detected_by_value_in_any_detail_field() -> Result<(), serde_json::Error> {

@@ -32,7 +32,7 @@ Joueur de Warframe, sur son poste Windows ou Linux, qui prépare ses sessions de
 2. Onglet Recherche Mission : choisir un type de mission, ajouter des objets par autocomplétion, régler rotation, missions spéciales, Secteurs sombres et mode ; lire le tableau trié.
 3. Onglet Recherche Spot : ajouter des objets, filtrer par type de mission et planète ; lire les ennemis au meilleur taux, puis les nœuds où les trouver.
 4. Onglet Reliques : choisir une Warframe ; lire, par pièce, les reliques qui la donnent et leurs chances Intacte à Éclatante ; filtrer par « En mission » et « Vaulted ».
-5. Onglet Items : choisir une catégorie, taper tout ou partie d'un nom français ou anglais ; cliquer un item pour lire chacun de ses champs, sa valeur et sa traduction française ; cliquer une valeur HTTP/HTTPS soulignée pour ouvrir son adresse dans le navigateur par défaut.
+5. Onglet Items : choisir une catégorie, taper tout ou partie d'un nom français ou anglais ; cliquer un item pour lire chacun de ses champs, sa valeur et sa traduction française ; cliquer une valeur HTTP/HTTPS soulignée pour ouvrir son adresse dans le navigateur par défaut. L'adresse `wikiaUrl`, si valide, apparaît aussi comme lien à côté du nom dans le titre du détail.
 6. Onglet Carte stellaire : filtrer les nœuds par type de mission, planète, faction, niveau min–max et Secteurs sombres ; lire planète, nœud, type, faction et niveaux (Jupiter, Io, Défense, 15-20).
 
 ## Critères de succès observables

@@ -11,8 +11,8 @@ use super::AppWindow;
 use super::search::{columns, rows, strings, with_state};
 use crate::db::{self, DbError};
 use crate::item_view::{
-    RESULT_LIMIT, category_labels, detail_table, detail_title, empty_detail, empty_items,
-    item_table, ordered_categories, selected_category, summary,
+    RESULT_LIMIT, category_labels, detail_table, detail_title, detail_wiki_url, empty_detail,
+    empty_items, item_table, ordered_categories, selected_category, summary,
 };
 use crate::search_view::ResultTable;
 use crate::update::DataPaths;
@@ -189,7 +189,7 @@ impl ItemState {
         window.set_item_current_row(-1);
         window.set_item_rows(rows(&self.table));
         self.picked = None;
-        self.show_detail(window, None, empty_detail());
+        self.show_detail(window, None, empty_detail(), None);
     }
 
     fn pick(&mut self, window: &AppWindow, row: i32) {
@@ -208,27 +208,36 @@ impl ItemState {
             Some(conn) => db::wfcd_item_detail(conn, id),
             None => Ok(None),
         };
-        let table = match detail {
-            Ok(Some((json, json_fr))) => match detail_table(&json, json_fr.as_deref()) {
-                Ok(table) => table,
+        let (table, wiki_url) = match detail {
+            Ok(Some((json, json_fr))) => match detail_table(&json, json_fr.as_deref())
+                .and_then(|table| Ok((table, detail_wiki_url(&json)?)))
+            {
+                Ok(detail) => detail,
                 Err(error) => {
                     log::error!("Items, JSON de l'item {id} illisible : {error}");
-                    empty_detail()
+                    (empty_detail(), None)
                 }
             },
-            Ok(None) => empty_detail(),
+            Ok(None) => (empty_detail(), None),
             Err(error) => {
                 log::error!("Items, détail de l'item {id} : {error}");
-                empty_detail()
+                (empty_detail(), None)
             }
         };
-        self.show_detail(window, Some(&name), table);
+        self.show_detail(window, Some(&name), table, wiki_url.as_deref());
     }
 
-    fn show_detail(&mut self, window: &AppWindow, name: Option<&str>, table: ResultTable) {
+    fn show_detail(
+        &mut self,
+        window: &AppWindow,
+        name: Option<&str>,
+        table: ResultTable,
+        wiki_url: Option<&str>,
+    ) {
         window.set_item_link_error(SharedString::default());
         self.detail = table;
         window.set_item_detail_title(detail_title(name).into());
+        window.set_item_wiki_url(wiki_url.unwrap_or_default().into());
         window.set_item_detail_columns(columns(&self.detail));
         window.set_item_detail_rows(rows(&self.detail));
     }

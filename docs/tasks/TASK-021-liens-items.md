@@ -9,6 +9,7 @@
 - **Objectif :** ouvrir dans le navigateur les URL affichées dans les détails des items, notamment `introduced.url`.
 - **Travail à réaliser :** détecter les valeurs HTTP/HTTPS dans tous les champs et leur traduction, les afficher comme liens, ouvrir le navigateur par défaut au clic, conserver le tri et signaler les erreurs récupérables.
 - **Critères d'acceptation :**
+  - [ ] Le titre affiche « Détail : NOM – URL », avec `wikiaUrl` cliquable à côté du nom ; sans adresse valide, seul le nom apparaît.
   - [ ] Les valeurs HTTP/HTTPS sont soulignées et cliquables dans les colonnes Valeur et Français, indépendamment du nom du champ.
   - [ ] Le clic ouvre l'adresse dans le navigateur par défaut sans bloquer l'interface ; une erreur de lancement est journalisée et affichée.
   - [ ] Les valeurs ordinaires restent du texte ; le tri reste utilisable.
@@ -21,6 +22,8 @@
 
 Une tranche : détail des items et lancement du navigateur, sans nouvelle dépendance ni téléchargement.
 
+Complément demandé le 2026-11-22 : afficher aussi `wikiaUrl` dans l'en-tête, à côté du nom de l'item ; réutiliser l'ouverture du navigateur des liens du tableau. Le lien est effacé au changement de recherche ou pour un item sans URL valide.
+
 ## Validation et preuves
 
 - 2026-11-22, Windows : fmt et Clippy sans avertissement ; 127 tests réussis, dont la détection des URL dans les champs imbriqués et traduits ; 1 test de performance ignoré par défaut (base de développement requise).
@@ -29,6 +32,8 @@ Une tranche : détail des items et lancement du navigateur, sans nouvelle dépen
 - 2026-11-22 : construction debug réussie ; formatage par slint-lsp 1.18.1. Les contrôles suivants utilisent `CARGO_INCREMENTAL=0` pour éviter l'avertissement de liens physiques du cache dans le bac à sable, selon le coffre commun.
 - Validation manuelle attendue : lancer `target/debug/plop-warframe.exe`, onglet Items, sélectionner Ash (ou un item comportant `introduced.url` / `wikiUrl`), cliquer le lien souligné de la colonne Valeur ; le navigateur par défaut doit ouvrir l'adresse complète. Trier les trois colonnes puis réessayer ; vérifier les champs ordinaires, le défilement et, si présente, une URL dans la colonne Français.
 - Non exécutés : clic réel dans le navigateur (validation utilisateur), essai Linux ; aucun téléchargement effectué.
+- Complément d'en-tête : sélectionner un item avec `wikiaUrl`, vérifier « Détail : NOM – URL » et cliquer l'adresse ; changer d'item et de recherche pour vérifier que le lien suit la sélection et disparaît sans adresse valide. Les liens du tableau restent disponibles.
+- 2026-11-22, complément d'en-tête : contrôle complet et construction debug réussis sans avertissement, avec `CARGO_INCREMENTAL=0` (fmt, Clippy, 128 tests réussis et 1 test de performance ignoré, release, licences, notices et 4 contrôles documentaires). `detail_header_uses_only_a_valid_wikia_url` couvre l'adresse de l'item, son absence, une valeur nulle et un protocole non web. Validation manuelle toujours attendue.
 - Version et changelog à mettre à jour à la clôture après validation manuelle ; branche conservée sans fusion.
 
 ## Obstacles et reprise

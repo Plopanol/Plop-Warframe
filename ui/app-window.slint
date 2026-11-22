@@ -816,6 +816,7 @@ component ItemTab inherits VerticalBox {
     in property <[[StandardListViewItem]]> rows;
     in-out property <int> current-row;
     in property <string> detail-title;
+    in property <string> wiki-url;
     in property <[TableColumn]> detail-columns;
     in property <[[StandardListViewItem]]> detail-rows;
     in property <string> link-error;
@@ -902,8 +903,47 @@ component ItemTab inherits VerticalBox {
             VerticalLayout {
                 spacing: 8px;
                 horizontal-stretch: 1;
-                Heading {
-                    text: root.detail-title;
+                HorizontalLayout {
+                    spacing: 6px;
+                    Heading {
+                        text: root.detail-title;
+                        vertical-alignment: center;
+                        horizontal-stretch: 0;
+                    }
+
+                    if root.wiki-url != "": Text {
+                        text: "–";
+                        vertical-alignment: center;
+                        horizontal-stretch: 0;
+                    }
+                    Rectangle {
+                        horizontal-stretch: 1;
+                        min-width: 0px;
+                        height: 28px;
+                        wiki-label := Text {
+                            text: root.wiki-url;
+                            width: parent.width;
+                            height: parent.height;
+                            color: Theme.accent;
+                            overflow: elide;
+                            vertical-alignment: center;
+                        }
+
+                        if root.wiki-url != "": Rectangle {
+                            y: parent.height / 2 + 9px;
+                            width: min(wiki-label.preferred-width, parent.width);
+                            height: 1px;
+                            background: Theme.accent;
+                        }
+                        if root.wiki-url != "": TouchArea {
+                            accessible-role: button;
+                            accessible-id: "item-wfcd-wiki-link";
+                            accessible-label: root.wiki-url;
+                            enabled: root.enabled;
+                            mouse-cursor: pointer;
+                            clicked => { root.open-url(root.wiki-url); }
+                        }
+                    }
                 }
 
                 HorizontalLayout {
@@ -1258,6 +1298,7 @@ export component AppWindow inherits Window {
     in property <[[StandardListViewItem]]> item-rows;
     in-out property <int> item-current-row: -1;
     in property <string> item-detail-title;
+    in property <string> item-wiki-url;
     in property <[TableColumn]> item-detail-columns;
     in property <[[StandardListViewItem]]> item-detail-rows;
     in property <string> item-link-error;
@@ -1485,6 +1526,7 @@ export component AppWindow inherits Window {
                     rows: root.item-rows;
                     current-row <=> root.item-current-row;
                     detail-title: root.item-detail-title;
+                    wiki-url: root.item-wiki-url;
                     detail-columns: root.item-detail-columns;
                     detail-rows: root.item-detail-rows;
                     link-error: root.item-link-error;
